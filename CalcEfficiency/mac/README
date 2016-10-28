@@ -1,0 +1,28 @@
+My intent for this package is the following:
+On BNB nu :
+0) With SignalEff : Calculate number of CCpi0 in BNB nu sample, same on selection2 sample
+   The first run gives us the number of events we should expect, the second gives us the 
+   efficiency of Selection2 on our signal event.
+
+1) Run Hit-Removal on Selection2 sample.  This will give me the same sample with extra info
+   about the hits
+
+2) Run FilterHitRatio on output of 1. This module will remove events with hit ratios below 
+   some threshold and calculate both the efficiency of the removal, and purity of the final sample
+
+   The combined efficiencies give us selection eff
+
+3) Run Clustering, showerreconstruction, ertool on output of 2-- how many events do we snag (correctly)
+   vs how many we started with? 
+
+   This gives us our reconstruction efficiency
+
+On Cosmic data (need to have pandora vertices):
+0) Run Hit-Removal on cosmics data
+1) Run Filter on output of 0.  Hopefully there aren't too many pandora vertices, so we don't snag too many
+2) Run Reconstruction-- do we grab any pi0s?
+
+Further, need to understand :
+0) Which signal cuts to use for pi0 selection (angle, IP, radL,mass?)
+1) Energy loss associated with each step of reconstruction, if I use pi0 mass peak as signal cut
+2) Other?
