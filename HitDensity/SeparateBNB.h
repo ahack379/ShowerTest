@@ -1,9 +1,9 @@
 /**
- * \file MakeVtx.h
+ * \file SeparateBNB.h
  *
  * \ingroup HitDensity
  * 
- * \brief Class def header for a class MakeVtx
+ * \brief Class def header for a class SeparateBNB
  *
  * @author ah673
  */
@@ -12,62 +12,46 @@
 
     @{*/
 
-#ifndef LARLITE_MAKEVTX_H
-#define LARLITE_MAKEVTX_H
+#ifndef LARLITE_SEPARATEBNB_H
+#define LARLITE_SEPARATEBNB_H
 
 #include "Analysis/ana_base.h"
 
 namespace larlite {
   /**
-     \class MakeVtx
+     \class SeparateBNB
      User custom analysis class made by SHELL_USER_NAME
    */
-  class MakeVtx : public ana_base{
+  class SeparateBNB : public ana_base{
   
   public:
 
     /// Default constructor
-    MakeVtx(){ _name="MakeVtx"; _fout=0; _pi0=0; _mu=0; _bnb=0; _pi0_offset=0; _mu_offset=0; _bnb_offset=0; }
+    SeparateBNB(){ _name="SeparateBNB"; _fout=0; _get_shower_events = false ;}
 
     /// Default destructor
-    virtual ~MakeVtx(){}
+    virtual ~SeparateBNB(){}
 
-    /** IMPLEMENT in MakeVtx.cc!
+    /** IMPLEMENT in SeparateBNB.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in MakeVtx.cc! 
+    /** IMPLEMENT in SeparateBNB.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in MakeVtx.cc! 
+    /** IMPLEMENT in SeparateBNB.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
 
-    void SetPi0( bool usingPi0 ) { _pi0 = usingPi0 ; }
-    void SetMu( bool usingMu ) { _mu = usingMu ; }
-    void SetBNB( bool usingBNB ) { _bnb = usingBNB ; }
-
-    void SetPi0Offset(float offset) { _pi0_offset = offset ; } 
-    void SetMuOffset(float offset) { _mu_offset = offset ; } 
-    void SetBNBOffset(float offset) { _bnb_offset = offset ; } 
-
+    void GetShowerEvts(bool get){ _get_shower_events = get ; }
 
   protected:
 
-  int _id; 
-
-  bool _pi0 ;
-  bool _mu ;
-  bool _bnb ;
-  float _pi0_offset ;
-  float _mu_offset ;
-  float _bnb_offset ;
-
-  int _event ;
+  bool _get_shower_events; 
     
   };
 }

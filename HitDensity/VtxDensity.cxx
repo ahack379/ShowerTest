@@ -4,6 +4,7 @@
 #include "VtxDensity.h"
 #include "DataFormat/hit.h"
 #include "DataFormat/vertex.h"
+#include "DataFormat/mctruth.h"
 #include "LArUtil/GeometryHelper.h"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -15,8 +16,6 @@ namespace larlite {
 
    if( !_tree ){
      _tree = new TTree("tree","tree"); 
-     _tree->Branch("sum_charge00",&_sum_charge00,"sum_charge00/F"); 
-     _tree->Branch("sum_charge02",&_sum_charge02,"sum_charge02/F"); 
      _tree->Branch("hits_in_rad",&_hits_in_rad,"hits_in_rad/F"); 
      _tree->Branch("hits_in_rad_g",&_hits_in_rad_g,"hits_in_rad_g/F"); 
      _tree->Branch("hits_tot",&_hits_tot,"hits_tot/F"); 
@@ -46,23 +45,17 @@ namespace larlite {
 
     auto const& geomH = ::larutil::GeometryHelper::GetME();
 
-    std::cout<<"\nNew event! "<<_event<<std::endl ;
+    //std::cout<<"\nNew event! "<<_event<<std::endl ;
     _event++;
-  
-    //auto ev_hit00 = storage->get_data<event_hit>("hit00");
-    //auto ev_hit02 = storage->get_data<event_hit>("hit02");
-    //if ( !ev_hit00 || !ev_hit00->size() ) return false; 
-    //if ( !ev_hit02 || !ev_hit02->size() ) return false; 
 
-    auto ev_hit = storage->get_data<event_hit>("shrhits");//hit02");
-    if ( !ev_hit || !ev_hit->size() ) return false; 
+    auto ev_hit = storage->get_data<event_hit>("hit02"); //shrhits");//hit02");
+    if ( !ev_hit || !ev_hit->size() ){std::cout<<"Returning..."<<std::endl ; return false; }
 
     auto ev_hit_g = storage->get_data<event_hit>("gaushit");//hit02");
-    if ( !ev_hit_g || !ev_hit_g->size() ) return false; 
+    if ( !ev_hit_g || !ev_hit_g->size() ) {std::cout<<"Returning..."<<std::endl ; return false; }
 
-    auto ev_vtx = storage->get_data<event_vertex>("numuCC_vertex");
-
-    if ( !ev_vtx || !ev_vtx->size() ) return false; 
+    auto ev_vtx = storage->get_data<event_vertex>("mcvertex"); //numuCC_vertex");
+    if ( !ev_vtx || !ev_vtx->size() ) {std::cout<<"Returning..."<<std::endl ; return false; }
 
     auto vtx = ev_vtx->at(0); 
 
@@ -70,7 +63,7 @@ namespace larlite {
     auto vtxWT  = geomH->Point_3Dto2D(vtxXYZ,2);//plane);
          
     auto vtx_w = vtxWT.w; // / geomH->WireToCm();
-    auto vtx_t = vtxWT.t + 800 * geomH->TimeToCm() ; // geomH->TimeToCm() + 800; //_time_offset ;
+    auto vtx_t = vtxWT.t + 0 * geomH->TimeToCm() ; // 800 for single particle files
 
     std::vector<::cv::Point> contour;
 
@@ -96,6 +89,7 @@ namespace larlite {
            contour.emplace_back(pt);
            } 
 
+        //std::cout<<"Gauss and shr hits: "<<ev_hit_g->size()<<", "<<ev_hit->size()<<std::endl ;
 
         // Count hits in radius
         for(auto const & h : *ev_hit){
@@ -122,24 +116,34 @@ namespace larlite {
         _radii.emplace_back(rad);
 	_density.emplace_back(_hits_in_rad / (M_PI * rad * rad )) ;
 
-        if( _hits_in_rad_g == 0 )
-	  _hits_per_r.emplace_back(0.);
-        else 
-	  _hits_per_r.emplace_back(float(_hits_in_rad)/2/_hits_in_rad_g);
+      if( _use_mcbnb_info ){
+        auto ev_truth = storage->get_data<event_mctruth>("generator");
+        auto & truth = ev_truth->at(0);
+        auto & nu  = truth.GetNeutrino();
+        
+        auto const & t = nu.InteractionType();
+        if( (t == 1004 || t == 1011 || t == 1080 || t == 1086 || t == 1090) ){
+
+          if( _hits_in_rad_g == 0 )
+            _hits_per_r.emplace_back(0.);
+          else 
+            _hits_per_r.emplace_back(float(_hits_in_rad)/_hits_in_rad_g);
+            } 
+          }
+      else{
+
+          if( _hits_in_rad_g == 0 )
+	    _hits_per_r.emplace_back(0.);
+          else 
+	    _hits_per_r.emplace_back(float(_hits_in_rad)/_hits_in_rad_g);
         //std::cout<<"Hits in rad "<<rad<<": "<<float(_hits_in_rad)/2/_hits_in_rad_g<<std::endl; 
+        }
 
       }
+
+
     
     _hits_tot = ev_hit->size() ;
-
-    _sum_charge00 = 0.;
-    _sum_charge02 = 0.;
-
-    //for ( auto const & h : *ev_hit00 )
-    //  _sum_charge00 += h.Integral(); 
-    //for ( auto const & h : *ev_hit02 )
-    //  _sum_charge02 += h.Integral(); 
-
     _tree->Fill();
   
     return true;

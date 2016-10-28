@@ -11,7 +11,9 @@
 
 #pragma link C++ class larlite::VtxDensity+;
 #pragma link C++ class larlite::MakeVtx+;
+#pragma link C++ class larlite::SeparateBNB+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
+
 
 

@@ -14,5 +14,5 @@
 *~
 *.pcm
 *.swp
-*.Dict
+*Dict.cxx
 

@@ -27,7 +27,8 @@ namespace larlite {
   public:
 
     /// Default constructor
-    VtxDensity(){ _name="VtxDensity"; _fout=0; _tree=nullptr; _hits_tot=0.; _hits_in_rad=0;}
+    VtxDensity(){ _name="VtxDensity"; _fout=0; _tree=nullptr; _hits_tot=0.; _hits_in_rad=0; 
+                  _use_mcbnb_info = false; }
 
     /// Default destructor
     virtual ~VtxDensity(){}
@@ -47,16 +48,15 @@ namespace larlite {
     */
     virtual bool finalize();
 
+    void UseMCBNBInfo(bool setMC ) { _use_mcbnb_info = setMC ; }
+
   protected:
 
   TTree * _tree ;
-  float _sum_charge00 ;
-  float _sum_charge02 ;
-
   float _hits_tot;
   float _hits_in_rad; 
   float _hits_in_rad_g;
-  
+  bool _use_mcbnb_info ;
 
   int _event ;
 

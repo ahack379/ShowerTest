@@ -21,17 +21,15 @@ my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
 
 # Specify output root file name
 #my_proc.set_ana_output_file("ana.root");
-my_proc.set_output_file("vtx.root");
+my_proc.set_output_file("track_bnb.root");
 
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
-aunit = fmwk.MakeVtx()
-aunit.SetPi0Offset(160*0.05)
-aunit.SetMuOffset(160*0.05)
-aunit.SetBNBOffset(0) #100*0.05)
-aunit.SetBNB(True)
+aunit = fmwk.SeparateBNB()
+aunit.GetShowerEvts(False)
 
 my_proc.add_process(aunit)
+my_proc.enable_filter(True)
 
 #my_proc.set_data_to_write(fmwk.data.kHit,'gaushit')
 #my_proc.set_data_to_write(fmwk.data.kCluster,'pandoraCosmic')
