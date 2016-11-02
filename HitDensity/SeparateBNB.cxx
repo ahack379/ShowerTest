@@ -20,7 +20,7 @@ namespace larlite {
       
       for ( auto const & p : parts ){
         
-        if( p.PdgCode() == 11 || p.PdgCode() == 22 || p.PdgCode() == 111 ){
+        if( p.StatusCode() == 1 && ( p.PdgCode() == 111 ) ){
           if( _get_shower_events )
             return true ;
           else

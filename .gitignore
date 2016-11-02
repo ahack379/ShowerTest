@@ -15,4 +15,5 @@
 *.pcm
 *.swp
 *Dict.cxx
+*.ipynb_checkpoints
 

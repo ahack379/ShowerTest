@@ -31,7 +31,10 @@ aunit.SetMuOffset(160*0.05)
 aunit.SetBNBOffset(0) #100*0.05)
 aunit.SetBNB(True)
 
+#my_proc.add_process(fmwk.FlashCut())
 my_proc.add_process(aunit)
+
+#my_proc.enable_filter(True)
 
 #my_proc.set_data_to_write(fmwk.data.kHit,'gaushit')
 #my_proc.set_data_to_write(fmwk.data.kCluster,'pandoraCosmic')
@@ -44,7 +47,7 @@ print  "Finished configuring ana_processor. Start event loop!"
 print
 
 # Let's run it.
-my_proc.run(0,5000);
+my_proc.run()
 
 
 # done!

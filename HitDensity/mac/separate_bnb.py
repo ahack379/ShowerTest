@@ -21,12 +21,12 @@ my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
 
 # Specify output root file name
 #my_proc.set_ana_output_file("ana.root");
-my_proc.set_output_file("track_bnb.root");
+my_proc.set_output_file("shower_bnb.root");
 
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
 aunit = fmwk.SeparateBNB()
-aunit.GetShowerEvts(False)
+aunit.GetShowerEvts(True)
 
 my_proc.add_process(aunit)
 my_proc.enable_filter(True)
@@ -42,7 +42,7 @@ print  "Finished configuring ana_processor. Start event loop!"
 print
 
 # Let's run it.
-my_proc.run(0,5000);
+my_proc.run()# 0,5000);
 
 
 # done!
