@@ -13,8 +13,10 @@
 #pragma link C++ class larlite::MakeVtx+;
 #pragma link C++ class larlite::SeparateBNB+;
 #pragma link C++ class larlite::FlashCut+;
+#pragma link C++ class larlite::RatioCut+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
+
 
 
 
