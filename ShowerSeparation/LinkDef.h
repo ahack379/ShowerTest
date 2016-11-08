@@ -9,12 +9,14 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-#pragma link C++ class larlite::SignalEff+;
-#pragma link C++ class larlite::Sel2CCpi0Eff+;
-#pragma link C++ class larlite::FilterHitRatio+;
-#pragma link C++ class larlite::AVFilter+;
+#pragma link C++ class larlite::VtxDensity+;
+#pragma link C++ class larlite::MakeVtx+;
+#pragma link C++ class larlite::SeparateBNB+;
+#pragma link C++ class larlite::FlashCut+;
+#pragma link C++ class larlite::RatioCut+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
+
 
 
 

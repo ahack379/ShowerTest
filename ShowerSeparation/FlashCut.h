@@ -1,58 +1,53 @@
 /**
- * \file Sel2CCpi0Eff.h
+ * \file FlashCut.h
  *
- * \ingroup CalcEfficiency
+ * \ingroup HitDensity
  * 
- * \brief Class def header for a class Sel2CCpi0Eff
+ * \brief Class def header for a class FlashCut
  *
  * @author ah673
  */
 
-/** \addtogroup CalcEfficiency
+/** \addtogroup HitDensity
 
     @{*/
 
-#ifndef LARLITE_SEL2CCPI0EFF_H
-#define LARLITE_SEL2CCPI0EFF_H
+#ifndef LARLITE_FLASHCUT_H
+#define LARLITE_FLASHCUT_H
 
 #include "Analysis/ana_base.h"
 
 namespace larlite {
   /**
-     \class Sel2CCpi0Eff
+     \class FlashCut
      User custom analysis class made by SHELL_USER_NAME
    */
-  class Sel2CCpi0Eff : public ana_base{
+  class FlashCut : public ana_base{
   
   public:
 
     /// Default constructor
-    Sel2CCpi0Eff(){ _name="Sel2CCpi0Eff"; _fout=0; }
+    FlashCut(){ _name="FlashCut"; _fout=0;}
 
     /// Default destructor
-    virtual ~Sel2CCpi0Eff(){}
+    virtual ~FlashCut(){}
 
-    /** IMPLEMENT in Sel2CCpi0Eff.cc!
+    /** IMPLEMENT in FlashCut.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in Sel2CCpi0Eff.cc! 
+    /** IMPLEMENT in FlashCut.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in Sel2CCpi0Eff.cc! 
+    /** IMPLEMENT in FlashCut.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
 
   protected:
-
-  int _events ;
-  int _signal ;
-
-  std::vector<int> _event_list ;
     
   };
 }

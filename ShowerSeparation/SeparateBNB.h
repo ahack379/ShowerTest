@@ -1,58 +1,57 @@
 /**
- * \file Sel2CCpi0Eff.h
+ * \file SeparateBNB.h
  *
- * \ingroup CalcEfficiency
+ * \ingroup HitDensity
  * 
- * \brief Class def header for a class Sel2CCpi0Eff
+ * \brief Class def header for a class SeparateBNB
  *
  * @author ah673
  */
 
-/** \addtogroup CalcEfficiency
+/** \addtogroup HitDensity
 
     @{*/
 
-#ifndef LARLITE_SEL2CCPI0EFF_H
-#define LARLITE_SEL2CCPI0EFF_H
+#ifndef LARLITE_SEPARATEBNB_H
+#define LARLITE_SEPARATEBNB_H
 
 #include "Analysis/ana_base.h"
 
 namespace larlite {
   /**
-     \class Sel2CCpi0Eff
+     \class SeparateBNB
      User custom analysis class made by SHELL_USER_NAME
    */
-  class Sel2CCpi0Eff : public ana_base{
+  class SeparateBNB : public ana_base{
   
   public:
 
     /// Default constructor
-    Sel2CCpi0Eff(){ _name="Sel2CCpi0Eff"; _fout=0; }
+    SeparateBNB(){ _name="SeparateBNB"; _fout=0; _get_shower_events = false ;}
 
     /// Default destructor
-    virtual ~Sel2CCpi0Eff(){}
+    virtual ~SeparateBNB(){}
 
-    /** IMPLEMENT in Sel2CCpi0Eff.cc!
+    /** IMPLEMENT in SeparateBNB.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in Sel2CCpi0Eff.cc! 
+    /** IMPLEMENT in SeparateBNB.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in Sel2CCpi0Eff.cc! 
+    /** IMPLEMENT in SeparateBNB.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
 
+    void GetShowerEvts(bool get){ _get_shower_events = get ; }
+
   protected:
 
-  int _events ;
-  int _signal ;
-
-  std::vector<int> _event_list ;
+  bool _get_shower_events; 
     
   };
 }

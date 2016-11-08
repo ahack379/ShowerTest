@@ -20,35 +20,21 @@ for x in xrange(len(sys.argv)-1):
 my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
 
 # Specify output root file name
-#my_proc.set_ana_output_file("ana.root");
-my_proc.set_output_file("mcvtx.root");
+#my_proc.set_ana_output_file("density_ana.root") #sys.argv[-1])#"ana.root");
+my_proc.set_output_file("shower_events_post_ratiocut.root")
 
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
-aunit = fmwk.MakeVtx()
-aunit.SetPi0Offset(160*0.05)
-aunit.SetMuOffset(160*0.05)
-aunit.SetBNBOffset(0) #100*0.05)
-aunit.SetBNB(True)
-
-#my_proc.add_process(fmwk.FlashCut())
-my_proc.add_process(aunit)
+my_proc.add_process(fmwk.RatioCut())
 
 my_proc.enable_filter(True)
-
-#my_proc.set_data_to_write(fmwk.data.kHit,'gaushit')
-#my_proc.set_data_to_write(fmwk.data.kCluster,'pandoraCosmic')
-#my_proc.set_data_to_write(fmwk.data.kCluster,'pandoraNu')
-#my_proc.set_data_to_write(fmwk.data.kVertex,'numuCC_vertex')
-#my_proc.set_data_to_write(fmwk.data.kAssociation,'shrcluster')
 
 print
 print  "Finished configuring ana_processor. Start event loop!"
 print
 
 # Let's run it.
-my_proc.run()
-
+my_proc.run(0,300) #5050);
 
 # done!
 print

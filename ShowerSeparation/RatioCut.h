@@ -1,58 +1,68 @@
 /**
- * \file Sel2CCpi0Eff.h
+ * \file RatioCut.h
  *
- * \ingroup CalcEfficiency
+ * \ingroup SumCharge
  * 
- * \brief Class def header for a class Sel2CCpi0Eff
+ * \brief Class def header for a class RatioCut
  *
  * @author ah673
  */
 
-/** \addtogroup CalcEfficiency
+/** \addtogroup SumCharge
 
     @{*/
 
-#ifndef LARLITE_SEL2CCPI0EFF_H
-#define LARLITE_SEL2CCPI0EFF_H
+#ifndef LARLITE_RATIOCUT_H
+#define LARLITE_RATIOCUT_H
 
 #include "Analysis/ana_base.h"
 
 namespace larlite {
   /**
-     \class Sel2CCpi0Eff
+     \class RatioCut
      User custom analysis class made by SHELL_USER_NAME
    */
-  class Sel2CCpi0Eff : public ana_base{
+  class RatioCut : public ana_base{
   
   public:
 
     /// Default constructor
-    Sel2CCpi0Eff(){ _name="Sel2CCpi0Eff"; _fout=0; }
+    RatioCut(){ _name="RatioCut"; _fout=0; _tree=nullptr; _hits_tot=0.; _hits_in_rad=0; 
+                  _use_mcbnb_info = false; }
 
     /// Default destructor
-    virtual ~Sel2CCpi0Eff(){}
+    virtual ~RatioCut(){}
 
-    /** IMPLEMENT in Sel2CCpi0Eff.cc!
+    /** IMPLEMENT in RatioCut.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in Sel2CCpi0Eff.cc! 
+    /** IMPLEMENT in RatioCut.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in Sel2CCpi0Eff.cc! 
+    /** IMPLEMENT in RatioCut.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
 
+    void UseMCBNBInfo(bool setMC ) { _use_mcbnb_info = setMC ; }
+
   protected:
 
-  int _events ;
-  int _signal ;
+  TTree * _tree ;
+  float _hits_tot;
+  float _hits_in_rad; 
+  float _hits_in_rad_g;
+  bool _use_mcbnb_info ;
 
-  std::vector<int> _event_list ;
+  int _event ;
+
+  std::vector<float> _radii;
+  std::vector<float> _density;
+  std::vector<float> _hits_per_r;
     
   };
 }
