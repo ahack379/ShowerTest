@@ -20,7 +20,7 @@ endif
 #
 # Define directories to be compile upon a global "make"...
 #
-SUBDIRS := SumCharge HitDensity CalcEfficiency #ADD_NEW_SUBDIR ... do not remove this comment from this line
+SUBDIRS := Example ShowerSeparation CalcEfficiency #ADD_NEW_SUBDIR ... do not remove this comment from this line
 
 #####################################################################################
 #
@@ -30,13 +30,13 @@ SUBDIRS := SumCharge HitDensity CalcEfficiency #ADD_NEW_SUBDIR ... do not remove
 .phony: all clean
 
 all:
-	@for i in $(SUBDIRS); do ( echo "" && echo "Compiling $$i..." && cd $(LARLITE_USERDEVDIR)/ShowerTest/$$i && $(MAKE) ) || exit $$?; done
+	@for i in $(SUBDIRS); do ( echo "" && echo "Compiling $$i..." && cd $(LARLITE_USERDEVDIR)/FindNeutrinos/$$i && $(MAKE) ) || exit $$?; done
 #####################################################################################
 #
 # CLEANs...
 #
 clean:
-	@for i in $(SUBDIRS); do ( echo "" && echo "Cleaning $$i..." && cd $(LARLITE_USERDEVDIR)/ShowerTest/$$i && $(MAKE) clean && rm -f $(LARLITE_LIBDIR)/$$i.* ) || exit $$?; done
+	@for i in $(SUBDIRS); do ( echo "" && echo "Cleaning $$i..." && cd $(LARLITE_USERDEVDIR)/FindNeutrinos/$$i && $(MAKE) clean && rm -f $(LARLITE_LIBDIR)/$$i.* ) || exit $$?; done
 
 #####################################################################################
 #
@@ -44,13 +44,13 @@ clean:
 #
 doxygen:
 	@echo 'dOxygenising your code...'
-	@mkdir -p $(LARLITE_USERDEVDIR)/ShowerTest/doc/dOxygenMyProject
-	@doxygen $(LARLITE_USERDEVDIR)/ShowerTest/doc/doxygenMyProject.script
+	@mkdir -p $(LARLITE_USERDEVDIR)/FindNeutrinos/doc/dOxygenMyProject
+	@doxygen $(LARLITE_USERDEVDIR)/FindNeutrinos/doc/doxygenMyProject.script
 
 doxygen+:
 	@echo 'dOxygenising MyProject + local-ROOT...'
-	@mkdir -p $(LARLITE_USERDEVDIR)/ShowerTest/doc/dOxygenMyProject+
-	@doxygen $(LARLITE_USERDEVDIR)/ShowerTest/doc/doxygenMyProject+.script
+	@mkdir -p $(LARLITE_USERDEVDIR)/FindNeutrinos/doc/dOxygenMyProject+
+	@doxygen $(LARLITE_USERDEVDIR)/FindNeutrinos/doc/doxygenMyProject+.script
 #
 #####################################################################################
 #EOF
