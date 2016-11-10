@@ -14,6 +14,7 @@
 #pragma link C++ class larlite::SeparateBNB+;
 #pragma link C++ class larlite::FlashCut+;
 #pragma link C++ class larlite::RatioCut+;
+#pragma link C++ class larlite::SeparateCCNC+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
 

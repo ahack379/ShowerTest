@@ -1,59 +1,60 @@
 /**
- * \file Sel2CCpi0Eff.h
+ * \file SeparateCCNC.h
  *
- * \ingroup CalcEfficiency
+ * \ingroup HitDensity
  * 
- * \brief Class def header for a class Sel2CCpi0Eff
+ * \brief Class def header for a class SeparateCCNC
  *
  * @author ah673
  */
 
-/** \addtogroup CalcEfficiency
+/** \addtogroup HitDensity
 
     @{*/
 
-#ifndef LARLITE_SEL2CCPI0EFF_H
-#define LARLITE_SEL2CCPI0EFF_H
+#ifndef LARLITE_SEPARATECCNC_H
+#define LARLITE_SEPARATECCNC_H
 
 #include "Analysis/ana_base.h"
 
 namespace larlite {
   /**
-     \class Sel2CCpi0Eff
+     \class SeparateCCNC
      User custom analysis class made by SHELL_USER_NAME
    */
-  class Sel2CCpi0Eff : public ana_base{
+  class SeparateCCNC : public ana_base{
   
   public:
 
     /// Default constructor
-    Sel2CCpi0Eff(){ _name="Sel2CCpi0Eff"; _fout=0; _CCNC=false;}
+    SeparateCCNC(){ _name="SeparateCCNC"; _fout=0; _getNC = false ;}
 
     /// Default destructor
-    virtual ~Sel2CCpi0Eff(){}
+    virtual ~SeparateCCNC(){}
 
-    /** IMPLEMENT in Sel2CCpi0Eff.cc!
+    /** IMPLEMENT in SeparateCCNC.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in Sel2CCpi0Eff.cc! 
+    /** IMPLEMENT in SeparateCCNC.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
+    /** IMPLEMENT in SeparateCCNC.cc! 
+        Finalize method to be called after all events processed.
+    */
     virtual bool finalize();
 
-    void GetBothCCNC( bool getem){ _CCNC = getem ; }
+    void GetNC(bool get){ _getNC = get ; }
 
   protected:
 
-  int _events ;
+  bool _getNC;
   int _signal ;
 
-  bool _CCNC ;
-
-  std::vector<int> _event_list ;
+  int _events ;
     
   };
 }

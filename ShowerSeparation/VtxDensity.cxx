@@ -64,8 +64,7 @@ namespace larlite {
          
     auto vtx_w = vtxWT.w ; // Comes in cm; 
     auto vtx_t = vtxWT.t + 800. * geomH->TimeToCm() ; // 800 for single particle files
-
-    std::vector<::cv::Point> contour;
+    //std::cout<<"Vertex info :" <<vtx_w<<", "<<vtx_t<<std::endl ;
 
     float rad = 0. ;
     float offset = 0.;
@@ -73,22 +72,20 @@ namespace larlite {
     std::vector<float> x(50,0);
     std::vector<float> y(50,0);
 
-    //std::cout<<"\nvtx coords : " <<vtx_w<<", "<<vtx_t<<", and wire time: "<<vtx_w/geomH->WireToCm()<<", "<<vtx_t/geomH->TimeToCm()<<std::endl ;
-    
     for(int j = 0; j < rad_its; j++){
+       //int j = 11;
 
-        rad = (j+1) * 5 + offset ;
+        rad = float ( (j+1) * 5. ) ;
         _hits_in_rad = 0.;
         _hits_in_rad_g = 0.;
+        std::vector<::cv::Point> contour;
 
         // Build circle around radius
         for(int i = 0; i < x.size(); i++){
 
            x[i] = vtx_w + rad * cos(M_PI * 2. * i / x.size());
            y[i] = vtx_t + rad * sin(M_PI * 2. * i / x.size());
-
-	   //std::cout<<"["<<x[i]<<", "<<y[i]<<"]," ;
-
+           
            ::cv::Point pt(x[i],y[i]) ;
            contour.emplace_back(pt);
            } 
@@ -96,6 +93,7 @@ namespace larlite {
         ::cv::Point pt(contour.at(0).x, contour.at(0).y) ;
         contour.emplace_back(pt);
 	
+	int h0 = 0;
 
         // Count hits in radius
         for(auto const & h : *ev_hit){
@@ -104,19 +102,20 @@ namespace larlite {
 
 	    if( h.WireID().Plane != 2 ) continue; 
             //std::cout<<"Hit loc + vtx : ("<<h.WireID().Wire<<","<<h.PeakTime()<<"),("<<vtx_w<<","<<vtx_t<<")"<<std::endl;
+	    h0++;
 
             ::cv::Point h_pt(h.WireID().Wire * geomH->WireToCm(),
 	                     h.PeakTime() * geomH->TimeToCm()) ;
             auto inside = ::cv::pointPolygonTest(contour,h_pt,false); 
-
+           
             if(inside  >= 0) _hits_in_rad ++ ;
             }
 
-
+        int h_g = 0;
         for(auto const & h : *ev_hit_g){
-
+        
 	    if( h.WireID().Plane != 2 ) continue; 
-
+           h_g ++;
             ::cv::Point h_pt(h.WireID().Wire * geomH->WireToCm(),
 	                     h.PeakTime() * geomH->TimeToCm()) ;
             auto inside = ::cv::pointPolygonTest(contour,h_pt,false); 
@@ -124,41 +123,21 @@ namespace larlite {
             if(inside  >= 0) _hits_in_rad_g ++ ;
             }
 
+         //if ( j == 11 )
 	//std::cout<<"At rad "<<rad<<" gaus and hit02 ratios: "<<_hits_in_rad_g <<", "<<_hits_in_rad <<std::endl ;
 
         _radii.emplace_back(rad);
 	_density.emplace_back(_hits_in_rad / (M_PI * rad * rad )) ;
 
-      if( _use_mcbnb_info ){
-        auto ev_truth = storage->get_data<event_mctruth>("generator");
-        auto & truth = ev_truth->at(0);
-        auto & nu  = truth.GetNeutrino();
-        
-        auto const & t = nu.InteractionType();
-        if( (t == 1004 || t == 1011 || t == 1080 || t == 1086 || t == 1090) ){
-
-          if( _hits_in_rad_g == 0 )
-            _hits_per_r.emplace_back(0.);
-          else 
-            _hits_per_r.emplace_back(float(_hits_in_rad)/_hits_in_rad_g);
-            } 
-          }
-      else{
-
-          if( _hits_in_rad_g == 0 )
-	    _hits_per_r.emplace_back(0.);
-          else 
-	    _hits_per_r.emplace_back(float(_hits_in_rad)/_hits_in_rad_g);
-        //std::cout<<"Hits in rad "<<rad<<": "<<float(_hits_in_rad)/2/_hits_in_rad_g<<std::endl; 
-        }
+        if( _hits_in_rad_g == 0 )
+	  _hits_per_r.emplace_back(0.);
+        else 
+	  _hits_per_r.emplace_back(float(_hits_in_rad)/_hits_in_rad_g);
 
       }
 
     //std::cout<<"Event "<<_event-1<<" has hit Dens "<<_hits_per_r.at(8)<<" at radius 45cm "<<std::endl ;
     //std::cout<<"Gauss and shr hits: "<<ev_hit_g->size()<<", "<<ev_hit->size()<<"\n" ;
-
-
-
     
     _hits_tot = ev_hit->size() ;
     _tree->Fill();

@@ -32,7 +32,6 @@ namespace larlite {
 
     int rad_its = 15;
     _hits_tot = 0.;
-//temp
     _hits_per_r.clear();
     _hits_per_r.reserve(rad_its);
 
@@ -57,6 +56,7 @@ namespace larlite {
          
     auto vtx_w = vtxWT.w ; // Comes in cm; 
     auto vtx_t = vtxWT.t + 800. * geomH->TimeToCm() ; // 800 for single particle files
+    //std::cout<<"Vertex info :" <<vtx_w<<", "<<vtx_t<<std::endl ;
 
     std::vector<::cv::Point> contour;
 
@@ -74,6 +74,7 @@ namespace larlite {
 
        x[i] = vtx_w + rad * cos(M_PI * 2. * i / x.size());
        y[i] = vtx_t + rad * sin(M_PI * 2. * i / x.size());
+       //std::cout<<"["<<x[i]<<", "<<y[i]<<"]," ;
 
        ::cv::Point pt(x[i],y[i]) ;
        contour.emplace_back(pt);
@@ -84,7 +85,6 @@ namespace larlite {
 
      float ratio = 0.;
 	
-
      // Count hits in radius
      for(auto const & h : *ev_hit){
 
@@ -94,7 +94,7 @@ namespace larlite {
                           h.PeakTime() * geomH->TimeToCm()) ;
          auto inside = ::cv::pointPolygonTest(contour,h_pt,false); 
 
-         if(inside  >= 0) _hits_in_rad ++ ;
+         if(inside  > 0) _hits_in_rad ++ ;
          }
 
      for(auto const & h : *ev_hit_g){
@@ -107,10 +107,16 @@ namespace larlite {
 
          if(inside  >= 0) _hits_in_rad_g ++ ;
          }
+        
+	 if( _hits_in_rad_g == 0 )
+	   ratio = 0;
+	 else 
+	   ratio = float(_hits_in_rad)/_hits_in_rad_g;
+	
 
-	//std::cout<<"At rad "<<rad<<" gaus and hit02 ratios: "<<_hits_in_rad_g <<", "<<_hits_in_rad <<std::endl ;
+     //std::cout<<"Event "<<_event-1<<" has Gaus and shr hits: "<<_hits_in_rad_g <<", "<<_hits_in_rad <<std::endl ;
 
-    if( ratio < 0.1 ) return false ;
+    if( ratio < 0.2 ) return false ;
     
     _hits_tot = ev_hit->size() ;
     _tree->Fill();

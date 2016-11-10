@@ -27,7 +27,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    SeparateBNB(){ _name="SeparateBNB"; _fout=0; _get_shower_events = false ;}
+    SeparateBNB(){ _name="SeparateBNB"; _fout=0; _get_pi0s = false ;}
 
     /// Default destructor
     virtual ~SeparateBNB(){}
@@ -47,11 +47,11 @@ namespace larlite {
     */
     virtual bool finalize();
 
-    void GetShowerEvts(bool get){ _get_shower_events = get ; }
+    void GetPi0s(bool get){ _get_pi0s = get ; }
 
   protected:
 
-  bool _get_shower_events; 
+  bool _get_pi0s;
     
   };
 }
