@@ -30,7 +30,7 @@ namespace larlite {
   
   bool RatioCut::analyze(storage_manager* storage) {
 
-    int rad_its = 15;
+    int rad_its = 1;
     _hits_tot = 0.;
     _hits_per_r.clear();
     _hits_per_r.reserve(rad_its);
@@ -116,7 +116,7 @@ namespace larlite {
 
      //std::cout<<"Event "<<_event-1<<" has Gaus and shr hits: "<<_hits_in_rad_g <<", "<<_hits_in_rad <<std::endl ;
 
-    if( ratio < 0.2 ) return false ;
+    if( ratio < _ratio_cut ) return false ;
     
     _hits_tot = ev_hit->size() ;
     _tree->Fill();

@@ -1,9 +1,9 @@
 /**
- * \file FilterHRNoMuon.h
+ * \file NoMuonVtxDensity.h
  *
  * \ingroup CalcEfficiency
  * 
- * \brief Class def header for a class FilterHRNoMuon
+ * \brief Class def header for a class NoMuonVtxDensity
  *
  * @author ariana Hackenburg
  */
@@ -12,25 +12,25 @@
 
     @{*/
 
-#ifndef LARLITE_FILTERHRNOMUON_H
-#define LARLITE_FILTERHRNOMUON_H
+#ifndef LARLITE_NOMUONVTXDENSITY_H
+#define LARLITE_NOMUONVTXDENSITY_H
 
 #include "Analysis/ana_base.h"
 
 namespace larlite {
   /**
-     \class FilterHRNoMuon
+     \class NoMuonVtxDensity
      User custom analysis class made by SHELL_USER_NAME
    */
-  class FilterHRNoMuon : public ana_base{
+  class NoMuonVtxDensity : public ana_base{
   
   public:
 
     /// Default constructor
-    FilterHRNoMuon(){ _name="FilterHRNoMuon"; _fout=0; _tree=nullptr; _ratio_cut = 0.; _radius = 40. ;}
+    NoMuonVtxDensity(){ _name="NoMuonVtxDensity"; _fout=0; _tree=nullptr; _ratio_cut = 0.; _radius = 40. ;}
 
     /// Default destructor
-    virtual ~FilterHRNoMuon(){}
+    virtual ~NoMuonVtxDensity(){}
 
     virtual bool initialize();
 

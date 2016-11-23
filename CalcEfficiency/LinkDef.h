@@ -12,6 +12,7 @@
 #pragma link C++ class larlite::SignalEff+;
 #pragma link C++ class larlite::Sel2CCpi0Eff+;
 #pragma link C++ class larlite::GetInteractionInfo+;
+#pragma link C++ class larlite::CCpi0Eff+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
 

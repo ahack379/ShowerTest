@@ -25,7 +25,9 @@ my_proc.set_output_file("shower_events_post_ratiocut.root")
 
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
-my_proc.add_process(fmwk.RatioCut())
+ratio = fmwk.RatioCut()
+ratio.SetRatioCut(0.24)
+my_proc.add_process(ratio)
 
 my_proc.enable_filter(True)
 

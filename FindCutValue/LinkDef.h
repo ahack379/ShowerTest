@@ -9,7 +9,7 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-#pragma link C++ class FilterHRNoMuon+;
+#pragma link C++ class NoMuonVtxDensity+;
 #pragma link C++ class VtxDensity+;
 //ADD_NEW_CLASS ... do not change this line
 #endif

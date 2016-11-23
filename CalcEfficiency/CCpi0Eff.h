@@ -1,69 +1,58 @@
 /**
- * \file RatioCut.h
+ * \file CCpi0Eff.h
  *
- * \ingroup SumCharge
+ * \ingroup HitDensity
  * 
- * \brief Class def header for a class RatioCut
+ * \brief Class def header for a class CCpi0Eff
  *
  * @author ah673
  */
 
-/** \addtogroup SumCharge
+/** \addtogroup HitDensity
 
     @{*/
 
-#ifndef LARLITE_RATIOCUT_H
-#define LARLITE_RATIOCUT_H
+#ifndef LARLITE_CCPI0EFF_H
+#define LARLITE_CCPI0EFF_H
 
 #include "Analysis/ana_base.h"
 
 namespace larlite {
   /**
-     \class RatioCut
+     \class CCpi0Eff
      User custom analysis class made by SHELL_USER_NAME
    */
-  class RatioCut : public ana_base{
+  class CCpi0Eff : public ana_base{
   
   public:
 
     /// Default constructor
-    RatioCut(){ _name="RatioCut"; _fout=0; _tree=nullptr; _hits_tot=0.; _hits_in_rad=0; 
-                  _ratio_cut=0.2; }
+    CCpi0Eff(){ _name="CCpi0Eff"; _fout=0;}
 
     /// Default destructor
-    virtual ~RatioCut(){}
+    virtual ~CCpi0Eff(){}
 
-    /** IMPLEMENT in RatioCut.cc!
+    /** IMPLEMENT in CCpi0Eff.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in RatioCut.cc! 
+    /** IMPLEMENT in CCpi0Eff.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in RatioCut.cc! 
+    /** IMPLEMENT in CCpi0Eff.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
 
-    void SetRatioCut(bool ratio ) { _ratio_cut = ratio ; } 
-
   protected:
 
-  float _ratio_cut ;
-
-  TTree * _tree ;
-  float _hits_tot;
-  float _hits_in_rad; 
-  float _hits_in_rad_g;
-
   int _event ;
+  int _signal ;
 
-  std::vector<float> _radii;
-  std::vector<float> _density;
-  std::vector<float> _hits_per_r;
+  std::vector<int> _event_list ;
     
   };
 }

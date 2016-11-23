@@ -19,12 +19,9 @@ for x in xrange(len(sys.argv)-1):
 # Specify IO mode
 my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 
-#my_proc.set_output_file("track_events.root")
 my_proc.set_ana_output_file("dens_ana.root")
 
-#my_proc.enable_filter(True)
-
-hit_filter = fmwk.FilterHRNoMuon()
+hit_filter = fmwk.NoMuonVtxDensity()
 #hit_filter.SetRadius(40.)
 #hit_filter.SetRatio(0.5)
 

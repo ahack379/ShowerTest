@@ -86,44 +86,44 @@ namespace larlite {
 
           if( dist < 0.4 ) {
 
-          //  _signal++ ;
-          //  _event_list.emplace_back(_events);
-          //  std::cout<<"Foudn a CCpi0!!!!!!!!!!!"<<std::endl ;
+            _signal++ ;
+            _event_list.emplace_back(_events);
+            std::cout<<"Foudn a CCpi0!!!!!!!!!!!"<<std::endl ;
 
           bool found = false;
 	  float min_e = 1e9;
 
           // This chunk of code finds the min energy of a pi0 shower and stores it in a tree for cuts based analysis
 
-          for ( auto const & s : *ev_mcs ){
-            if ( s.MotherPdgCode() == 111 ){
-              auto st = s.Start() ;
-              auto dist = sqrt( pow(xyz[0] - st.X(),2) + pow(xyz[1] - st.Y(),2) +pow(xyz[2] - st.Z(),2) ); 
-                if( dist < 0.4 ) {
-		  std::cout<<"Energy is : "<<s.DetProfile().E()<<std::endl ;
+        //  for ( auto const & s : *ev_mcs ){
+        //    if ( s.MotherPdgCode() == 111 ){
+        //      auto st = s.Start() ;
+        //      auto dist = sqrt( pow(xyz[0] - st.X(),2) + pow(xyz[1] - st.Y(),2) +pow(xyz[2] - st.Z(),2) ); 
+        //        if( dist < 0.4 ) {
+	//	  std::cout<<"Energy is : "<<s.DetProfile().E()<<std::endl ;
 
-		  // If we enter this if block, we've found the second gamma 
-                  if( found == true ){
+	//	  // If we enter this if block, we've found the second gamma 
+        //          if( found == true ){
 
-                    _energy = s.DetProfile().E();
+        //            _energy = s.DetProfile().E();
 
-		    if( min_e < _energy )
-		      _energy = min_e;
+	//	    if( min_e < _energy )
+	//	      _energy = min_e;
 
-                    if( _energy <= 30 ){
-                      _signal++ ;
-                      _event_list.emplace_back(_events);
-		      }
+        //            if( _energy <= 30 ){
+        //              _signal++ ;
+        //              _event_list.emplace_back(_events);
+	//	      }
 
-                    _cut_tree->Fill();
-                    break;
-                    }
-		  min_e = s.DetProfile().E();
-		   
-                  found = true;
-                  }
-                }
-              }
+        //            _cut_tree->Fill();
+        //            break;
+        //            }
+	//	  min_e = s.DetProfile().E();
+	//	   
+        //          found = true;
+        //          }
+        //        }
+        //      }
                   return true;
             }
 

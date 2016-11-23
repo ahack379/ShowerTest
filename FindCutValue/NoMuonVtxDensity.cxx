@@ -1,7 +1,7 @@
-#ifndef LARLITE_FILTERHRNOMUON_CXX
-#define LARLITE_FILTERHRNOMUON_CXX
+#ifndef LARLITE_NOMUONVTXDENSITY_CXX
+#define LARLITE_NOMUONVTXDENSITY_CXX
 
-#include "FilterHRNoMuon.h"
+#include "NoMuonVtxDensity.h"
 #include "DataFormat/hit.h"
 #include "DataFormat/vertex.h"
 #include "DataFormat/mctruth.h"
@@ -14,7 +14,7 @@
 
 namespace larlite {
 
-  bool FilterHRNoMuon::initialize() {
+  bool NoMuonVtxDensity::initialize() {
 
    _event = 0 ;
    _hits_in_rad_g = 0;
@@ -29,7 +29,7 @@ namespace larlite {
     return true;
   }
   
-  bool FilterHRNoMuon::analyze(storage_manager* storage) {
+  bool NoMuonVtxDensity::analyze(storage_manager* storage) {
 
 
     auto const& geomH = ::larutil::GeometryHelper::GetME();
@@ -217,7 +217,7 @@ namespace larlite {
     return true;
   }
 
-  bool FilterHRNoMuon::finalize() {
+  bool NoMuonVtxDensity::finalize() {
 
     if(_fout) { _fout->cd(); _tree->Write(); }
 
@@ -229,7 +229,7 @@ namespace larlite {
 
 
 // t is interaction type
-bool FilterHRNoMuon::IsSignal(int t){
+bool NoMuonVtxDensity::IsSignal(int t){
 
     if( (t == 1004 || t == 1011 || t == 1080 || t == 1086 || t == 1090) )  
       return true ;
