@@ -16,6 +16,7 @@
 #define LARLITE_SEL2CCPI0EFF_H
 
 #include "Analysis/ana_base.h"
+#include <TTree.h>
 
 namespace larlite {
   /**
@@ -27,7 +28,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    Sel2CCpi0Eff(){ _name="Sel2CCpi0Eff"; _fout=0; _CCNC=false;}
+    Sel2CCpi0Eff(){ _name="Sel2CCpi0Eff"; _fout=0; _CCNC=false; _cut_tree=nullptr;}
 
     /// Default destructor
     virtual ~Sel2CCpi0Eff(){}
@@ -54,6 +55,9 @@ namespace larlite {
   bool _CCNC ;
 
   std::vector<int> _event_list ;
+
+  TTree * _cut_tree ;
+  float _energy ;
     
   };
 }

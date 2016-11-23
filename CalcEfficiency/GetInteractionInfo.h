@@ -1,58 +1,53 @@
 /**
- * \file SeparateBNB.h
+ * \file GetInteractionInfo.h
  *
- * \ingroup HitDensity
+ * \ingroup CalcEfficiency
  * 
- * \brief Class def header for a class SeparateBNB
+ * \brief Class def header for a class GetInteractionInfo
  *
  * @author ah673
  */
 
-/** \addtogroup HitDensity
+/** \addtogroup CalcEfficiency
 
     @{*/
 
-#ifndef LARLITE_SEPARATEBNB_H
-#define LARLITE_SEPARATEBNB_H
+#ifndef LARLITE_GETINTERACTIONINFO_H
+#define LARLITE_GETINTERACTIONINFO_H
 
 #include "Analysis/ana_base.h"
 
 namespace larlite {
   /**
-     \class SeparateBNB
+     \class GetInteractionInfo
      User custom analysis class made by SHELL_USER_NAME
    */
-  class SeparateBNB : public ana_base{
+  class GetInteractionInfo : public ana_base{
   
   public:
 
     /// Default constructor
-    SeparateBNB(){ _name="SeparateBNB"; _fout=0; _get_pi0s = false ;}
+    GetInteractionInfo(){ _name="GetInteractionInfo"; _fout=0;}
 
     /// Default destructor
-    virtual ~SeparateBNB(){}
+    virtual ~GetInteractionInfo(){}
 
-    /** IMPLEMENT in SeparateBNB.cc!
+    /** IMPLEMENT in GetInteractionInfo.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in SeparateBNB.cc! 
+    /** IMPLEMENT in GetInteractionInfo.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in SeparateBNB.cc! 
+    /** IMPLEMENT in GetInteractionInfo.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
 
-    void GetPi0s(bool get){ _get_pi0s = get ; }
-
   protected:
-
-  bool _get_pi0s;
-  int _event ;
     
   };
 }

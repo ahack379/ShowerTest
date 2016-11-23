@@ -17,28 +17,24 @@ for x in xrange(len(sys.argv)-1):
     my_proc.add_input_file(sys.argv[x+1])
 
 # Specify IO mode
-my_proc.set_io_mode(fmwk.storage_manager.kREAD)
+my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
 
 # Specify output root file name
-#my_proc.set_output_file("trks_separated.root");
-
-my_proc.set_ana_output_file("ana.root")
+#my_proc.set_ana_output_file("eff.root");
+my_proc.set_output_file("BNBEventsInAV.root");
 
 my_proc.enable_filter(True)
 
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
-ana = fmwk.Sel2CCpi0Eff()
-ana.GetBothCCNC(False)
-
-my_proc.add_process(ana)
+my_proc.add_process(fmwk.AVFilter())
 
 print
 print  "Finished configuring ana_processor. Start event loop!"
 print
 
 # Let's run it.
-my_proc.run(106,1)
+my_proc.run();
 
 # done!
 print

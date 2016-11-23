@@ -16,4 +16,6 @@
 *.swp
 *Dict.cxx
 *.ipynb_checkpoints
+Example/*
+Misc
 

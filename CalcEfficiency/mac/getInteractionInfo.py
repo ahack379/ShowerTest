@@ -13,29 +13,28 @@ from larlite import larlite as fmwk
 my_proc = fmwk.ana_processor()
 
 # Set input root file
-for x in xrange(len(sys.argv)-1):
+for x in xrange(len(sys.argv)-2):
     my_proc.add_input_file(sys.argv[x+1])
 
 # Specify IO mode
 my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 
-
-# Specify output root file name
-my_proc.set_ana_output_file("density_ana.root") #sys.argv[-1])#"ana.root");
-
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
-my_proc.add_process(fmwk.VtxDensity())
+ana = fmwk.GetInteractionInfo()
 
-####
-my_proc.set_output_file("DENSITY_TEST.root") #sys.argv[-1])#"ana.root");
+my_proc.add_process(ana)
+
+event = sys.argv[-1]
+
+print "\n\n\n EVENT IS ", event
 
 print
 print  "Finished configuring ana_processor. Start event loop!"
 print
 
 # Let's run it.
-my_proc.run()#0,5050);
+my_proc.run(int(event),1);
 
 # done!
 print

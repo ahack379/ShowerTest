@@ -54,7 +54,7 @@ namespace larlite {
     auto ev_hit_g = storage->get_data<event_hit>("gaushit");//hit02");
     if ( !ev_hit_g || !ev_hit_g->size() ) {std::cout<<"Returning..."<<std::endl ; return false; }
 
-    auto ev_vtx = storage->get_data<event_vertex>("mcvertex"); //numuCC_vertex");
+    auto ev_vtx = storage->get_data<event_vertex>("numuCC_vertex");
     if ( !ev_vtx || !ev_vtx->size() ) {std::cout<<"Returning..."<<std::endl ; return false; }
 
     auto vtx = ev_vtx->at(0); 

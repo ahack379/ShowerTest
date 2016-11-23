@@ -17,24 +17,25 @@ for x in xrange(len(sys.argv)-1):
     my_proc.add_input_file(sys.argv[x+1])
 
 # Specify IO mode
-my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
+my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 
-my_proc.set_output_file("filtered_events.root")
 
-my_proc.enable_filter(True)
+# Specify output root file name
+my_proc.set_ana_output_file("density_ana.root") #sys.argv[-1])#"ana.root");
 
-hit_filter = fmwk.FilterHitRatio()
-hit_filter.SetRadius(40.)
-hit_filter.SetRatio(0.5)
+# Attach an analysis unit ... here we use a base class which does nothing.
+# Replace with your analysis unit if you wish.
+my_proc.add_process(fmwk.VtxDensity())
 
-my_proc.add_process(hit_filter)
+####
+#my_proc.set_output_file("DENSITY_TEST.root") #sys.argv[-1])#"ana.root");
 
 print
 print  "Finished configuring ana_processor. Start event loop!"
 print
 
 # Let's run it.
-my_proc.run();
+my_proc.run()#0,5050);
 
 # done!
 print

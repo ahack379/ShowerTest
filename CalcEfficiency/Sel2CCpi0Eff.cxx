@@ -15,6 +15,12 @@ namespace larlite {
     _events = -1 ;
     _signal = 0;
 
+    if ( ! _cut_tree ){
+      _cut_tree = new TTree("cuttree","cuttree");
+      _cut_tree->Branch("_energy",&_energy,"_energy/F");
+    }
+
+
     _event_list.clear();
 
     return true;
@@ -44,10 +50,12 @@ namespace larlite {
     xyz[1] = traj.at(traj.size() - 1).Y();
     xyz[2] = traj.at(traj.size() - 1).Z();
 
+
     bool pi0 = false ;
 
     for ( auto const & s : *ev_mcs ){
 
+       //std::cout<<"Shower PDG: "<<s.PdgCode()<<std::endl ;
        if ( s.MotherPdgCode() == 111 ){
 
          auto st = s.Start() ;
@@ -69,6 +77,8 @@ namespace larlite {
     if( !_CCNC ) {
 
     for ( auto const & t : *ev_mct ){
+
+       //std::cout<<"Track PDG: "<<t.PdgCode()<<std::endl ;
        if ( t.PdgCode() == 13 || t.PdgCode() == -13 ){
 
          auto st = t.Start() ;
@@ -76,46 +86,62 @@ namespace larlite {
 
           if( dist < 0.4 ) {
 
-            _signal++ ;
-            _event_list.emplace_back(_events);
-            std::cout<<"Foudn a CCpi0!!!!!!!!!!!"<<std::endl ;
-            return true;
+          //  _signal++ ;
+          //  _event_list.emplace_back(_events);
+          //  std::cout<<"Foudn a CCpi0!!!!!!!!!!!"<<std::endl ;
+
+          bool found = false;
+	  float min_e = 1e9;
+
+          // This chunk of code finds the min energy of a pi0 shower and stores it in a tree for cuts based analysis
+
+          for ( auto const & s : *ev_mcs ){
+            if ( s.MotherPdgCode() == 111 ){
+              auto st = s.Start() ;
+              auto dist = sqrt( pow(xyz[0] - st.X(),2) + pow(xyz[1] - st.Y(),2) +pow(xyz[2] - st.Z(),2) ); 
+                if( dist < 0.4 ) {
+		  std::cout<<"Energy is : "<<s.DetProfile().E()<<std::endl ;
+
+		  // If we enter this if block, we've found the second gamma 
+                  if( found == true ){
+
+                    _energy = s.DetProfile().E();
+
+		    if( min_e < _energy )
+		      _energy = min_e;
+
+                    if( _energy <= 30 ){
+                      _signal++ ;
+                      _event_list.emplace_back(_events);
+		      }
+
+                    _cut_tree->Fill();
+                    break;
+                    }
+		  min_e = s.DetProfile().E();
+		   
+                  found = true;
+                  }
+                }
+              }
+                  return true;
             }
+
+
           }
         }
       }
 
-    return true; 
 
-   // auto parts = ev_truth->at(0).GetParticles();
-   // for ( auto const & p : parts ){
-   //   
-   //   if( p.StatusCode() == 1)
-   //      std::cout<<"PDG "<<p.PdgCode()<<", and Parent: "<<p.Mother()<<std::endl ;
-
-   //   if( p.StatusCode() == 1 && ( p.PdgCode() == 111 ) ){
-   //       std::cout<<"Foudn a pi0!!!" <<std::endl ;
-
-   //       auto ptraj = p.Trajectory() ;
-   //       if( !ptraj.size() ) continue;
-
-   //       auto dist = sqrt( pow(xyz[0] - ptraj.at(0).X(),2) + pow(xyz[1] - ptraj.at(0).Y(),2) +pow(xyz[2] - ptraj.at(0).Z(),2) ); 
-   //      
-   //       if( dist < 0.4 ) {
-   //         _signal++ ;
-   //         _event_list.emplace_back(_events);
-   //         continue;
-   //        }
-   //     }
-
-   //   }
-
-    //return true;
   }
 
   bool Sel2CCpi0Eff::finalize() {
 
     std::cout<<"CCpi0 are "<<float(_signal)/(_events+1)*100<<"\% of BNB ("<<_signal<<"/"<<_events+1<<")"<<std::endl ;
+    if(_fout){
+      _fout->cd();
+      _cut_tree->Write();
+      }
 
     std::cout<<_event_list.size()<<" in Event list :" <<std::endl ;
     for( auto const & e : _event_list )
