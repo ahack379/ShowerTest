@@ -1,69 +1,66 @@
 /**
- * \file RatioCut.h
+ * \file Pi0Energy.h
  *
- * \ingroup SumCharge
+ * \ingroup EnergyStudy
  * 
- * \brief Class def header for a class RatioCut
+ * \brief Class def header for a class Pi0Energy
  *
  * @author ah673
  */
 
-/** \addtogroup SumCharge
+/** \addtogroup EnergyStudy
 
     @{*/
 
-#ifndef LARLITE_RATIOCUT_H
-#define LARLITE_RATIOCUT_H
+#ifndef LARLITE_PI0ENERGY_H
+#define LARLITE_PI0ENERGY_H
 
 #include "Analysis/ana_base.h"
+#include "GeoAlgo/GeoAlgo.h"
 
 namespace larlite {
   /**
-     \class RatioCut
+     \class Pi0Energy
      User custom analysis class made by SHELL_USER_NAME
    */
-  class RatioCut : public ana_base{
+  class Pi0Energy : public ana_base{
   
   public:
 
     /// Default constructor
-    RatioCut(){ _name="RatioCut"; _fout=0; _tree=nullptr; _hits_tot=0.; _hits_in_rad=0; 
-                  _ratio_cut=0.2; }
+    Pi0Energy(){ _name="Pi0Energy"; _fout=0; _energy_tree=0;}
 
     /// Default destructor
-    virtual ~RatioCut(){}
+    virtual ~Pi0Energy(){}
 
-    /** IMPLEMENT in RatioCut.cc!
+    /** IMPLEMENT in Pi0Energy.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in RatioCut.cc! 
+    /** IMPLEMENT in Pi0Energy.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in RatioCut.cc! 
+    /** IMPLEMENT in Pi0Energy.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
 
-    void SetRatioCut(float ratio ) { _ratio_cut = ratio ; } 
+    void Clear() ;
 
   protected:
 
-  float _ratio_cut ;
+  TTree * _energy_tree ;
+  float _true_e ;
+  float _reco_e ;
+  int _n_true_pi0;
 
-  TTree * _tree ;
-  float _hits_tot;
-  float _hits_in_rad; 
-  float _hits_in_rad_g;
+  float _event ;
+  std::vector<int> _event_list ;
 
-  int _event ;
-
-  std::vector<float> _radii;
-  std::vector<float> _density;
-  std::vector<float> _hits_per_r;
+  geoalgo::GeoAlgo _geoAlgo ;
     
   };
 }

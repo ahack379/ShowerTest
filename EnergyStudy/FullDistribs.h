@@ -1,69 +1,75 @@
 /**
- * \file RatioCut.h
+ * \file FullDistribs.h
  *
- * \ingroup SumCharge
+ * \ingroup EnergyStudy
  * 
- * \brief Class def header for a class RatioCut
+ * \brief Class def header for a class FullDistribs
  *
  * @author ah673
  */
 
-/** \addtogroup SumCharge
+/** \addtogroup EnergyStudy
 
     @{*/
 
-#ifndef LARLITE_RATIOCUT_H
-#define LARLITE_RATIOCUT_H
+#ifndef LARLITE_FULLDISTRIBS_H
+#define LARLITE_FULLDISTRIBS_H
 
 #include "Analysis/ana_base.h"
+#include "GeoAlgo/GeoAlgo.h"
 
 namespace larlite {
   /**
-     \class RatioCut
+     \class FullDistribs
      User custom analysis class made by SHELL_USER_NAME
    */
-  class RatioCut : public ana_base{
+  class FullDistribs : public ana_base{
   
   public:
 
     /// Default constructor
-    RatioCut(){ _name="RatioCut"; _fout=0; _tree=nullptr; _hits_tot=0.; _hits_in_rad=0; 
-                  _ratio_cut=0.2; }
+    FullDistribs(){ _name="FullDistribs"; _fout=0; _energy_tree=0; _gamma_tree=0;}
 
     /// Default destructor
-    virtual ~RatioCut(){}
+    virtual ~FullDistribs(){}
 
-    /** IMPLEMENT in RatioCut.cc!
+    /** IMPLEMENT in FullDistribs.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in RatioCut.cc! 
+    /** IMPLEMENT in FullDistribs.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in RatioCut.cc! 
+    /** IMPLEMENT in FullDistribs.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
 
-    void SetRatioCut(float ratio ) { _ratio_cut = ratio ; } 
+    void Clear() ;
 
   protected:
 
-  float _ratio_cut ;
+  TTree * _energy_tree ;
+  float _true_pi0_e ;
+  float _true_angle ;
+  float _true_asym ;
+  std::vector<float> _true_vtx ;
+  std::vector<float> _reco_vtx ;
 
-  TTree * _tree ;
-  float _hits_tot;
-  float _hits_in_rad; 
-  float _hits_in_rad_g;
+  int _n_true_pi0;
 
-  int _event ;
+  float _event ;
 
-  std::vector<float> _radii;
-  std::vector<float> _density;
-  std::vector<float> _hits_per_r;
+  TTree * _gamma_tree ;
+  float _gamma_e;
+  float _rad_l ;
+
+  std::vector<int> _event_list ;
+
+  geoalgo::GeoAlgo _geoAlgo ;
     
   };
 }

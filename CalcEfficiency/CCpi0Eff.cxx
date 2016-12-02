@@ -61,7 +61,7 @@ namespace larlite {
      std::cout<<"CCpi0 are "<<float(_signal)/(_event)*100<<"\% of BNB ("<<_signal<<"/"<<_event<<")"<<std::endl ;
 
      std::cout<<_event_list.size()<<" in Event list :" <<std::endl ;
-     for( auto const & e : _event_list ) std::cout<<e<<", ";
+    //for( auto const & e : _event_list ) std::cout<<e<<", ";
 
 
   
