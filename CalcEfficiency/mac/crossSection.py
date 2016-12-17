@@ -19,19 +19,18 @@ for x in xrange(len(sys.argv)-1):
 # Specify IO mode
 my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 
-# Specify output root file name
-my_proc.set_ana_output_file("truth_test.root");
-
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
-my_proc.add_process(fmwk.TruthDistribs())
+ana = fmwk.CrossSection()
+
+my_proc.add_process(ana)
 
 print
 print  "Finished configuring ana_processor. Start event loop!"
 print
 
 # Let's run it.
-my_proc.run();
+my_proc.run()
 
 # done!
 print

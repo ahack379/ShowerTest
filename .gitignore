@@ -14,8 +14,12 @@
 *~
 *.pcm
 *.swp
+*.swo
 *Dict.cxx
 *.ipynb_checkpoints
 Example/*
 Misc
+*.png
+*.txt
+*.log
 

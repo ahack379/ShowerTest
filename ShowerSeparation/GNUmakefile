@@ -14,6 +14,7 @@ OBJECTS = $(SOURCES:.cxx=.o)
 INCFLAGS  = -I.                       #Include itself
 INCFLAGS += $(shell larlite-config --includes)
 INCFLAGS += -I$(OPENCV_INCDIR)
+INCFLAGS += -I$(LARLITE_USERDEVDIR)/DC_Com2
 
 # platform-specific options
 OSNAME          = $(shell uname -s)
@@ -26,6 +27,7 @@ include $(LARLITE_BASEDIR)/Makefile/Makefile.${OSNAME}
 # call the common GNUmakefile
 LDFLAGS += $(shell larlite-config --libs)
 LDFLAGS += -L$(OPENCV_LIBDIR) -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc
+LDFLAGS += -L$(LARLITE_LIBDIR) -lCommissioning_Clusterer
 
 include $(LARLITE_BASEDIR)/Makefile/GNUmakefile.CORE
 

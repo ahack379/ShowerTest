@@ -1,11 +1,11 @@
 import sys
 
-if len(sys.argv) < 2:
-    msg  = '\n'
-    msg += "Usage 1: %s $INPUT_ROOT_FILE(s)\n" % sys.argv[0]
-    msg += '\n'
-    sys.stderr.write(msg)
-    sys.exit(1)
+#if len(sys.argv) < 2:
+#    msg  = '\n'
+#    msg += "Usage 1: %s $INPUT_ROOT_FILE(s)\n" % sys.argv[0]
+#    msg += '\n'
+#    sys.stderr.write(msg)
+#    sys.exit(1)
 
 from larlite import larlite as fmwk
 
@@ -20,20 +20,21 @@ for x in xrange(len(sys.argv)-1):
 my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 
 # Specify output root file name
-my_proc.set_ana_output_file("truth_test.root");
+my_proc.set_ana_output_file("ana.root");
+#my_proc.set_output_file("test_lin.root")
 
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
-my_proc.add_process(fmwk.TruthDistribs())
+aunit = fmwk.SepTrkShrNearVtx()
+
+my_proc.add_process(aunit)
+#my_proc.enable_filter(True)
 
 print
 print  "Finished configuring ana_processor. Start event loop!"
 print
 
-# Let's run it.
-my_proc.run();
-
-# done!
+my_proc.run(0,10) #0,5000)
 print
 print "Finished running ana_processor event loop!"
 print

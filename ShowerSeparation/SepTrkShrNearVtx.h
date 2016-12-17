@@ -1,53 +1,63 @@
 /**
- * \file AVFilter.h
+ * \file SepTrkShrNearVtx.h
  *
- * \ingroup Filters
+ * \ingroup ShowerSeparation
  * 
- * \brief Class def header for a class AVFilter
+ * \brief Class def header for a class SepTrkShrNearVtx
  *
  * @author ah673
  */
 
-/** \addtogroup Filters
+/** \addtogroup ShowerSeparation
 
     @{*/
 
-#ifndef LARLITE_AVFILTER_H
-#define LARLITE_AVFILTER_H
+#ifndef LARLITE_SEPTRKSHRNEARVTX_H
+#define LARLITE_SEPTRKSHRNEARVTX_H
 
 #include "Analysis/ana_base.h"
+#include "TTree.h"
 
 namespace larlite {
   /**
-     \class AVFilter
+     \class SepTrkShrNearVtx
      User custom analysis class made by SHELL_USER_NAME
    */
-  class AVFilter : public ana_base{
+  class SepTrkShrNearVtx : public ana_base{
   
   public:
 
     /// Default constructor
-    AVFilter(){ _name="AVFilter"; _fout=0;}
+    SepTrkShrNearVtx(){ _name="SepTrkShrNearVtx"; _fout=0; _lin_tree=0;}
 
     /// Default destructor
-    virtual ~AVFilter(){}
+    virtual ~SepTrkShrNearVtx(){}
 
-    /** IMPLEMENT in AVFilter.cc!
+    /** IMPLEMENT in SepTrkShrNearVtx.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in AVFilter.cc! 
+    /** IMPLEMENT in SepTrkShrNearVtx.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in AVFilter.cc! 
+    /** IMPLEMENT in SepTrkShrNearVtx.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
 
+    void Clear();
+
   protected:
+
+  int _event ; 
+
+  TTree * _lin_tree;
+  float _lin ;
+  float _tll ;
+  int _nhits ;
     
   };
 }

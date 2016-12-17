@@ -1,53 +1,72 @@
 /**
- * \file AVFilter.h
+ * \file CrossSection.h
  *
- * \ingroup Filters
+ * \ingroup HitDensity
  * 
- * \brief Class def header for a class AVFilter
+ * \brief Class def header for a class CrossSection
  *
  * @author ah673
  */
 
-/** \addtogroup Filters
+/** \addtogroup HitDensity
 
     @{*/
 
-#ifndef LARLITE_AVFILTER_H
-#define LARLITE_AVFILTER_H
+#ifndef LARLITE_CROSSSECTION_H
+#define LARLITE_CROSSSECTION_H
 
 #include "Analysis/ana_base.h"
 
 namespace larlite {
   /**
-     \class AVFilter
+     \class CrossSection
      User custom analysis class made by SHELL_USER_NAME
    */
-  class AVFilter : public ana_base{
+  class CrossSection : public ana_base{
   
   public:
 
     /// Default constructor
-    AVFilter(){ _name="AVFilter"; _fout=0;}
+    CrossSection(){ _name="CrossSection"; _fout=0;}
 
     /// Default destructor
-    virtual ~AVFilter(){}
+    virtual ~CrossSection(){}
 
-    /** IMPLEMENT in AVFilter.cc!
+    /** IMPLEMENT in CrossSection.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in AVFilter.cc! 
+    /** IMPLEMENT in CrossSection.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in AVFilter.cc! 
+    /** IMPLEMENT in CrossSection.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
 
   protected:
+
+  int _event ;
+  int _signal;
+  int _tot_event_in_AV ;
+  int _n_numu ;
+  int _n_nu_all ;
+
+  double _tot_pot ;
+
+  float _xmin ;
+  float _xmax ;
+  float _ymin ; 
+  float _ymax ; 
+  float _zmin ; 
+  float _zmax ; 
+
+  float _mean_e ;
+
+  std::vector<int> _event_list ;
     
   };
 }
