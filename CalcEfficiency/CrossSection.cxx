@@ -75,22 +75,40 @@ namespace larlite {
     auto parts = ev_mctruth->at(0).GetParticles();
     bool pi0 = false;
     bool mu  = false ;
+    int n_pi0 = 0;
+    int n_mes = 0;
+    int n_lep = 0;
+    int n_mu = 0;
       
     for ( auto const & p : parts ){
       
-      if( p.StatusCode() == 1 && p.PdgCode() == 111 )
+      if( p.StatusCode() == 1 && p.PdgCode() == 111 ){
         pi0 = true;
+	n_pi0 += 1;
+	}
 
-      if( p.StatusCode() == 1 && abs(p.PdgCode()) == 13 )
-        mu = true; 
-        
-      if( mu && pi0 ){
+      if( p.StatusCode() == 1 && p.PdgCode() == 13 ){
+        n_mu += 1;
+        mu = true;  
+	}
+
+      if( p.StatusCode() == 1 && (abs(p.PdgCode()) == 211 || abs(p.PdgCode()) == 321 ||  p.PdgCode() == 130 
+                                   || p.PdgCode() == 310 || abs(p.PdgCode()) == 311 ) ){
+        n_mes += 1;
+        break ;
+	}
+
+      if( p.StatusCode() == 1 && (abs(p.PdgCode()) == 11 || p.PdgCode() == 22 )){
+        n_lep += 1;
+        break ;
+        }
+      }
+
+      if( mu == 1 && n_pi0 == 1 && n_lep == 0 && n_mes == 0){
         //std::cout<<"**********************FOUND CCPI0!! "<<std::endl;
         _signal++;
 	_event_list.emplace_back(_event-1);
-        break;
         }
-      }
 
     auto ev_mcflux = storage->get_data<event_mcflux>("generator"); 
     if(!ev_mcflux || !ev_mcflux->size() ) return false;
@@ -125,17 +143,15 @@ namespace larlite {
 
      _mean_e /= _n_numu ;
       
-     std::cout<<"Mean Energy for integrated flux : "<<_mean_e<<std::endl ;
+     //std::cout<<"Mean Energy for integrated flux : "<<_mean_e<<std::endl ;
 
-     std::cout<<"Signal in AV: "<<_signal<<std::endl ;
-     std::cout<<"N targets: "<<n_targ <<std::endl ;
-     //std::cout<<"Numus, total nu, AV : "<< _n_numu<<", "<<_n_nu_all<<", "<<FV<<std::endl ;
-     std::cout<<"Total POT: "<<_tot_pot<<", flux: "<<flux<<" numu/cm3/POT"<<std::endl;
+     //std::cout<<"Signal in AV: "<<_signal<<std::endl ;
+     //std::cout<<"N targets: "<<n_targ <<std::endl ;
+     //std::cout<<"Total POT: "<<_tot_pot<<", flux: "<<flux<<" numu/cm3/POT"<<std::endl;
+     //std::cout<<"MC Cross section : "<<float(_signal) / n_targ / flux ; 
 
-     std::cout<<"MC Cross section : "<<float(_signal) / n_targ / flux ; 
-
-    //std::cout<<_event_list.size()<<" in Event list :" <<std::endl ;
-    //for( auto const & e : _event_list ) std::cout<<e<<", ";
+    std::cout<<_event_list.size()<<" in Event list :" <<std::endl ;
+    for( auto const & e : _event_list ) std::cout<<e<<", ";
 
 
   

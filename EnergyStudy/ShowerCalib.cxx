@@ -25,7 +25,7 @@ namespace larlite {
       _pi0_tree->Branch("true_angle",&_true_angle,"true_angle/F");
       _pi0_tree->Branch("true_asym",&_true_asym,"true_asym/F");
       _pi0_tree->Branch("reco_pi0_e",&_reco_pi0_e,"reco_pi0_e/F");
-      _pi0_tree->Branch("event",&_event,"event/I");
+      //_pi0_tree->Branch("event",&_event,"event/I");
       }
 
     if( !_gamma_tree ){
@@ -39,6 +39,20 @@ namespace larlite {
       _gamma_tree->Branch("reco_rad_l",&_reco_rad_l,"reco_rad_l/F");
       }
 
+    if( !_gain_tree ){
+      _gain_tree = new TTree("gain_tree","Signal Processing Hit Normalization");
+      _gain_tree->Branch("_pl",&_pl,"pl/I");
+      _gain_tree->Branch("_wire",&_wire,"wire/I");
+      _gain_tree->Branch("_tick",&_tick,"tick/I");
+      _gain_tree->Branch("_reco_area",&_reco_area,"reco_area/D");
+      _gain_tree->Branch("_reco_amp",&_reco_amp,"reco_amp/D");
+      _gain_tree->Branch("_gain",&_gain,"gain/D");
+      _gain_tree->Branch("_q",&_q,"q/D");
+      _gain_tree->Branch("_event",&_event,"event/I");
+      _gain_tree->Branch("_clus",&_clus,"clus/I");
+    }
+
+
     _event = -1;
 
   _event_list = {69 }; 
@@ -49,6 +63,15 @@ namespace larlite {
   }
 
   void ShowerCalib::Clear(){
+    _pl = -2; 
+    _wire = -9;
+    _tick = -9;
+    _reco_area = 0;
+    _reco_amp = 0;
+    _gain = -9;
+    _q = 0;
+    _clus = -1;
+
     _true_pi0_e = -999;
     _true_angle = -9;
     _true_asym = -9;
@@ -67,13 +90,13 @@ namespace larlite {
   
   bool ShowerCalib::analyze(storage_manager* storage) {
 
-    _event ++; 
+    _event++; 
     Clear() ;
 
     //if(std::find(_event_list.begin(), _event_list.end(), _event) == _event_list.end()) 
     //  return false;
 
-    std::cout<<"\nEvent is : "<<_event <<std::endl ;
+    //std::cout<<"\nEvent is : "<<_event <<std::endl ;
 
     auto ev_mctruth= storage->get_data<event_mctruth>("generator"); 
     if(!ev_mctruth || !ev_mctruth->size() ){
@@ -122,7 +145,7 @@ namespace larlite {
     return false;
     }
 
-  if( ev_s->size() < 2 ) return false ;
+  if( ev_s->size() < 1 ) return false ;
 
   auto ev_ass = storage->get_data<larlite::event_ass>("showerreco");
   auto const& ass_clus_v = ev_ass->association(ev_s->id(), ev_clus->id());
@@ -140,36 +163,46 @@ namespace larlite {
   // Loop over showers. I think.
   for (size_t i = 0; i < ass_clus_v.size(); i++ ){
       
+    float sub_true_charge = 0 ;
+    float sub_reco_charge = 0 ;
+    //std::cout<<"Number of clusters assoc to shower: "<<ass_clus_v.at(i).size()<<std::endl ;
+    // Loop over clusters associated to this shower. Again, I think.
     for (size_t j = 0; j < ass_clus_v.at(i).size(); j++ ){
+
         auto clus_id = ass_clus_v.at(i).at(j); 
         auto iclus = ev_clus->at(clus_id);
        
         if (iclus.Plane().Plane != 2 ) continue; 
 
+        _clus = clus_id ;
+        _pl = iclus.Plane().Plane ;
+
         auto const & ass_clus_hit = ass_hit_v.at(clus_id) ;
 
-        std::cout<<"Number of hits: "<<ass_clus_hit.size()<<std::endl;
+        float test_energy = 0;
 
-        float sub_true_charge = 0 ;
-        float sub_reco_charge = 0 ;
-
+        //std::cout<<"Number of hits: "<<ass_clus_hit.size()<<std::endl;
         for (auto const& k : ass_clus_hit){
 
           auto const& reco_hit = ev_hit->at ( k );
 
-          float tick = reco_hit.PeakTime();
-          float wire = reco_hit.WireID().Wire;
-          float reco_area = reco_hit.Integral();
+          _tick = reco_hit.PeakTime() - 810;
+          _wire = reco_hit.WireID().Wire;
+          _reco_area = reco_hit.Integral();
+          _reco_amp = reco_hit.PeakAmplitude();
 
           auto clocktick = larutil::DetectorProperties::GetME()->SamplingRate() * 1.e-3; //time sample in usec
-          float lifetime_corr = exp( tick * clocktick / 8000);
-          float electrons = reco_area * 189 ; //mcc8 value
+          float lifetime_corr = exp( _tick * clocktick / 8000);
+          float electrons = _reco_area * 189 ; //mcc8 value
 
-          float dQ = electrons * lifetime_corr * 23.6 * 10e-6 ; 
+
+          float dQ = electrons * lifetime_corr * 23.6 * 1e-6 ; 
           float dE = dQ / 0.62 ; // 0.62 -> recomb factor
 
+          test_energy += dE ;
+
           // find the simchannel info for this channel
-          auto chan = geom->PlaneWireToChannel(iclus.Plane().Plane,wire);
+          auto chan = geom->PlaneWireToChannel(iclus.Plane().Plane,_wire);
 
           // are there simch @ this channel?
           if (Ch2SimchIdx_map.find(chan) == Ch2SimchIdx_map.end())
@@ -179,31 +212,45 @@ namespace larlite {
           auto const& simch = ev_simch->at( Ch2SimchIdx_map[chan] );
 
           // get the charge deposited in the appropriate time-range
-          auto const& ide_v = simch.TrackIDsAndEnergies( reco_hit.PeakTime() - 4*reco_hit.RMS() + 7298,
-                                                         reco_hit.PeakTime() + 4*reco_hit.RMS() + 7298);
+          auto const& ide_v = simch.TrackIDsAndEnergies( reco_hit.PeakTime() - 2*reco_hit.RMS() + 7298,
+                                                         reco_hit.PeakTime() + 2*reco_hit.RMS() + 7298);
 
-          auto q = 0;
+          _q = 0;
           float temp_energy = 0;
           for (auto const&  ide : ide_v){
-            q += ide.numElectrons;
+            _q += ide.numElectrons;
             temp_energy +=  ide.energy ;
               }
 
-          auto gain = float(q) / reco_area ; 
 
-          if ( gain > 240 ){
-            std::cout<<"GAIN IS HUGE: "<<gain<<", "<<sub_true_charge<<", "<<sub_reco_charge<<std::endl ;
+          _gain = float(_q) / _reco_area; 
+
+          if ( _reco_area < 0.1) continue; 
+
+          //if( _gain > 260) 
+          //   std::cout<<"**************True: "<<_q<<", reco area: " <<_reco_area<<std::endl ;
+         
+
+          //std::cout<<"Event is: "<<_event <<std::endl ;
+          _gain_tree->Fill();
+
+          if ( _gain > 240 ){
 	    sub_true_charge += temp_energy;
             sub_reco_charge += dE;
+            //std::cout<<"GAIN IS HUGE: "<<_gain<<", "<<temp_energy<<", "<<dE<<std::endl ;
              } 
+           //else
+           // std::cout<<"GAIN ISNT HUGE: "<<_gain<<", "<<temp_energy<<", "<<dE<<std::endl ;
            
              }
+           }
           shrid_to_energyloss_true[i] = sub_true_charge ;
           shrid_to_energyloss_reco[i] = sub_reco_charge ;
-           }
+          //std::cout<<"True and reco charge for subtractions: "<<sub_true_charge<<", "<<sub_reco_charge<<std::endl ;
         }
 
-    //std::cout<<"True and reco charge: "<<sub_true_charge<<", "<<sub_reco_charge<<std::endl ;
+
+
  
     std::vector<int> shr_ids;
      
@@ -327,9 +374,9 @@ namespace larlite {
             }// shower ID 2 
         }// shower ID 1 
 
-       std::cout<<"Cand size: "<<cand_ids.size()<<std::endl ;
+       //std::cout<<"Cand size: "<<cand_ids.size()<<std::endl ;
        // Fill trees 
-       if( cand_ids.size() == 2 && min_it != -1){ 
+       if( cand_ids.size() == 2 && min_it != -1 && shr_ids.size() > 1){ 
     
            auto s1 = ev_s->at(cand_ids[0]) ;
            auto s2 = ev_s->at(cand_ids[1]) ;
@@ -374,13 +421,14 @@ namespace larlite {
 	   _reco_gamma_e = recos_1.Energy(2);
            _reco_adj_gamma_e = _reco_gamma_e - shrid_to_energyloss_reco[0] ; 
            _true_adj_gamma_e = _true_gamma_e - shrid_to_energyloss_true[0]; 
-           std::cout<<"Subtracting off energy loss: "<<shrid_to_energyloss_reco[0]<<std::endl  ;
+           //std::cout<<"Subtracting off reco energy loss: "<<shrid_to_energyloss_reco[0]<<std::endl  ;
 
 	   _true_reco_dot = max_dot;
 	   _gamma_tree->Fill();
-	   std::cout<<"Reco and tru gamma e: "<<_reco_gamma_e<<", "<<_true_gamma_e<<std::endl ;
-	   std::cout<<"Start of shower: "<<mcs_1.Start().X()<<", "<<mcs_1.Start().Y() <<", "<<mcs_1.Start().Z()<<std::endl ;
-	   std::cout<<"End of shower: "<<mcs_1.End().X()<<", "<<mcs_1.End().Y() <<", "<<mcs_1.End().Z()<<std::endl ;
+	   //std::cout<<"Reco and tru gamma e: "<<_reco_gamma_e<<", "<<_true_gamma_e<<std::endl ;
+	   //std::cout<<"Start of shower: "<<mcs_1.Start().X()<<", "<<mcs_1.Start().Y() <<", "<<mcs_1.Start().Z()<<std::endl ;
+	   //std::cout<<"End of shower: "<<mcs_1.End().X()<<", "<<mcs_1.End().Y() <<", "<<mcs_1.End().Z()<<std::endl ;
+           //std::cout<<"ev_mcs size , min mcs: "<<ev_mcs->size()<<", "<<min_mcs<<std::endl ;
 
 	   auto mcs_2 = ev_mcs->at(min_mcs) ;
 	   auto recos_2 = ev_s->at(min_recos) ;
@@ -398,10 +446,10 @@ namespace larlite {
 	   _true_reco_dot = dot;
 	   _gamma_tree->Fill();
 
-	   std::cout<<"\nReco and tru gamma e: "<<_reco_gamma_e<<", "<<_true_gamma_e<<std::endl ;
-           std::cout<<"Subtracting off energy loss: "<<shrid_to_energyloss_reco[1]<<std::endl  ;
-	   std::cout<<"Start of shower: "<<mcs_2.Start().X()<<", "<<mcs_2.Start().Y() <<", "<<mcs_2.Start().Z()<<std::endl ;
-	   std::cout<<"End of shower: "<<mcs_2.End().X()<<", "<<mcs_2.End().Y() <<", "<<mcs_2.End().Z()<<std::endl ;
+	   //std::cout<<"\nReco and tru gamma e: "<<_reco_gamma_e<<", "<<_true_gamma_e<<std::endl ;
+           //std::cout<<"Subtracting off energy loss: "<<shrid_to_energyloss_reco[1]<<std::endl  ;
+	   //std::cout<<"Start of shower: "<<mcs_2.Start().X()<<", "<<mcs_2.Start().Y() <<", "<<mcs_2.Start().Z()<<std::endl ;
+	   //std::cout<<"End of shower: "<<mcs_2.End().X()<<", "<<mcs_2.End().Y() <<", "<<mcs_2.End().Z()<<std::endl ;
          }
   
     return true;
@@ -413,6 +461,7 @@ namespace larlite {
       _fout->cd(); 
       _pi0_tree->Write(); 
       _gamma_tree->Write(); 
+      _gain_tree->Write();
       }
   
     return true;

@@ -19,7 +19,8 @@
 *.ipynb_checkpoints
 Example/*
 Misc
-*.png
+*/*/Plots/*.png
+*/*/*.png
 *.txt
 *.log
 

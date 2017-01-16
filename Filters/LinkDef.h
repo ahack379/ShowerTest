@@ -12,6 +12,8 @@
 #pragma link C++ class larlite::AVFilter+;
 #pragma link C++ class larlite::FlashCut+;
 #pragma link C++ class larlite::RatioCut+;
+#pragma link C++ class larlite::EnergyFilter+;
+
 
 //ADD_NEW_CLASS ... do not change this line
 #endif

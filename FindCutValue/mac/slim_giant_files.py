@@ -15,6 +15,7 @@ ch_pot = TChain("potsummary_generator_tree")
 ch_gaus = TChain("hit_gaushit_tree")
 ch_h02 = TChain("hit_hit02_tree")
 ch_vtx = TChain("vertex_numuCC_vertex_tree")
+#ch_vtx = TChain("vertex_mcvertex_tree")
 ch_trk = TChain("track_pandoraNu_tree")
 ch_ass_trk = TChain("ass_pandoraNu_tree")
 

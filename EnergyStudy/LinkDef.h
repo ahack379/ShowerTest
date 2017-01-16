@@ -16,7 +16,10 @@
 #pragma link C++ class larlite::ElecGainExtraction+;
 #pragma link C++ class larlite::HitCalibStudy+;
 #pragma link C++ class larlite::ShowerCalib+;
+#pragma link C++ class larlite::GammaEnergy+;
+#pragma link C++ class larlite::HitThreshStudy+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
+
 
 

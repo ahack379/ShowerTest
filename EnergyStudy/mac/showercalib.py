@@ -2,11 +2,12 @@ import sys
 
 if len(sys.argv) < 2:
     msg  = '\n'
-    msg += "Usage 1: %s $INPUT_ROOT_FILE(s)\n" % sys.argv[0]
+    msg += "Usage 1: %s $INPUT_ROOT_FILE\n" % sys.argv[0]
     msg += '\n'
     sys.stderr.write(msg)
     sys.exit(1)
 
+import ROOT
 from larlite import larlite as fmwk
 
 # Create ana_processor instance
@@ -19,23 +20,23 @@ for x in xrange(len(sys.argv)-1):
 # Specify IO mode
 my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 
-# Specify output root file name
-my_proc.set_ana_output_file("truth_test.root");
+# Specify analysis output root file name
+my_proc.set_ana_output_file("ana_showercal.root");
 
-# Attach an analysis unit ... here we use a base class which does nothing.
-# Replace with your analysis unit if you wish.
-my_proc.add_process(fmwk.TruthDistribs())
+# Specify data output root file name
+#my_proc.set_output_file("rawdigit_hits.root")
+
+calib = fmwk.ShowerCalib()
+my_proc.add_process(calib)
+
+#my_proc.set_data_to_write(fmwk.data.kHit,'rawhit')
+#my_proc.set_data_to_write(fmwk.data.kRawDigit,'daq')
 
 print
 print  "Finished configuring ana_processor. Start event loop!"
 print
 
-# Let's run it.
-my_proc.run(69,1);
+my_proc.run(0,500)
 
-# done!
-print
-print "Finished running ana_processor event loop!"
-print
+sys.exit()
 
-sys.exit(0)

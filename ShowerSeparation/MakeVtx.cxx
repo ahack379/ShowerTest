@@ -34,7 +34,6 @@ namespace larlite {
         auto ev_mcs= storage->get_data<event_mcshower>("mcreco"); 
         if(!ev_mcs || !ev_mcs->size() ){std::cout<<"NO SHOW "<<std::endl ; return false;}
         auto s = ev_mcs->at(0);
-          
          xyz[0] = s.Start().Position().X()+ _pi0_offset;
          xyz[1] = s.Start().Position().Y();
          xyz[2] = s.Start().Position().Z();
@@ -69,8 +68,8 @@ namespace larlite {
           xyz[1] = traj.at(traj.size() - 1).Y();
           xyz[2] = traj.at(traj.size() - 1).Z();
 
-	  if( xyz[0] < 20 || xyz[0] > 236.5 || xyz[1] < -96.5 || xyz[1] > 96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
-	    return false ;
+	  //if( xyz[0] < 20 || xyz[0] > 236.5 || xyz[1] < -96.5 || xyz[1] > 96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
+	  //  return false ;
 
 	  //std::cout<<"And vertex location: "<<xyz[0]<<", "<<xyz[1]<<", "<<xyz[2]<<std::endl;
 	   }

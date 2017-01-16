@@ -58,6 +58,10 @@ namespace larlite {
   float _lin ;
   float _tll ;
   int _nhits ;
+  bool _is_shower ;
+  float _length ;
+
+  std::vector<int> _event_list ; 
     
   };
 }

@@ -1,9 +1,9 @@
 /**
- * \file ShowerCalib.h
+ * \file ContainmentStudy.h
  *
  * \ingroup EnergyStudy
  * 
- * \brief Class def header for a class ShowerCalib
+ * \brief Class def header for a class ContainmentStudy
  *
  * @author ah673
  */
@@ -12,38 +12,38 @@
 
     @{*/
 
-#ifndef LARLITE_SHOWERCALIB_H
-#define LARLITE_SHOWERCALIB_H
+#ifndef LARLITE_CONTAINMENTSTUDY_H
+#define LARLITE_CONTAINMENTSTUDY_H
 
 #include "Analysis/ana_base.h"
 #include "GeoAlgo/GeoAlgo.h"
 
 namespace larlite {
   /**
-     \class ShowerCalib
+     \class ContainmentStudy
      User custom analysis class made by SHELL_USER_NAME
    */
-  class ShowerCalib : public ana_base{
+  class ContainmentStudy : public ana_base{
   
   public:
 
     /// Default constructor
-    ShowerCalib(){ _name="ShowerCalib"; _fout=0; _pi0_tree=0; _gamma_tree=0; _gain_tree=0;}
+    ContainmentStudy(){ _name="ContainmentStudy"; _fout=0; _pi0_tree=0; _gamma_tree=0; _energy_tree=0;}
 
     /// Default destructor
-    virtual ~ShowerCalib(){}
+    virtual ~ContainmentStudy(){}
 
-    /** IMPLEMENT in ShowerCalib.cc!
+    /** IMPLEMENT in ContainmentStudy.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in ShowerCalib.cc! 
+    /** IMPLEMENT in ContainmentStudy.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in ShowerCalib.cc! 
+    /** IMPLEMENT in ContainmentStudy.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
@@ -61,30 +61,21 @@ namespace larlite {
   float _reco_pi0_e ;
   int _n_true_pi0;
 
-  int _event ;
+  float _event ;
 
   TTree * _gamma_tree ;
   float _true_gamma_e;
   float _reco_gamma_e;
-  float _true_adj_gamma_e;
-  float _reco_adj_gamma_e;
   float _true_rad_l ;
   float _reco_rad_l ;
   float _true_reco_dot ;
 
-  TTree * _gain_tree;
-  int _clus ;
-  int _pl;
-  int _tick ;
-  int _wire;
-  double _reco_area ;
-  double _reco_amp;
-  double _gain;
-  double _q;
-
-
-
   std::vector<int> _event_list ;
+
+  TTree * _energy_tree ;
+  float _containment ;
+  float _sum_gamma_e; 
+  float _mass ;
 
   geoalgo::GeoAlgo _geoAlgo ;
     

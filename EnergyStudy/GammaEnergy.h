@@ -1,65 +1,63 @@
 /**
- * \file VtxDensity.h
+ * \file GammaEnergy.h
  *
- * \ingroup SumCharge
+ * \ingroup EnergyStudy
  * 
- * \brief Class def header for a class VtxDensity
+ * \brief Class def header for a class GammaEnergy
  *
  * @author ah673
  */
 
-/** \addtogroup SumCharge
+/** \addtogroup EnergyStudy
 
     @{*/
 
-#ifndef LARLITE_VTXDENSITY_H
-#define LARLITE_VTXDENSITY_H
+#ifndef LARLITE_GAMMAENERGY_H
+#define LARLITE_GAMMAENERGY_H
 
 #include "Analysis/ana_base.h"
 
 namespace larlite {
   /**
-     \class VtxDensity
+     \class GammaEnergy
      User custom analysis class made by SHELL_USER_NAME
    */
-  class VtxDensity : public ana_base{
+  class GammaEnergy : public ana_base{
   
   public:
 
     /// Default constructor
-    VtxDensity(){ _name="VtxDensity"; _fout=0; _tree=nullptr; _hits_tot=0.; _hits_in_rad=0; }
+    GammaEnergy(){ _name="GammaEnergy"; _fout=0; _tree=0;}
 
     /// Default destructor
-    virtual ~VtxDensity(){}
+    virtual ~GammaEnergy(){}
 
-    /** IMPLEMENT in VtxDensity.cc!
+    /** IMPLEMENT in GammaEnergy.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in VtxDensity.cc! 
+    /** IMPLEMENT in GammaEnergy.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in VtxDensity.cc! 
+    /** IMPLEMENT in GammaEnergy.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
 
   protected:
 
-  TTree * _tree ;
-  float _hits_tot;
-  float _hits_in_rad; 
-  float _hits_in_rad_g;
-
+  TTree * _tree ; 
   int _event ;
-  int _keep ;
+  float _reco_e ;
+  float _hit_reco_e ;
+  float _mc_e ; 
+  float _sum ;
+  float _sum_adj ;
+  float _sum_reco_int ;
 
-  std::vector<float> _radii;
-  std::vector<float> _density;
-  std::vector<float> _hits_per_r;
     
   };
 }

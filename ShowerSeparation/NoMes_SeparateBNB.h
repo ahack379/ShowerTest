@@ -1,65 +1,59 @@
 /**
- * \file VtxDensity.h
+ * \file NoMes_SeparateBNB.h
  *
- * \ingroup SumCharge
+ * \ingroup HitDensity
  * 
- * \brief Class def header for a class VtxDensity
+ * \brief Class def header for a class NoMes_SeparateBNB
  *
  * @author ah673
  */
 
-/** \addtogroup SumCharge
+/** \addtogroup HitDensity
 
     @{*/
 
-#ifndef LARLITE_VTXDENSITY_H
-#define LARLITE_VTXDENSITY_H
+#ifndef LARLITE_NOMES_SEPARATEBNB_H
+#define LARLITE_NOMES_SEPARATEBNB_H
 
 #include "Analysis/ana_base.h"
 
 namespace larlite {
   /**
-     \class VtxDensity
+     \class NoMes_SeparateBNB
      User custom analysis class made by SHELL_USER_NAME
    */
-  class VtxDensity : public ana_base{
+  class NoMes_SeparateBNB : public ana_base{
   
   public:
 
     /// Default constructor
-    VtxDensity(){ _name="VtxDensity"; _fout=0; _tree=nullptr; _hits_tot=0.; _hits_in_rad=0; }
+    NoMes_SeparateBNB(){ _name="NoMes_SeparateBNB"; _fout=0; _get_pi0s = false ;}
 
     /// Default destructor
-    virtual ~VtxDensity(){}
+    virtual ~NoMes_SeparateBNB(){}
 
-    /** IMPLEMENT in VtxDensity.cc!
+    /** IMPLEMENT in NoMes_SeparateBNB.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in VtxDensity.cc! 
+    /** IMPLEMENT in NoMes_SeparateBNB.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in VtxDensity.cc! 
+    /** IMPLEMENT in NoMes_SeparateBNB.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
 
+    void GetPi0s(bool get){ _get_pi0s = get ; }
+
   protected:
 
-  TTree * _tree ;
-  float _hits_tot;
-  float _hits_in_rad; 
-  float _hits_in_rad_g;
-
+  bool _get_pi0s;
   int _event ;
-  int _keep ;
-
-  std::vector<float> _radii;
-  std::vector<float> _density;
-  std::vector<float> _hits_per_r;
+  int _signal;
     
   };
 }

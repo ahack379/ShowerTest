@@ -26,6 +26,7 @@ namespace larlite {
     }
 
     _event = 0;
+    _keep = 0;
 
     return true;
   }
@@ -45,7 +46,7 @@ namespace larlite {
 
     auto const& geomH = ::larutil::GeometryHelper::GetME();
 
-    //std::cout<<"\nNew event! "<<_event<<std::endl ;
+    std::cout<<"\nNew event! "<<_event<<std::endl ;
     _event++;
 
     auto ev_hit = storage->get_data<event_hit>("hit02"); //shrhits");//hit02");
@@ -123,16 +124,18 @@ namespace larlite {
             if(inside  >= 0) _hits_in_rad_g ++ ;
             }
 
-         //if ( j == 11 )
-	//std::cout<<"At rad "<<rad<<" gaus and hit02 ratios: "<<_hits_in_rad_g <<", "<<_hits_in_rad <<std::endl ;
 
         _radii.emplace_back(rad);
 	_density.emplace_back(_hits_in_rad / (M_PI * rad * rad )) ;
 
         if( _hits_in_rad_g == 0 )
 	  _hits_per_r.emplace_back(0.);
-        else 
+        else {
 	  _hits_per_r.emplace_back(float(_hits_in_rad)/_hits_in_rad_g);
+	  std::cout<<"At rad "<<rad<<", ratio: "<<float(_hits_in_rad)/_hits_in_rad_g<<std::endl; // gaus and hit02 ratios: "<<_hits_in_rad_g <<", "<<_hits_in_rad <<std::endl ;
+	   if( float(_hits_in_rad) / _hits_in_rad_g > 0.24)
+	     _keep++;
+	}
 
       }
 
@@ -146,6 +149,8 @@ namespace larlite {
   }
 
   bool VtxDensity::finalize() {
+
+    std::cout<<"At 60cm, for 0.24 cut we keep: "<<_keep<<std::endl ;
 
     if(_fout){
       _fout->cd(); 
