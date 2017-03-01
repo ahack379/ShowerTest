@@ -1,9 +1,9 @@
 /**
- * \file TruthDistribs.h
+ * \file MCVariableStudy.h
  *
  * \ingroup EnergyStudy
  * 
- * \brief Class def header for a class TruthDistribs
+ * \brief Class def header for a class MCVariableStudy
  *
  * @author ah673
  */
@@ -12,38 +12,38 @@
 
     @{*/
 
-#ifndef LARLITE_TRUTHDISTRIBS_H
-#define LARLITE_TRUTHDISTRIBS_H
+#ifndef LARLITE_MCVARIABLESTUDY_H
+#define LARLITE_MCVARIABLESTUDY_H
 
 #include "Analysis/ana_base.h"
 #include "GeoAlgo/GeoAlgo.h"
 
 namespace larlite {
   /**
-     \class TruthDistribs
+     \class MCVariableStudy
      User custom analysis class made by SHELL_USER_NAME
    */
-  class TruthDistribs : public ana_base{
+  class MCVariableStudy : public ana_base{
   
   public:
 
     /// Default constructor
-    TruthDistribs(){ _name="TruthDistribs"; _fout=0; _pi0_tree=0; _gamma_tree=0;}
+    MCVariableStudy(){ _name="MCVariableStudy"; _fout=0; _pi0_tree=0; _gamma_tree=0;}
 
     /// Default destructor
-    virtual ~TruthDistribs(){}
+    virtual ~MCVariableStudy(){}
 
-    /** IMPLEMENT in TruthDistribs.cc!
+    /** IMPLEMENT in MCVariableStudy.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in TruthDistribs.cc! 
+    /** IMPLEMENT in MCVariableStudy.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in TruthDistribs.cc! 
+    /** IMPLEMENT in MCVariableStudy.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
@@ -57,8 +57,10 @@ namespace larlite {
   float _true_2mcs_e ;
   float _true_angle ;
   float _true_asym ;
-  float _gamma_e_max ;
-  float _gamma_e_min ;
+  float _true_gamma_e_max ;
+  float _true_gamma_e_min ;
+  float _true_RL_maxE ;
+  float _true_RL_minE ;
   float _true_pi0_mom ;
   float _true_nu_e ;
 

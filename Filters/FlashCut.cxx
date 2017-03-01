@@ -25,7 +25,7 @@ namespace larlite {
     if ( !ev_flash || ev_flash->size() == 0 ) return false ;
 
     for( auto const & f : *ev_flash ){
-      if( f.TotalPE() > 50 )
+      if( f.TotalPE() > 50 && f.Time() >3.65 && f.Time() < 5.25)
         return true;
         //std::cout<<"Test. "<<std::endl;
        }

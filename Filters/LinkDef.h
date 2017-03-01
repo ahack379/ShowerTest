@@ -15,5 +15,7 @@
 #pragma link C++ class larlite::EnergyFilter+;
 
 
+#pragma link C++ class larlite::TrackMultiplicity+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
+

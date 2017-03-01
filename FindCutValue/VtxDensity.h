@@ -54,12 +54,21 @@ namespace larlite {
   float _hits_in_rad; 
   float _hits_in_rad_g;
 
+  float _hits_p0_in_rad; 
+  float _hits_p0_in_rad_g;
+  float _hits_p1_in_rad; 
+  float _hits_p1_in_rad_g;
+
+  int plane_to_use = 2;
+
   int _event ;
   int _keep ;
 
   std::vector<float> _radii;
   std::vector<float> _density;
   std::vector<float> _hits_per_r;
+  std::vector<float> _gaus_hits_per_r;
+  std::vector<float> _shr_hits_per_r;
     
   };
 }

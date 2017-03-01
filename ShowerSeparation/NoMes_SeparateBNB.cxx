@@ -62,9 +62,8 @@ namespace larlite {
       
     for ( auto const & p : parts ){
 
-     if( p.StatusCode() == 1 && p.PdgCode() == 111 ){
+     if( p.StatusCode() == 1 && p.PdgCode() == 111 )
         n_pi0 += 1;
-        }   
 
       if( p.StatusCode() == 1 && p.PdgCode() == 13 )
         n_mu += 1;
@@ -75,7 +74,7 @@ namespace larlite {
         break ;
         }   
 
-      if( p.StatusCode() == 1 && (abs(p.PdgCode()) == 11 || p.PdgCode() == 22 )){ 
+      if( p.StatusCode() == 1 && (abs(p.PdgCode()) == 11 || p.PdgCode() == -13 )){ 
         n_lep += 1;
         break ;
         }   

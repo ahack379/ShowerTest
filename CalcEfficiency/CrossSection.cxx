@@ -98,13 +98,13 @@ namespace larlite {
         break ;
 	}
 
-      if( p.StatusCode() == 1 && (abs(p.PdgCode()) == 11 || p.PdgCode() == 22 )){
+      if( p.StatusCode() == 1 && (abs(p.PdgCode()) == 11 || p.PdgCode() == -13)){
         n_lep += 1;
         break ;
         }
       }
 
-      if( mu == 1 && n_pi0 == 1 && n_lep == 0 && n_mes == 0){
+      if( n_mu == 1 && n_pi0 == 1 && n_lep == 0 && n_mes == 0){
         //std::cout<<"**********************FOUND CCPI0!! "<<std::endl;
         _signal++;
 	_event_list.emplace_back(_event-1);
@@ -126,11 +126,8 @@ namespace larlite {
 
   bool CrossSection::finalize() {
 
-     float FV = 216.35 * 193 * 1016.8 ;  // Active area
-     float AV = 256.35 * 232. * 1036.8 ; // Fiducial area
-
-     float FA = 216.35 * 193 ;  // Active area
-     float AA = 256.35 * 232. ; // Fiducial area
+     float FV = 216.35 * 193 * 1016.8 ;  // Fiducial volume 
+     //float AV = 256.35 * 232. * 1036.8 ; // Active volume 
 
      float rho = 1.4 ; // g / cm3
      float avogadro = 6.022*pow(10,23);
@@ -145,9 +142,10 @@ namespace larlite {
       
      //std::cout<<"Mean Energy for integrated flux : "<<_mean_e<<std::endl ;
 
-     //std::cout<<"Signal in AV: "<<_signal<<std::endl ;
+     //std::cout<<"Signal in FV: "<<_signal<<std::endl ;
      //std::cout<<"N targets: "<<n_targ <<std::endl ;
      //std::cout<<"Total POT: "<<_tot_pot<<", flux: "<<flux<<" numu/cm3/POT"<<std::endl;
+     std::cout<<"Total POT: "<<_tot_pot<<std::endl;
      //std::cout<<"MC Cross section : "<<float(_signal) / n_targ / flux ; 
 
     std::cout<<_event_list.size()<<" in Event list :" <<std::endl ;

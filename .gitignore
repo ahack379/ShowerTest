@@ -23,4 +23,7 @@ Misc
 */*/*.png
 *.txt
 *.log
-
+Plots/*.png
+*.png
+*.C
+*.C

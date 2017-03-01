@@ -20,13 +20,13 @@ for x in xrange(len(sys.argv)-1):
 my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
 
 # Specify output root file name
-#my_proc.set_ana_output_file("ana.root");
-my_proc.set_output_file("/Volumes/UBooNEData/mcc7/cosmics_bnb/NOMES_trk_full_bnbcosmic_separated.root");
+my_proc.set_ana_output_file("pi0_ana.root");
+#my_proc.set_output_file("TEST.root") #/Volumes/UBooNEData/mcc7/cosmics_bnb/NOMES_trk_full_bnbcosmic_separated.root");
 
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
 aunit = fmwk.NoMes_SeparateBNB()
-aunit.GetPi0s(False)
+aunit.GetPi0s(True)
 
 my_proc.add_process(aunit)
 my_proc.enable_filter(True)

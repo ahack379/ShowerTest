@@ -18,6 +18,7 @@
 #pragma link C++ class larlite::ShowerCalib+;
 #pragma link C++ class larlite::GammaEnergy+;
 #pragma link C++ class larlite::HitThreshStudy+;
+#pragma link C++ class larlite::MCVariableStudy+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
 

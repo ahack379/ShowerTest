@@ -41,14 +41,14 @@ namespace larlite {
     //std::cout<<"Ratio: "<<_ratio_cut<<std::endl ;
     _event++;
 
-    auto ev_hit = storage->get_data<event_hit>("hit02"); //shrhits");//hit02");
-    if ( !ev_hit || !ev_hit->size() ){std::cout<<"Returning..."<<std::endl ; return false; }
+    //auto ev_hit = storage->get_data<event_hit>("hit02"); //shrhits");//hit02");
+    //if ( !ev_hit || !ev_hit->size() ){std::cout<<"Returning..."<<std::endl ; return false; }
 
     auto ev_hit_g = storage->get_data<event_hit>("gaushit");//hit02");
-    if ( !ev_hit_g || !ev_hit_g->size() ) {std::cout<<"Returning..."<<std::endl ; return false; }
+    if ( !ev_hit_g || !ev_hit_g->size() ) {std::cout<<"Returning, no hits..."<<std::endl ; return false; }
 
     auto ev_vtx = storage->get_data<event_vertex>("numuCC_vertex");
-    if ( !ev_vtx || !ev_vtx->size() ) {std::cout<<"Returning..."<<std::endl ; return false; }
+    if ( !ev_vtx || !ev_vtx->size() ) {std::cout<<"Returning, no vertex..."<<std::endl ; return false; }
 
     auto vtx = ev_vtx->at(0); 
 
@@ -87,16 +87,16 @@ namespace larlite {
      float ratio = 0.;
 	
      // Count hits in radius
-     for(auto const & h : *ev_hit){
+     //for(auto const & h : *ev_hit){
 
-         if( h.WireID().Plane != 2 ) continue; 
+     //    if( h.WireID().Plane != 2 ) continue; 
 
-         ::cv::Point h_pt(h.WireID().Wire * geomH->WireToCm(),
-                          h.PeakTime() * geomH->TimeToCm()) ;
-         auto inside = ::cv::pointPolygonTest(contour,h_pt,false); 
+     //    ::cv::Point h_pt(h.WireID().Wire * geomH->WireToCm(),
+     //                     h.PeakTime() * geomH->TimeToCm()) ;
+     //    auto inside = ::cv::pointPolygonTest(contour,h_pt,false); 
 
-         if(inside  > 0) _hits_in_rad ++ ;
-         }
+     //    if(inside  >= 0) _hits_in_rad ++ ;
+     //    }
 
      for(auto const & h : *ev_hit_g){
 
@@ -107,19 +107,20 @@ namespace larlite {
          auto inside = ::cv::pointPolygonTest(contour,h_pt,false); 
 
          if(inside  >= 0) _hits_in_rad_g ++ ;
+
+         if(inside  >= 0 && h.GoodnessOfFit() >= 0) _hits_in_rad++ ;
          }
         
-	 if( _hits_in_rad_g == 0 )
-	   ratio = 0;
-	 else 
-	   ratio = float(_hits_in_rad)/_hits_in_rad_g;
-	
+     if( _hits_in_rad_g == 0 )
+	ratio = 0;
+     else 
+	ratio = float(_hits_in_rad)/_hits_in_rad_g;
 
      //std::cout<<"Event "<<_event-1<<" has Gaus and shr hits: "<<_hits_in_rad_g <<", "<<_hits_in_rad <<std::endl ;
 
     if( ratio < _ratio_cut ) return false ;
     
-    _hits_tot = ev_hit->size() ;
+    _hits_tot = ev_hit_g->size() ;
     _tree->Fill();
   
     return true;

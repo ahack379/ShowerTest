@@ -20,8 +20,7 @@ namespace larlite {
 
     // This module runs on Sel2 output 
     // How many of the pi0 events in this set do we get?
-    // How many do we misID?
-    // _sel_ev_list is the list of entryIDs of pi0s reco'd by ERTool
+    // PURPOSE OF MODULE: Access purity and efficiency of selectionII using MCC8 adjustments
     auto ev_truth = storage->get_data<event_mctruth>("generator");
     auto & truth = ev_truth->at(0);
     auto & nu  = truth.GetNeutrino();

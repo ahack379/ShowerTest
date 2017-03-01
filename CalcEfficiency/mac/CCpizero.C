@@ -9,8 +9,8 @@ int CCpizero() {
    //energy (not momentum!) thresholds in GeV
    double Ar_Ethresh_p = 0;
    double Ar_Ethresh_mu = 0;
-   double Ar_Ethresh_pi = 0;
-   double Ar_Ethresh_pi0 = 0;
+   double Ar_Ethresh_pi = 0; //.139 + .040;
+   double Ar_Ethresh_pi0 = 0; //.135 + 0.040;
    double Ar_Ethresh_K = 0;
    double Ar_Ethresh_K0 = 0;
    double Ar_Ethresh_e = 0;
@@ -31,7 +31,7 @@ int CCpizero() {
    double C_Ethresh_Sigma = 0;
    double C_Ethresh_antip = 0;
 
-   double nargon = 1;
+   double nargon = 1; //1;
    double ncarbon = 1;
 
    int Ar_n = 17;
@@ -45,7 +45,7 @@ int CCpizero() {
    //std::cout<<"GRAPH STUFF: "<<Ar_genie_cc_numu->GetN();
    for(int i = 0; i < Ar_n; i++) {
       Ar_sigma[i] = Ar_genie_cc_numu -> Eval(Ar_E[i]/1000.);
-    //  std::cout<<Ar_sigma[i]<<", "<<Ar_E[i]/1000<<std::endl;
+      std::cout<<Ar_sigma[i]<<", "<<Ar_E[i]/1000<<std::endl;
    }
 
    int C_n = 10;
@@ -61,8 +61,12 @@ int CCpizero() {
 
    double *Ar_N_ccincl = new double[Ar_n];
    double *Ar_N_0pi = new double[Ar_n];
+   double *Ar_N_0pi_NoMes = new double[Ar_n];
+   double *Ar_N_0pi_NoMesLep = new double[Ar_n];
    double *C_N_ccincl = new double[C_n];
    double *C_N_0pi = new double[C_n];
+   double *C_N_0pi_NoMes= new double[C_n];
+   double *C_N_0pi_NoMesLep= new double[C_n];
 
    int nf;
    int *pdgf = new int[1000];
@@ -95,6 +99,8 @@ int CCpizero() {
 
       double n_ccincl = 0;
       double n_0pi = 0;
+      double n_0pi_nomes = 0;
+      double n_0pi_nomeslep = 0;
 
       int npi = 0;
       int npi0 = 0;
@@ -102,6 +108,7 @@ int CCpizero() {
       int nk = 0;
       int nk0 = 0;
       int ngamma = 0;
+      int nelec = 0;
       int nn = 0;
       int npseudo = 0;
       int nlambda0 = 0;
@@ -127,11 +134,11 @@ int CCpizero() {
          nantip = 0;
          nexclude = -1;
          nelec = 0;
-         ////std::cout<<"\n";
          for(int j = 0; j < nf; j++) {
-	    //std::cout<<"PDG: "<<pdgf[j]<<", ";
+	    //if ( pdgf[j] != 2112 && pdgf[j] != 2212 )
+	    //  std::cout<<"PDG: "<<pdgf[j]<<", ";
             if(pdgf[j] == 111 && Ef[j] > Ar_Ethresh_pi0) npi0++;
-            else if(pdgf[j] == 11 )  nelec++;
+            else if(pdgf[j] == 11 ) {nelec++;}
             else if((pdgf[j] == 211 || pdgf[j] == -211) && Ef[j] > Ar_Ethresh_pi) npi++;
             else if(pdgf[j] == 2212 && Ef[j] > Ar_Ethresh_p) np++;
             else if((pdgf[j] == 321 || pdgf[j] == -321) && Ef[k] > Ar_Ethresh_K) nk++;
@@ -145,7 +152,9 @@ int CCpizero() {
          }// end loop over particles	
 
          n_ccincl++;
-         if(npi0 == 1 && npi == 0 && nk == 0 && nk0 == 0 && ngamma == 0 && nelec == 0) n_0pi++;
+         if(npi0 == 1 && npi == 0 && nk == 0 && nk0 == 0 && nelec == 0) n_0pi_nomeslep++;
+         if(npi0 == 1 && npi == 0 && nk == 0 && nk0 == 0){ n_0pi_nomes++; }
+         if(npi0 == 1) { n_0pi++;}
 
       }//end loop over events
 
@@ -153,6 +162,10 @@ int CCpizero() {
    
       Ar_N_ccincl[k] = n_ccincl / nev / nargon * Ar_sigma[k];
       Ar_N_0pi[k] = n_0pi / nev / nargon * Ar_sigma[k];
+      Ar_N_0pi_NoMes[k] = n_0pi_nomes / nev / nargon * Ar_sigma[k];
+      Ar_N_0pi_NoMesLep[k] = n_0pi_nomeslep / nev / nargon * Ar_sigma[k];
+
+      std::cout<<"CCincl, CCpi0, nevent: "<<n_ccincl<<", "<<n_0pi_nomeslep<<", "<<nev<<std::endl;
    }
 
 
@@ -181,6 +194,8 @@ int CCpizero() {
       double n_1p = 0;
       double n_2p = 0;
       double n_0pi = 0;
+      double n_0pi_nomes = 0;
+      double n_0pi_nomeslep = 0;
 
       int npi = 0;
       int npi0 = 0;
@@ -188,6 +203,7 @@ int CCpizero() {
       int nk = 0;
       int nk0 = 0;
       int ngamma = 0;
+      int nelec = 0;
       int nn = 0;
       int npseudo = 0;
       int nlambda0 = 0;
@@ -195,6 +211,7 @@ int CCpizero() {
       int nsigma = 0;
       int nantip = 0;
       int nexclude = 0;
+      std::cout<<"\n***********N EVENTS: "<<nev<<std::endl ;
 
       for(int i = 0; i < nev; i++) {
 
@@ -232,10 +249,9 @@ int CCpizero() {
 
          nexclude = npi + npi0 + nk + nk0 + ngamma + nlambda0 + nsigma + nsigma0 + nantip;
          n_ccincl++;
-         //if(npi0 == 1) n_0pi++;
-         if(npi0 == 1 && npi == 0 && nk == 0 && nk0 == 0 && ngamma == 0 && nelec == 0) n_0pi++;
-         //if(npi0 == 1 && (npi != 0 || nk != 0 || nk0 != 0 || ngamma != 0 || nelec != 0) ) 
-	   //std::cout<<"WELL...OK..."<<std::endl ;
+         if(npi0 == 1) n_0pi++;
+         if(npi0 == 1 && npi == 0 && nk == 0 && nk0 == 0){ n_0pi_nomes++; }
+         if(npi0 == 1 && npi == 0 && nk == 0 && nk0 == 0 && nelec == 0) n_0pi_nomeslep++;
 
       }//end loop over events
 
@@ -243,6 +259,8 @@ int CCpizero() {
 
       C_N_ccincl[k] = n_ccincl / nev / ncarbon * C_sigma[k];
       C_N_0pi[k] = n_0pi / nev / ncarbon * C_sigma[k];
+      C_N_0pi_NoMes[k] = n_0pi_nomes / nev / ncarbon * C_sigma[k];
+      C_N_0pi_NoMesLep[k] = n_0pi_nomeslep / nev / ncarbon * C_sigma[k];
    }
 
 
@@ -255,10 +273,10 @@ int CCpizero() {
    TGraph *fake = new TGraph();
    fake -> SetPoint(0, 100, 0);
    //fake -> SetPoint(1, 2000,3); //100000, 100);
-   fake -> SetPoint(1, 3000,3); //100000, 100);
+   fake -> SetPoint(1,2000,14); //100000, 100);
    fake -> SetMarkerColor(10);
    (fake -> GetXaxis()) -> SetTitle("E_{#nu} [MeV]");
-   (fake -> GetYaxis()) -> SetTitle("#sigma (10^{-38} cm^2 / nucleon");
+   (fake -> GetYaxis()) -> SetTitle("#sigma (10^{-38} cm^2 / molecule)");
 
    fake -> Draw("AP");
    TGraph *gr_Ar_0pi = new TGraph(Ar_n, Ar_E, Ar_N_0pi);
@@ -268,27 +286,58 @@ int CCpizero() {
    (gr_Ar_0pi -> GetXaxis()) -> SetRangeUser(10, 2000);//100000);
    (gr_Ar_0pi -> GetYaxis()) -> SetRangeUser(0, 2);
    (gr_Ar_0pi -> GetXaxis()) -> SetTitle("E_{#nu} [MeV]");
-   (gr_Ar_0pi -> GetYaxis()) -> SetTitle("#sigma (10^{-38} cm^2 / nucleon");
-
-   auto x = gr_Ar_0pi->GetX() ;
-   auto y = gr_Ar_0pi->GetY() ;
-   float area = 0;
-   for ( int i = 0; i < 16; i++){
-     area += (y[i] * (x[i+1] - x[i]) ) ; // /2000);
-     std::cout<<"X,Y: "<< x[i]<<", "<<y[i]<<std::endl; 
-     }
-
-
-     std::cout<<"Total area and ave: "<<area<<", "<<area/(2000 - 100)<<std::endl ;
-
-   //std::cout<<"Integral! "<<gr_Ar_0pi->Integral(0,-1)<<", "<<gr_Ar_0pi->Integral()/2000 <<std::endl ;
-
+   (gr_Ar_0pi -> GetYaxis()) -> SetTitle("#sigma (10^{-38} cm^2 / nucleon)");
    gr_Ar_0pi -> Draw("LSAME");
+
+   std::cout<<"\nARGON: ";
+   auto y = gr_Ar_0pi->GetY() ;
+   for ( int i = 0; i < 17; i++)
+     std::cout<<y[i]<<", "; 
+
+   TGraph *gr_Ar_0pi_NoMes = new TGraph(Ar_n, Ar_E, Ar_N_0pi_NoMes);
+   gr_Ar_0pi_NoMes -> SetLineColor(1);
+   gr_Ar_0pi_NoMes -> SetLineStyle(2);
+   gr_Ar_0pi_NoMes->Draw("LSAME");
+
+   TGraph *gr_Ar_0pi_NoMesLep = new TGraph(Ar_n, Ar_E, Ar_N_0pi_NoMesLep);
+   gr_Ar_0pi_NoMesLep -> SetLineColor(1);
+   gr_Ar_0pi_NoMesLep -> SetLineStyle(3);
+   gr_Ar_0pi_NoMesLep -> Draw("LSAME");
+
+   std::cout<<"\nARGON NO MES: ";
+   auto y_nomes = gr_Ar_0pi_NoMesLep->GetY() ;
+   for ( int i = 0; i < 17; i++)
+     std::cout<<y_nomes[i]<<", "; 
+
+
    TGraph *gr_C_0pi = new TGraph(C_n, C_E, C_N_0pi);
    gr_C_0pi -> SetLineWidth(2);
    gr_C_0pi -> SetLineStyle(1);
    gr_C_0pi -> SetLineColor(2);
    gr_C_0pi -> Draw("LSAME");
+
+   std::cout<<"\nCARBON ES: ";
+   auto y_C= gr_C_0pi->GetY() ;
+   for ( int i = 0; i < 10; i++)
+     std::cout<<y_C[i]<<", "; 
+
+
+   TGraph *gr_C_0pi_NoMes = new TGraph(C_n, C_E, C_N_0pi_NoMes);
+   gr_C_0pi_NoMes -> SetLineColor(2);
+   gr_C_0pi_NoMes -> SetLineStyle(2);
+   gr_C_0pi_NoMes->Draw("LSAME");
+
+   TGraph *gr_C_0pi_NoMesLep = new TGraph(C_n, C_E, C_N_0pi_NoMesLep);
+   gr_C_0pi_NoMesLep -> SetLineColor(2);
+   gr_C_0pi_NoMesLep -> SetLineStyle(3);
+   gr_C_0pi_NoMesLep->Draw("LSAME");
+
+   std::cout<<"\nCARBON NO MES: ";
+   auto y_C_nomes = gr_C_0pi_NoMesLep->GetY() ;
+   for ( int i = 0; i < 10; i++)
+     std::cout<<y_C_nomes[i]<<", "; 
+
+
    //TGraph *gr_Ar_incl = new TGraph(Ar_n, Ar_E, Ar_N_ccincl);
    //gr_Ar_incl -> SetTitle("#nu - Ar");
    //gr_Ar_incl -> SetLineWidth(2);
@@ -299,6 +348,15 @@ int CCpizero() {
    //gr_C_incl -> SetLineStyle(7);
    //gr_C_incl -> SetLineColor(2);
    //gr_C_incl -> Draw("LSAME");
+
+   float tot_xsec_c = 0;
+   auto y_c = gr_C_0pi->GetY() ;
+   for ( int i = 1; i < 10; i++){
+     tot_xsec_c += y_c[i] ;
+     }
+   
+   cout<<"Total carbon cross section : "<<tot_xsec_c<<std::endl ;
+
 
    cout << "Done!" << endl;
 

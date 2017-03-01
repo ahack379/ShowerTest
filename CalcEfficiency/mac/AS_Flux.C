@@ -26,11 +26,11 @@ int AS_Flux() {
 
    TH1F *h_flux_numu_cut = (TH1F*)h_flux_numu->Clone("h_flux_numu_cut");
    for(int i = 0; i < h_flux_numu_cut -> GetNbinsX(); i++) {
-      if(h_flux_numu_cut -> GetBinCenter(i) < 0.){
-        std::cout<<"SHIT "<<std::endl ;
+      //if(h_flux_numu_cut -> GetBinCenter(i) < 0.){
+      if(h_flux_numu_cut -> GetBinCenter(i) < 0.5 || h_flux_numu_cut->GetBinCenter(i) >= 2.){ h_flux_numu_cut -> SetBinContent(i, 0);
+        //std::cout<<"SHIT "<<std::endl ;
         h_flux_numu_cut -> SetBinContent(i, 0);
 	}
-      //if(h_flux_numu_cut -> GetBinCenter(i) < 0.4 || h_flux_numu_cut->GetBinCenter(i) > 4.) h_flux_numu_cut -> SetBinContent(i, 0);
    }
    //h_flux_numu_cut -> SetMarkerStyle(20);
    //h_flux_numu_cut -> SetMarkerColor(4);
@@ -53,7 +53,7 @@ int AS_Flux() {
    while (lowersum < lowerborder) {
       i++;
       lowersum += h_flux_numu_cut -> GetBinContent(i);
-      cout << i << "\t" << lowersum << endl;
+      //cout << i << "\t" << lowersum << endl;
    }
 
    cout << "The total flux for " << targetpot << " POT is " << h_flux_numu -> Integral() << endl;

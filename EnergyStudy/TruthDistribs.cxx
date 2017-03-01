@@ -17,6 +17,10 @@ namespace larlite {
       _pi0_tree->Branch("true_angle",&_true_angle,"true_angle/F");
       _pi0_tree->Branch("true_asym",&_true_asym,"true_asym/F");
       _pi0_tree->Branch("reco_pi0_e",&_reco_pi0_e,"reco_pi0_e/F");
+      _pi0_tree->Branch("true_pi0_mom",&_true_pi0_mom,"true_pi0_mom/F");
+      _pi0_tree->Branch("gamma_e_min",&_gamma_e_min,"gamma_e_min/F");
+      _pi0_tree->Branch("gamma_e_max",&_gamma_e_max,"gamma_e_max/F");
+      _pi0_tree->Branch("true_nu_e",&_true_nu_e,"true_nu_e/F");
       _pi0_tree->Branch("event",&_event,"event/I");
       }
 
@@ -44,6 +48,10 @@ namespace larlite {
     _true_angle = -9;
     _true_asym = -9;
     _reco_pi0_e = -999;
+    _gamma_e_max = 0 ;
+    _gamma_e_min = 0 ;
+    _true_pi0_mom = -999;
+    _true_nu_e = -999;
 
     _n_true_pi0 = 0;
 
@@ -72,8 +80,9 @@ namespace larlite {
 
     auto parts = ev_mctruth->at(0).GetParticles();
 
-    bool pi0 = false;
-    bool mu  = false ;
+    int n_mes = 0;
+    int n_lep = 0;
+    int n_mu = 0;
     
     std::vector<float> start(3,0) ;
     
@@ -85,9 +94,25 @@ namespace larlite {
         start[1] = p.Trajectory().at(0).Y();
         start[2] = p.Trajectory().at(0).Z();
         }
-      }   
-    
-    if ( _n_true_pi0 != 1 ) return false; 
+
+      if( p.StatusCode() == 1 && p.PdgCode() == 13 )
+        n_mu ++; 
+
+      if( p.StatusCode() == 1 && (abs(p.PdgCode()) == 211 || abs(p.PdgCode()) == 321 ||  p.PdgCode() == 130 
+                                   || p.PdgCode() == 310 || abs(p.PdgCode()) == 311 ) ){
+        n_mes ++; 
+        }   
+
+      if( p.StatusCode() == 1 && (abs(p.PdgCode()) == 11 || p.PdgCode() == -13))
+        n_lep ++; 
+
+      }
+
+    if( n_mu != 1 || _n_true_pi0 != 1 && n_lep != 0 && n_mes != 0) return false;
+    //if ( _n_true_pi0 != 1 ) return false; 
+
+    _true_nu_e = ev_mctruth->at(0).GetNeutrino().Nu().Trajectory().at(0).E() ;
+    std::cout<<"TRue nu energy: "<<_true_nu_e<<std::endl; 
       
    // Replace pi0 energy with combined shower energy 
     auto ev_mcs = storage->get_data<event_mcshower>("mcreco"); 
