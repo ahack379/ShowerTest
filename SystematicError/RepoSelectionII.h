@@ -210,6 +210,14 @@ namespace larlite {
 
     /////////// My extra variables
     int _n_it_per_event ;
+    int _n_true_signal ;
+    float _tot_pot ;
+
+    TTree * _it_tree ;
+    std::vector<int> _tagged_v ;
+    std::vector<int> _bkgd_v ;
+    std::vector<int> _eff_v ;
+    std::vector<int> _xsec_v ;
     
   };
 }

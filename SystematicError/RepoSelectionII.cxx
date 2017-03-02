@@ -9,6 +9,8 @@
 #include "DataFormat/event_ass.h"
 #include "DataFormat/hit.h"
 #include "DataFormat/shower.h"
+#include "DataFormat/potsummary.h"
+#include "DataFormat/mctruth.h"
 
 // HitRatio
 #include "opencv2/highgui/highgui.hpp"
@@ -118,6 +120,8 @@ namespace larlite {
     _fout                    = 0;
     fGeometry = nullptr;
     fGeomH = nullptr;
+    _n_it_per_event = 100;
+    _it_tree = nullptr;
 
   }
   
@@ -126,16 +130,30 @@ namespace larlite {
     fGeometry = larutil::Geometry::GetME(); 
     fGeomH = larutil::GeometryHelper::GetME(); 
 
-    _n_it_per_event = 100;
+    _n_true_signal = 0;
+    _tot_pot = 0. ;
+
+    if( !_it_tree ){
+       _it_tree = new TTree("it_tree","it_tree");
+       _it_tree->Branch("tagged_v",&_tagged_v,"std::vector<int>");
+       _it_tree->Branch("bkgd_v",&_tagged_v,"std::vector<int>");
+       _it_tree->Branch("eff_v",&_tagged_v,"std::vector<int>");
+       _it_tree->Branch("xsec_v",&_tagged_v,"std::vector<int>");
+       }
+
+    _tagged_v.resize(_n_it_per_event,0) ;
+    _bkgd_v.resize(_n_it_per_event,0) ;
+    _eff_v.resize(_n_it_per_event,0) ;
+    _xsec_v.resize(_n_it_per_event,0) ;
  
     return true;
    }
 
   void RepoSelectionII::genNewSelIIValues(){
 
-    fDistToEdgeX = random(fMin_DistToEdgeX,fMax_DistToEdgeX);
-    fDistToEdgeY = random(fMin_DistToEdgeY,fMax_DistToEdgeY);
-    fDistToEdgeZ = random(fMin_DistToEdgeZ,fMax_DistToEdgeZ);
+    //fDistToEdgeX = random(fMin_DistToEdgeX,fMax_DistToEdgeX);
+    //fDistToEdgeY = random(fMin_DistToEdgeY,fMax_DistToEdgeY);
+    //fDistToEdgeZ = random(fMin_DistToEdgeZ,fMax_DistToEdgeZ);
     fPEThresh    = random(fMin_PEThresh,fMax_PEThresh);
     fTrk2FlashDist  = random(fMin_Trk2FlashDist,fMax_Trk2FlashDist);
     fMinTrk2VtxDist = random(fMin_MinTrk2VtxDist,fMax_MinTrk2VtxDist);
@@ -221,8 +239,55 @@ namespace larlite {
        return false;
        }
 
+    auto ev_pot = storage->get_subrundata<potsummary>("generator"); 
+    auto ev_mctruth = storage->get_data<event_mctruth>("generator"); 
+
+    if( !ev_pot ){ 
+       std::cout<<"No POT..."<<std::endl ;
+       return false;
+       }
+
+    if(!ev_mctruth || !ev_mctruth->size() ){ 
+       std::cout<<"No Truth..."<<std::endl ;
+       return false;
+    }
+
+    if( storage->subrun_id() != storage->last_subrun_id() )
+      _tot_pot += ev_pot->totgoodpot ;
+
+    auto nu  = ev_mctruth->at(0).GetNeutrino();
+    double FV_test_xyz[3] = {0.};
+    auto traj = nu.Nu().Trajectory();
+    FV_test_xyz[0] = traj.at(traj.size() - 1).X();
+    FV_test_xyz[1] = traj.at(traj.size() - 1).Y();
+    FV_test_xyz[2] = traj.at(traj.size() - 1).Z();
+
+    auto parts = ev_mctruth->at(0).GetParticles();
+
+    int n_pi0 = 0;
+    int n_mu = 0;
+    bool isSignal = false ;
+    
+    for ( auto const & p : parts ){
+    
+      if( p.StatusCode() == 1 && p.PdgCode() == 111 )
+        n_pi0 += 1;
+
+      if( p.StatusCode() == 1 && p.PdgCode() == 13 )
+        n_mu += 1;
+        }
+
+    if( (FV_test_xyz[0] > 0 + fDistToEdgeX || FV_test_xyz[0] < 256.35 - fDistToEdgeX || 
+          FV_test_xyz[1] > -116.5 + fDistToEdgeY ||  FV_test_xyz[1] < 116.5 - fDistToEdgeY || 
+          FV_test_xyz[2] > 0 + fDistToEdgeZ || FV_test_xyz[2] < 1036.8 - fDistToEdgeZ) && 
+          n_mu == 1 && n_pi0 == 1 ){
+        isSignal = true; 
+        _n_true_signal ++ ;
+        }
+
+
     for( int evt_i = 0; evt_i < _n_it_per_event; evt_i++){
-        
+       
         if ( evt_i != 0 ) genNewSelIIValues();
 
         //check the flash info
@@ -753,6 +818,9 @@ namespace larlite {
 
         if( CandidatePairs.size() != 1 ) return false; 
 
+        if( isSignal ) _tagged_v[evt_i]++; 
+        else _bkgd_v[evt_i]++;
+
     }// loop over iterations per event
 
 
@@ -791,6 +859,23 @@ double RepoSelectionII::scaledEdx(double x, int plane, bool isdata) const{
  }
 
   bool RepoSelectionII::finalize() {
+
+    float FV = 216.35 * 193 * 1016.8 ;  // Fiducial volume 
+    float rho = 1.4 ; // g / cm3
+    float avogadro = 6.022*pow(10,23);
+    float g_per_mole = 39.948 ;
+    float n_nucleon = 40 ;
+    float n_targ = rho * FV / g_per_mole * avogadro * n_nucleon ;
+    float flux = _tot_pot / 1e20 * 1.20e11 ; //1.2e11 is integrated flux from beam group for 1e20 POT , 0.5 - 2.0 GeV
+
+    //float eff = 1. ; // This will be replaced by selection efficiency of loosened Sel2
+
+    for( int i = 0; i < _n_it_per_event; i++ ){
+      //eff *= float( _tagged_v[i] - _bkgd_v[i] ) / _n_true_signal ;
+      _xsec_v[i] = float(_tagged_v[i] - _bkgd_v[i]) / flux / n_targ ; // / eff ;
+      _eff_v[i] = float(_tagged_v[i] - _bkgd_v[i]) / _n_true_signal ;
+
+      }
   
     return true;
   }
