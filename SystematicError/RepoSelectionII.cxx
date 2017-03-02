@@ -7,6 +7,12 @@
 #include "DataFormat/vertex.h"
 #include "DataFormat/calorimetry.h"
 #include "DataFormat/event_ass.h"
+#include "DataFormat/hit.h"
+#include "DataFormat/shower.h"
+
+// HitRatio
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
 
 namespace larlite {
 
@@ -17,7 +23,9 @@ namespace larlite {
     fOpFlashModuleLabel      = "simpleFlashBeam"; 
     fCalorimetryModuleLabel  = "pandoraNucalo";
    
-    // Default values in larsoft updated SelectionII 
+    ///////////////////////////////////////////////////
+    // Default values in larsoft updated SelectionII //
+    ///////////////////////////////////////////////////
     fDistToEdgeX             =   20.;
     fDistToEdgeY             =   20.;
     fDistToEdgeZ             =   10.;
@@ -74,22 +82,56 @@ namespace larlite {
     fMax_MinStartdEdx1stTrk      =   3.5;
     fMax_MaxEnddEdx1stTrk        =   10.0;
 
+    ////////////////////////////////////////////
+    // Default values for HitRatio            //
+    ////////////////////////////////////////////
+    fRadius                      = 60. ;
+    fHitRatio                    = 0.24 ;
+    fMinHitsRequired             = 15 ;
+
+    // Min and Max on each parameter 
+    fMin_Radius                  = 40. ;
+    fMin_HitRatio                = 0.15 ;
+    fMin_MinHitsRequired         = 10 ;
+
+    fMax_Radius                  = 75. ;
+    fMax_HitRatio                = 0.38 ;
+    fMax_MinHitsRequired         = 50 ;
+
+    ////////////////////////////////////////////
+    // Default values for Showerreco          //
+    ////////////////////////////////////////////
+    fMinOpeningAngle             = 0.35 ;
+    fMaxIP                       = 4. ;
+    fMaxRadLength                = 62 ;
+
+    // Min and Max on each parameter 
+    fMin_MinOpeningAngle         = 0.3 ;
+    fMin_MaxIP                   = 2. ;
+    fMin_MaxRadLength            = 40 ;
+
+    fMax_MinOpeningAngle         = 0.65 ;
+    fMax_MaxIP                   = 8. ;
+    fMax_MaxRadLength            = 80 ;
+    
     _name                    = "RepoSelectionII";
     _fout                    = 0;
     fGeometry = nullptr;
+    fGeomH = nullptr;
 
   }
   
   bool RepoSelectionII::initialize(){
 
     fGeometry = larutil::Geometry::GetME(); 
+    fGeomH = larutil::GeometryHelper::GetME(); 
 
     _n_it_per_event = 100;
  
     return true;
    }
 
-  void RepoSelectionII::genNewValues(){
+  void RepoSelectionII::genNewSelIIValues(){
 
     fDistToEdgeX = random(fMin_DistToEdgeX,fMax_DistToEdgeX);
     fDistToEdgeY = random(fMin_DistToEdgeY,fMax_DistToEdgeY);
@@ -107,7 +149,24 @@ namespace larlite {
     fMaxTrkLengthySingle = random(fMin_MaxTrkLengthySingle,fMax_MaxTrkLengthySingle);
     fMinStartdEdx1stTrk  = random(fMin_MinStartdEdx1stTrk,fMax_MinStartdEdx1stTrk);
     fMaxEnddEdx1stTrk    = random(fMin_MaxEnddEdx1stTrk,fMax_MaxEnddEdx1stTrk);
+
    }
+
+  void RepoSelectionII::genNewHitRatioValues(){
+
+    fRadius = random(fMin_Radius,fMax_Radius) ;
+    fHitRatio = random(fMin_HitRatio,fMax_HitRatio) ;
+    fMinHitsRequired = random(fMin_MinHitsRequired,fMax_MinHitsRequired) ;
+
+     }
+
+  void RepoSelectionII::genNewShowerPairValues(){
+
+    fMinOpeningAngle = random(fMin_MinOpeningAngle,fMin_MinOpeningAngle) ;
+    fMaxIP = random(fMin_MaxIP,fMax_MaxIP) ;
+    fMaxRadLength = random(fMin_MaxRadLength,fMax_MaxRadLength) ;
+
+     }
  
   bool RepoSelectionII::analyze(storage_manager* storage) {
 
@@ -115,6 +174,8 @@ namespace larlite {
     auto tracklist = storage->get_data<event_track>(fTrackModuleLabel);
     auto vtxlist = storage->get_data<event_vertex>(fVertexModuleLabel);
     auto calolist = storage->get_data<event_calorimetry>(fCalorimetryModuleLabel);
+    auto ev_hit_g = storage->get_data<event_hit>("gaushit");
+    auto ev_s = storage->get_data<event_shower>("showerreco");
 
     if( !flashlist || flashlist->size() == 0 ){ 
        std::cout<<"No flashes..."<<std::endl ;
@@ -131,11 +192,20 @@ namespace larlite {
        return false;
        }
   
-
     if( !calolist || calolist->size() == 0 ){ 
        std::cout<<"No calo..."<<std::endl ;
        return false;
        }
+
+    if ( !ev_hit_g || !ev_hit_g->size() ) {
+       std::cout<<"No hits, returning..."<<std::endl ; 
+       return false; 
+    }
+
+    if( !ev_s || !ev_s->size() || ev_s->size() < 2 ){
+      std::cout<<"Not enough reco'd showers..." <<std::endl;
+      return false;
+     }
   
     //art::FindMany<anab::Calorimetry>  fmcal(trackListHandle, evt, fCalorimetryModuleLabel);
     auto ev_ass = storage->get_data<larlite::event_ass>(fCalorimetryModuleLabel);
@@ -153,7 +223,7 @@ namespace larlite {
 
     for( int evt_i = 0; evt_i < _n_it_per_event; evt_i++){
         
-        if ( evt_i != 0 ) genNewValues();
+        if ( evt_i != 0 ) genNewSelIIValues();
 
         //check the flash info
         double FlashPEmax=0;
@@ -539,7 +609,152 @@ namespace larlite {
           //outputfile[isample]<<run<<" "<<subrun<<" "<<event<<" "<<ivtx<<" "<<trkindex[ivtx][itrk]<<" "<<trkindex[ivtx].size()<<std::endl;
           //util::CreateAssn(*fMyProducerModule, evt, tracklist[itrk], vtxlist[ivtx], *vertexTrackAssociations);
         }
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////  End Selection II Cuts 
+    ///////  Begin HitRatio Cut     
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////    
+
+
+    if ( evt_i != 0 ) genNewHitRatioValues();
+
+    auto vtx = vtxlist->at(ivtx); 
+
+    std::vector<double> vtxXYZ = { vtx.X(), vtx.Y(), vtx.Z() };
+    auto vtxWT  = fGeomH->Point_3Dto2D(vtxXYZ,2); //plane);
+    
+    auto vtx_w = vtxWT.w ; // Comes in cm 
+    auto vtx_t = vtxWT.t + 800. * fGeomH->TimeToCm() ; 
+
+    std::vector<::cv::Point> contour;
+
+    //float rad = 60. ;
+    std::vector<float> x(50,0);
+    std::vector<float> y(50,0);
+
+    int hits_in_rad = 0.; 
+    int hits_in_rad_g = 0.; 
+
+    // Build circle around radius
+    for(int i = 0; i < x.size(); i++){
+
+       x[i] = vtx_w + fRadius * cos(M_PI * 2. * i / x.size());
+       y[i] = vtx_t + fRadius * sin(M_PI * 2. * i / x.size());
+
+       ::cv::Point pt(x[i],y[i]) ;
+       contour.emplace_back(pt);
+       }
+
+     ::cv::Point pt(contour.at(0).x, contour.at(0).y) ;
+     contour.emplace_back(pt);
+
+     float ratio = 0.;
+
+     for(auto const & h : *ev_hit_g){
+
+         if( h.WireID().Plane != 2 ) continue;
+
+         ::cv::Point h_pt(h.WireID().Wire * fGeomH->WireToCm(),
+                          h.PeakTime() * fGeomH->TimeToCm()) ;
+         auto inside = ::cv::pointPolygonTest(contour,h_pt,false);
+
+         if(inside  >= 0) hits_in_rad_g ++ ;
+
+         if(inside  >= 0 && h.GoodnessOfFit() >= 0) hits_in_rad++ ;
+         }
+
+     if( hits_in_rad_g == 0 )
+        ratio = 0;
+     else
+        ratio = float(hits_in_rad)/hits_in_rad_g;
+
+    if( ratio < fHitRatio || hits_in_rad_g < fMinHitsRequired ) return false ;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////  End HitRatio Cuts 
+    ///////  Begin Showerreco Cuts     
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////    
+
+    float min_IP = 1e9;
+    int min_it = -1 ;
+
+    std::vector<std::pair<int,int>> CandidatePairs;
+    std::vector<int> cand_ids;
+
+    for ( int s1 = 0; s1 < ev_s->size(); s1++ ){
+
+            auto const& shr1 = ev_s->at(s1);
+
+            for ( int s2 = 0; s2 < ev_s->size(); s2++ ){
+
+                if (s2 <= s1) continue;
+
+                auto const& shr2 = ev_s->at(s2);
+
+                geoalgo::Vector_t dflipA(-1.*shr1.Direction()) ; 
+                geoalgo::Vector_t dflipB(-1.*shr2.Direction()) ;
+
+                // Make the backwards projection for the showers
+                auto bksa = ::geoalgo::HalfLine_t(shr1.ShowerStart(),dflipA);
+                auto bksb = ::geoalgo::HalfLine_t(shr2.ShowerStart(),dflipB);
+
+                // Calc the Opening angle of the showers
+                double Oangle = acos( shr1.Direction().Dot(shr2.Direction())) ; 
+
+                // Calc the vertex point of the two showers. the true designated backwards project
+                geoalgo::Point_t vertex(3);
+    
+                auto st1 = shr1.ShowerStart();
+                auto st2 = shr2.ShowerStart();
+                auto dir1 = shr1.Direction();
+                auto dir2 = shr2.Direction();
+                geoalgo::HalfLine_t shr1_hl(st1.X(),st1.Y(),st1.Z(),dir1.X(),dir1.Y(), dir1.Z() );
+                geoalgo::HalfLine_t shr2_hl(st2.X(),st2.Y(),st2.Z(),dir2.X(),dir2.Y(), dir2.Z() );
+
+                _geoAlgo.commonOrigin(shr1_hl, shr2_hl, vertex, true);
+
+                // Calc Diretion of two correlated shower
+                geoalgo::Vector_t momentum(3);// need to fill out
+                geoalgo::Vector_t mom_vect(shr2.Direction()*shr1.Energy(2) +shr1.Direction()*shr2.Energy(2)) ;
+                mom_vect.Normalize();
+                momentum = mom_vect * sqrt(pow(shr1.Energy(),2)+pow(shr2.Energy(),2)+2*shr2.Energy()*shr1.Energy()*cos(Oangle));
+
+                //===========================================
+                auto _RIP = pow(_geoAlgo.SqDist(bksa,bksb),0.5);
+                auto _RadL_A = vertex.Dist(shr1.ShowerStart());
+                auto _RadL_B = vertex.Dist(shr2.ShowerStart());
+
+                if(Oangle < fMinOpeningAngle ){
+                  //std::cout<<"Bad Angle: "<< Oangle<<std::endl ; 
+                  continue;
+                 }
+
+                if(pow(_geoAlgo.SqDist(bksa,bksb),0.5) > fMaxIP ){
+                   //std::cout<<"Ip? "<<pow(_geoAlgo.SqDist(bksa,bksb),0.5)<<std::endl ; 
+                   continue;
+                  }
+
+                if(_RadL_A > fMaxRadLength || _RadL_B > fMaxRadLength ){
+                   //std::cout<<"Rad Length : "<<_RadL_A<<", "<<_RadL_B<<std::endl ;
+                   continue;
+                    }
+
+                // Bunch of cuts
+                if( _RIP < min_IP ){
+                  min_IP = _RIP ;
+                  min_it = CandidatePairs.size();
+                  }
+
+                CandidatePairs.push_back(std::make_pair(s1,s2));
+                cand_ids.emplace_back(s1);
+                cand_ids.emplace_back(s2);
+
+            }// shower ID 2 
+        }// shower ID 1 
+
+        if( CandidatePairs.size() != 1 ) return false; 
+
+    }// loop over iterations per event
+
 
     return true;
   }

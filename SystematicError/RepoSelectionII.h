@@ -17,6 +17,8 @@
 
 #include "Analysis/ana_base.h"
 #include "LArUtil/Geometry.h"
+#include "GeoAlgo/GeoAlgo.h"
+#include "LArUtil/GeometryHelper.h"
 
 namespace larlite {
   /**
@@ -54,28 +56,56 @@ namespace larlite {
      
     double random(double low, double high) ;
 
-    void genNewValues() ;
-    void SetDistToEdgeXYZ(double x, double y, double z){ 
-        fDistToEdgeX = x;             
-	fDistToEdgeY = y;
-	fDistToEdgeZ = z;
+    void genNewSelIIValues() ;
+
+    void genNewHitRatioValues() ;
+
+    void genNewShowerPairValues() ;
+
+    /// Set SelectionII Variables
+    void SetBounds_DistToEdgeXYZ(double minx, double miny, double minz,
+                                 double maxx, double maxy, double maxz){ 
+        fMin_DistToEdgeX = minx;             
+	fMin_DistToEdgeY = miny;
+	fMin_DistToEdgeZ = minz;
+        fMax_DistToEdgeX = maxx;             
+	fMax_DistToEdgeY = maxy;
+	fMax_DistToEdgeZ = maxz;
 	} 
-    void SetPEThresh (double PE ) { fPEThresh = PE ; }
-    void SetTrk2FlashDist (double t){ fTrk2FlashDist = t; }
-    void SetMinTrk2VtxDist(double t){ fMinTrk2VtxDist = t;}
-    void SetMinTrackLen        (double t){fMinTrackLen = t;} 
-    void SetMaxCosineAngle     (double t){fMaxCosineAngle = t;} 
-    void SetMaxCosy1stTrk      (double t){fMaxCosy1stTrk = t;} 
-    void SetMinTrackLen2ndTrk  (double t){fMinTrackLen2ndTrk = t;} 
-    void SetMaxCosySingle      (double t){fMaxCosySingle = t;} 
-    void SetMinTrackLenSingle  (double t){fMinTrackLenSingle = t;} 
-    void SetMindEdxRatioSingle (double t){fMindEdxRatioSingle = t;} 
-    void SetMaxTrkLengthySingle(double t){fMaxTrkLengthySingle= t;} 
-    void SetMinStartdEdx1stTrk (double t){fMinStartdEdx1stTrk = t;} 
-    void SetMaxEnddEdx1stTrk   (double t){fMaxEnddEdx1stTrk = t;} 
+    void SetBounds_PEThresh           (double min, double max){fMin_PEThresh           = min; fMax_PEThresh           = max;}  
+    void SetBounds_Trk2FlashDist      (double min, double max){fMin_Trk2FlashDist      = min; fMax_Trk2FlashDist      = max;}
+    void SetBounds_MinTrk2VtxDist     (double min, double max){fMin_MinTrk2VtxDist     = min; fMax_MinTrk2VtxDist     = max;}
+    void SetBounds_MinTrackLen        (double min, double max){fMin_MinTrackLen        = min; fMax_MinTrackLen        = max;}
+    void SetBounds_MaxCosineAngle     (double min, double max){fMin_MaxCosineAngle     = min; fMax_MaxCosineAngle     = max;}
+    void SetBounds_MaxCosy1stTrk      (double min, double max){fMin_MaxCosy1stTrk      = min; fMax_MaxCosy1stTrk      = max;}
+    void SetBounds_MinTrackLen2ndTrk  (double min, double max){fMin_MinTrackLen2ndTrk  = min; fMax_MinTrackLen2ndTrk  = max;}
+    void SetBounds_MaxCosySingle      (double min, double max){fMin_MaxCosySingle      = min; fMax_MaxCosySingle      = max;}
+    void SetBounds_MinTrackLenSingle  (double min, double max){fMin_MinTrackLenSingle  = min; fMax_MinTrackLenSingle  = max;}
+    void SetBounds_MindEdxRatioSingle (double min, double max){fMin_MindEdxRatioSingle = min; fMax_MindEdxRatioSingle = max;}
+    void SetBounds_MaxTrkLengthySingle(double min, double max){fMin_MaxTrkLengthySingle= min; fMax_MaxTrkLengthySingle= max;}
+    void SetBounds_MinStartdEdx1stTrk (double min, double max){fMin_MinStartdEdx1stTrk = min; fMax_MinStartdEdx1stTrk = max;}
+    void SetBounds_MaxEnddEdx1stTrk   (double min, double max){fMin_MaxEnddEdx1stTrk   = min; fMax_MaxEnddEdx1stTrk   = max;}
 
+    /// Set HitRatio Variables
+    void SetBounds_Radius        (float min, float max){fMin_Radius          = min; fMax_Radius          = max;} 
+    void SetBounds_HitRatio      (float min, float max){fMin_HitRatio        = min; fMax_HitRatio        = max;}
+    void SetBounds_MinHitsRequired (int min  , int max  ){fMin_MinHitsRequired = min; fMax_MinHitsRequired = max;}
+
+    /// Set Shower Variables
+    void SetBounds_OpeningAngle  (float min, float max) { fMin_MinOpeningAngle = min; fMax_MinOpeningAngle = max;} 
+    void SetBounds_MaxIP         (float min, float max) { fMin_MaxIP           = min; fMax_MaxIP           = max;}
+    void SetBounds_MaxRadLength  (float min, float max) { fMin_MaxRadLength    = min; fMax_MaxRadLength    = max;}
+
+    /////////////////////////////////////
+    // Other Variables
+    ////////////////////////////////////
+    void SetIters ( int it ) { _n_it_per_event = it; }
+    
   protected:
-
+    
+    /////////////////////////////
+    // Selection II variables  //
+    /////////////////////////////
     std::string fTrackModuleLabel       ; 
     std::string fVertexModuleLabel      ; 
     std::string fOpFlashModuleLabel     ; 
@@ -142,6 +172,41 @@ namespace larlite {
     double fMax_MaxEnddEdx1stTrk        ;
 
     const larutil::Geometry * fGeometry ;
+
+    /////////////////////////////
+    // HitRatio variables      //
+    /////////////////////////////
+    float fRadius ;
+    float fHitRatio ;
+    int   fMinHitsRequired ;
+
+    // Min and max parameters for random generation
+    float fMin_Radius ;
+    float fMin_HitRatio ;
+    float fMin_MinHitsRequired ;
+    float fMax_Radius ;
+    float fMax_HitRatio ;
+    float fMax_MinHitsRequired ;
+
+    /////////////////////////////
+    // Showerreco variables    //
+    /////////////////////////////
+    float fMinOpeningAngle ;
+    float fMaxIP ;
+    float fMaxRadLength ;
+
+    // Min and max parameters for random generation
+    float fMin_MinOpeningAngle ;
+    float fMin_MaxIP ;
+    float fMin_MaxRadLength ;
+
+    float fMax_MinOpeningAngle ;
+    float fMax_MaxIP ;
+    float fMax_MaxRadLength ;
+
+    ::geoalgo::GeoAlgo _geoAlgo ;
+    const larutil::GeometryHelper * fGeomH ;
+
 
     /////////// My extra variables
     int _n_it_per_event ;
