@@ -13,8 +13,9 @@ OBJECTS = $(SOURCES:.cxx=.o)
 # include options for this package
 INCFLAGS  = -I.                       #Include itself
 INCFLAGS += $(shell larlite-config --includes)
+INCFLAGS += $(shell basictool-config --includes)
 INCFLAGS += -I$(OPENCV_INCDIR)
-INCFLAGS += -I$(LARLITE_USERDEVDIR)/DC_Com2
+INCFLAGS += -I$(LARLITE_USERDEVDIR)/HitRemoval
 
 # platform-specific options
 OSNAME          = $(shell uname -s)
@@ -27,7 +28,8 @@ include $(LARLITE_BASEDIR)/Makefile/Makefile.${OSNAME}
 # call the common GNUmakefile
 LDFLAGS += $(shell larlite-config --libs)
 LDFLAGS += -L$(OPENCV_LIBDIR) -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc
-LDFLAGS += -L$(LARLITE_LIBDIR) -lCommissioning_Clusterer
+LDFLAGS += -L$(LARLITE_LIBDIR) -lHitRemoval_Clustering
+LDFLAGS += -L$(LARLITE_LIBDIR) -lBasicTool_TwoDimTools
 
 include $(LARLITE_BASEDIR)/Makefile/GNUmakefile.CORE
 

@@ -118,7 +118,7 @@ namespace larlite {
     if( _ccpi0_event != 1 && _nue_event != 1) return false ;
     //std::cout<<"\nNew event! "<<_event<<std::endl ;
 
-    int j = 6;
+    int j = 3;
 
       // Find closest + longest pandoraNu track to vertex  
       //std::cout<<"NUMBER TRACKS :" <<ev_trk->size()<<std::endl;

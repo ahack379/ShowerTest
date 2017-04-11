@@ -16,6 +16,8 @@
 
 
 #pragma link C++ class larlite::TrackMultiplicity+;
+#pragma link C++ class larlite::Pi0Cuts+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
+
 

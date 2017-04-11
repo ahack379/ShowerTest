@@ -13,6 +13,7 @@ OBJECTS = $(SOURCES:.cxx=.o)
 # include options for this package
 INCFLAGS  = -I.                       #Include itself
 INCFLAGS += $(shell larlite-config --includes)
+INCFLAGS += $(shell basictool-config --includes)
 INCFLAGS += -I$(OPENCV_INCDIR)
 
 # platform-specific options
@@ -21,6 +22,8 @@ HOST            = $(shell uname -n)
 OSNAMEMODE      = $(OSNAME)
 
 LDFLAGS += -L$(OPENCV_LIBDIR) -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc
+LDFLAGS += $(shell basictool-config --libs)
+
 
 
 # call kernel specific compiler setup

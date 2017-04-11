@@ -27,7 +27,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    VtxDensity(){ _name="VtxDensity"; _fout=0; _tree=nullptr; _hits_tot=0.; _hits_in_rad=0; }
+    VtxDensity(){ _name="VtxDensity"; _fout=0; _tree=nullptr; _hits_tot=0; _hits_in_rad=0; _get_pi0s = false; }
 
     /// Default destructor
     virtual ~VtxDensity(){}
@@ -47,10 +47,12 @@ namespace larlite {
     */
     virtual bool finalize();
 
+    void GetPi0s( bool getem) { _get_pi0s = getem ; }
+
   protected:
 
   TTree * _tree ;
-  float _hits_tot;
+  int _hits_tot;
   float _hits_in_rad; 
   float _hits_in_rad_g;
 
@@ -67,8 +69,16 @@ namespace larlite {
   std::vector<float> _radii;
   std::vector<float> _density;
   std::vector<float> _hits_per_r;
-  std::vector<float> _gaus_hits_per_r;
   std::vector<float> _shr_hits_per_r;
+  std::vector<float> _gaus_hits_per_r;
+
+  float _vtx_x ;
+  float _vtx_y ;
+  float _vtx_z ;
+
+  bool _get_pi0s;
+
+  int _shr_hits_tot;
     
   };
 }

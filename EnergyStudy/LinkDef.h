@@ -19,6 +19,7 @@
 #pragma link C++ class larlite::GammaEnergy+;
 #pragma link C++ class larlite::HitThreshStudy+;
 #pragma link C++ class larlite::MCVariableStudy+;
+#pragma link C++ class larlite::NueVariableStudy+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
 

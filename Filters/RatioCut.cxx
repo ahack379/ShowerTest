@@ -111,7 +111,7 @@ namespace larlite {
          if(inside  >= 0 && h.GoodnessOfFit() >= 0) _hits_in_rad++ ;
          }
         
-     if( _hits_in_rad_g == 0 )
+     if( _hits_in_rad_g < 15 ) // == 0
 	ratio = 0;
      else 
 	ratio = float(_hits_in_rad)/_hits_in_rad_g;
@@ -119,7 +119,6 @@ namespace larlite {
      //std::cout<<"Event "<<_event-1<<" has Gaus and shr hits: "<<_hits_in_rad_g <<", "<<_hits_in_rad <<std::endl ;
 
     if( ratio < _ratio_cut ) return false ;
-    
     _hits_tot = ev_hit_g->size() ;
     _tree->Fill();
   

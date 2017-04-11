@@ -14,6 +14,7 @@
 #pragma link C++ class larlite::GetInteractionInfo+;
 #pragma link C++ class larlite::CCpi0Eff+;
 #pragma link C++ class larlite::CrossSection+;
+#pragma link C++ class larlite::BackgroundCalc+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
 

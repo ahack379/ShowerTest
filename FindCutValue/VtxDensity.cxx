@@ -18,13 +18,20 @@ namespace larlite {
      _tree = new TTree("tree","tree"); 
      //_tree->Branch("hits_in_rad",&_hits_in_rad,"hits_in_rad/F"); 
      //_tree->Branch("hits_in_rad_g",&_hits_in_rad_g,"hits_in_rad_g/F"); 
-     _tree->Branch("hits_tot",&_hits_tot,"hits_tot/F"); 
+     _tree->Branch("hits_tot",&_hits_tot,"hits_tot/I"); 
      _tree->Branch("radii","std::vector<float>",&_radii); 
      //_tree->Branch("density","std::vector<float>",&_density); 
      _tree->Branch("event",&_event,"event/I"); 
      _tree->Branch("hits_per_r","std::vector<float>",&_hits_per_r); 
      _tree->Branch("gaus_hits_per_r","std::vector<float>",&_gaus_hits_per_r); 
      _tree->Branch("shr_hits_per_r","std::vector<float>",&_shr_hits_per_r); 
+
+
+     _tree->Branch("shr_hits_tot",&_shr_hits_tot,"shr_hits_tot/I"); 
+
+     _tree->Branch("vtx_x",&_vtx_x,"vtx_x/F"); 
+     _tree->Branch("vtx_y",&_vtx_y,"vtx_y/F"); 
+     _tree->Branch("vtx_z",&_vtx_z,"vtx_z/F"); 
     }
 
     _event = 0;
@@ -37,6 +44,7 @@ namespace larlite {
 
     int rad_its = 15;
     _hits_tot = 0.;
+    _shr_hits_tot = 0.;
 
     _radii.clear();
     _density.clear();
@@ -64,18 +72,50 @@ namespace larlite {
     auto ev_vtx = storage->get_data<event_vertex>("numuCC_vertex");
     if ( !ev_vtx || !ev_vtx->size() ) {std::cout<<"No vertex. Returning..."<<std::endl ; return false; }
 
-    _hits_tot = ev_hit_g->size() ;
+    //auto ev_mctruth= storage->get_data<event_mctruth>("generator"); 
+    //if(!ev_mctruth || !ev_mctruth->size() ) return false;
+
+    //auto & truth = ev_mctruth->at(0);
+    //auto parts = ev_mctruth->at(0).GetParticles();
+ 
+    //int n_pi0 = 0; 
+    //int n_mu = 0;
+
+    //for ( auto const & p : parts ){
+
+    //    if( p.StatusCode() == 1 && p.PdgCode() == 111 )
+    //      n_pi0 ++ ;
+
+    //    if( p.StatusCode() == 1 && p.PdgCode() == 13) 
+    //      n_mu++ ;
+    //}
+
+    //if((n_mu != 1 || n_pi0 != 1) && _get_pi0s )
+    //   return false;
+    //
+    //if((n_mu == 1 && n_pi0 == 1) && !_get_pi0s)
+    //   return false;
+
+    for( auto const & h : *ev_hit_g ){
+      if ( h.WireID().Plane == 2 ) _hits_tot++;
+      if ( h.WireID().Plane == 2 && h.GoodnessOfFit() >= 0 ) _shr_hits_tot++;
+      }
+
+    //_hits_tot = ev_hit_g->size() ;
     auto vtx = ev_vtx->at(0); 
 
     std::vector<double> vtxXYZ = { vtx.X(), vtx.Y(), vtx.Z() };
     auto vtxWT  = geomH->Point_3Dto2D(vtxXYZ,2);//plane);
+
+    _vtx_x = vtx.X();
+    _vtx_y = vtx.Y();
+    _vtx_z = vtx.Z();
          
     auto vtx_w = vtxWT.w ; // Comes in cm; 
     auto vtx_t = vtxWT.t + 800. * geomH->TimeToCm() ; // 800 for single particle files
     //std::cout<<"Vertex info :" <<vtx_w<<", "<<vtx_t<<std::endl ;
 
     float rad = 0. ;
-    float offset = 0.;
 
     std::vector<float> x(50,0);
     std::vector<float> y(50,0);
@@ -160,13 +200,15 @@ namespace larlite {
        //     _hits_in_rad = _hits_p0_in_rad ;
        //   }
        // }
+        
+
 
         _radii.emplace_back(rad);
 	_density.emplace_back(_hits_in_rad / (M_PI * rad * rad )) ;
 	_gaus_hits_per_r.emplace_back(_hits_in_rad_g);
 	_shr_hits_per_r.emplace_back(_hits_in_rad);
 
-        if( _hits_in_rad_g == 0 )
+        if( _hits_in_rad_g < 15 ) //== 0 )
 	  _hits_per_r.emplace_back(0.);
         else {
 	  _hits_per_r.emplace_back(float(_hits_in_rad)/_hits_in_rad_g);
@@ -174,14 +216,12 @@ namespace larlite {
 	   //if( float(_hits_in_rad) / _hits_in_rad_g > 0.24)
 	   //  _keep++;
 
-	 //if ( _hits_per_r.at(_hits_per_r.size()-1) <= 0.025 && rad == 60 ){ //&& _hits_in_rad_g > 15){
-
-	 if ( _hits_per_r.at(_hits_per_r.size()-1) > 0.975 && rad == 60 && _hits_in_rad_g > 15){
-	  
-           std::cout<<"\nHIGH RATIO EVENT! "<<_event<<", sub, run, event: "<<storage->subrun_id()<<", "<<storage->run_id()<<", "<<storage->event_id()<<std::endl ;
-	   std::cout<<"RATIO : " <<_hits_per_r.at(_hits_per_r.size()-1)<<", and shower hits : "<<_hits_in_rad<<", all: "<<_hits_in_rad_g<<std::endl ;
-	 
-	   }
+	 //if ( _hits_per_r.at(_hits_per_r.size()-1) > 0.975 && rad == 60 && _hits_in_rad_g > 15){
+	 // 
+         //  std::cout<<"\nHIGH RATIO EVENT! "<<_event<<", sub, run, event: "<<storage->subrun_id()<<", "<<storage->run_id()<<", "<<storage->event_id()<<std::endl ;
+	 //  std::cout<<"RATIO : " <<_hits_per_r.at(_hits_per_r.size()-1)<<", and shower hits : "<<_hits_in_rad<<", all: "<<_hits_in_rad_g<<std::endl ;
+	 //
+	 //  }
 	}
 
       }

@@ -7,6 +7,7 @@
 #include "DataFormat/mctrack.h"
 #include "DataFormat/vertex.h"
 #include "DataFormat/potsummary.h"
+#include "DataFormat/vertex.h"
 #include "DataFormat/mcflux.h"
 #include "LArUtil/GeometryHelper.h"
 #include "LArUtil/LArProperties.h"
@@ -46,7 +47,12 @@ namespace larlite {
   
   bool CrossSection::analyze(storage_manager* storage) {
 
-    //std::cout<<"\nEvent is : "<<_event<<std::endl; //", subrun: "<<storage->subrun_id()<<", "<<storage->last_subrun_id() <<std::endl ;
+    auto ev_temp = storage->event_id();
+    auto subrun_temp = storage->subrun_id();
+
+    std::cout<<"\nEvent is : "<<_event<<", "<<ev_temp<<", "<<subrun_temp<<std::endl; //", subrun: "<<storage->subrun_id()<<", "<<storage->last_subrun_id() <<std::endl ;
+
+
     _event++ ;
 
     // Now calculate the total POT + total numu neutrinos 
@@ -61,14 +67,16 @@ namespace larlite {
     auto & truth = ev_mctruth->at(0);
     auto & nu  = truth.GetNeutrino();
 
+
     double xyz[3] = {0.};
     auto traj = nu.Nu().Trajectory();
     xyz[0] = traj.at(traj.size() - 1).X();
     xyz[1] = traj.at(traj.size() - 1).Y();
     xyz[2] = traj.at(traj.size() - 1).Z();
 
-    if( xyz[0] < _xmin || xyz[0] > _xmax || xyz[1] < _ymin || xyz[1] > _ymax || xyz[2] < _zmin || xyz[2] > _zmax )
-      return true ;
+    if( xyz[0] < _xmin || xyz[0] > _xmax || xyz[1] < _ymin || xyz[1] > _ymax || xyz[2] < _zmin || xyz[2] > _zmax ){
+      return false;
+      }
 
     _tot_event_in_AV ++; 
 
@@ -93,33 +101,18 @@ namespace larlite {
 	}
 
       if( p.StatusCode() == 1 && (abs(p.PdgCode()) == 211 || abs(p.PdgCode()) == 321 ||  p.PdgCode() == 130 
-                                   || p.PdgCode() == 310 || abs(p.PdgCode()) == 311 ) ){
+                                   || p.PdgCode() == 310 || abs(p.PdgCode()) == 311 ) )
         n_mes += 1;
-        break ;
-	}
 
-      if( p.StatusCode() == 1 && (abs(p.PdgCode()) == 11 || p.PdgCode() == -13)){
+      if( p.StatusCode() == 1 && (abs(p.PdgCode()) == 11 || p.PdgCode() == -13))
         n_lep += 1;
-        break ;
-        }
       }
 
-      if( n_mu == 1 && n_pi0 == 1 && n_lep == 0 && n_mes == 0){
+      if( n_mu == 1 && n_pi0 == 1 ){ //&& n_lep == 0 && n_mes == 0){
         //std::cout<<"**********************FOUND CCPI0!! "<<std::endl;
         _signal++;
 	_event_list.emplace_back(_event-1);
         }
-
-    auto ev_mcflux = storage->get_data<event_mcflux>("generator"); 
-    if(!ev_mcflux || !ev_mcflux->size() ) return false;
-    
-    _n_nu_all += ev_mcflux->size() ;
-    for ( auto const & f : *ev_mcflux ) {
-      if ( f.fntype == 14 ){
-        _n_numu ++;
-        _mean_e += f.fnenergyn;
-         }
-       }
 
     return true;
   }
@@ -136,15 +129,15 @@ namespace larlite {
      float n_targ = rho * FV / g_per_mole * avogadro * n_nucleon ;
 
      float flux = 8.72*pow(10,9) ; //From technote float(_n_numu) / FA / _tot_pot ;
-     std::cout<<"CCpi0 are "<<float(_signal)/(_tot_event_in_AV)*100<<"\% of BNB ("<<_signal<<"/"<<_tot_event_in_AV<<")"<<std::endl ;
+     //std::cout<<"CCpi0 are "<<float(_signal)/(_tot_event_in_AV)*100<<"\% of BNB ("<<_signal<<"/"<<_tot_event_in_AV<<")"<<std::endl ;
+     std::cout<<"CCpi0 are "<<float(_signal)/_event*100<<"\% of BNB ("<<_signal<<"/"<<_event<<")"<<std::endl ;
 
      _mean_e /= _n_numu ;
       
-     //std::cout<<"Mean Energy for integrated flux : "<<_mean_e<<std::endl ;
-
      //std::cout<<"Signal in FV: "<<_signal<<std::endl ;
      //std::cout<<"N targets: "<<n_targ <<std::endl ;
      //std::cout<<"Total POT: "<<_tot_pot<<", flux: "<<flux<<" numu/cm3/POT"<<std::endl;
+
      std::cout<<"Total POT: "<<_tot_pot<<std::endl;
      //std::cout<<"MC Cross section : "<<float(_signal) / n_targ / flux ; 
 

@@ -20,29 +20,22 @@ for x in xrange(len(sys.argv)-1):
 my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
 
 # Specify output root file name
-#my_proc.set_ana_output_file("ana.root")
-my_proc.set_output_file("pi0.root") #/Volumes/UBooNEData/mcc/cosmics_bnb/ana_files/trk_full_bnbcosmic_separated.root");
+#my_proc.set_ana_output_file("density_ana.root") #sys.argv[-1])#"ana.root");
+my_proc.set_output_file("bnbcos_post_mult_cut.root")
 
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
-aunit = fmwk.SeparateBNB()
-aunit.GetPi0s(True)
+ratio = fmwk.TrackMultiplicity()
+my_proc.add_process(ratio)
 
-my_proc.add_process(aunit)
 my_proc.enable_filter(True)
 
 print
 print  "Finished configuring ana_processor. Start event loop!"
 print
 
-my_proc.run() #0,5000)
-
-#my_proc.set_data_to_write(fmwk.data.kHit,'gaushit')
-#my_proc.set_data_to_write(fmwk.data.kHit,'pandoraCosmicKHitRemoval')
-#my_proc.set_data_to_write(fmwk.data.kCluster,'pandoraCosmic')
-#my_proc.set_data_to_write(fmwk.data.kVertex,'numuCC_vertex')
-#my_proc.set_data_to_write(fmwk.data.kTrack,'pandoraNu')
-#my_proc.set_data_to_write(fmwk.data.kAssociation,'pandoraNu')
+# Let's run it.
+my_proc.run() #5050);
 
 # done!
 print

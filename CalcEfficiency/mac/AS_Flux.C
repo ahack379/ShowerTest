@@ -3,7 +3,8 @@
 int AS_Flux() {
 
    //double targetpot = 5.283e+19 * 20000/19750;
-   double targetpot = 2.42e20;
+   //double targetpot = .489520448636e+20; // 2.42e20;
+   double targetpot = 3.87942872837e20 ; //
 
    //BNB flux
    TFile *flux = new TFile("numode_bnb_470m_r200.root");
@@ -27,8 +28,9 @@ int AS_Flux() {
    TH1F *h_flux_numu_cut = (TH1F*)h_flux_numu->Clone("h_flux_numu_cut");
    for(int i = 0; i < h_flux_numu_cut -> GetNbinsX(); i++) {
       //if(h_flux_numu_cut -> GetBinCenter(i) < 0.){
-      if(h_flux_numu_cut -> GetBinCenter(i) < 0.5 || h_flux_numu_cut->GetBinCenter(i) >= 2.){ h_flux_numu_cut -> SetBinContent(i, 0);
-        //std::cout<<"SHIT "<<std::endl ;
+      // Changing 0.5 -> 0.475 due to underflow bin
+      if(h_flux_numu_cut -> GetBinCenter(i) < 0.475){ // || h_flux_numu_cut->GetBinCenter(i) >= 2.){
+        std::cout<<"I is :" <<i;
         h_flux_numu_cut -> SetBinContent(i, 0);
 	}
    }

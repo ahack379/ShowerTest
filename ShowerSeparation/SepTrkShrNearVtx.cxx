@@ -3,7 +3,7 @@
 
 #include "SepTrkShrNearVtx.h"
 #include "LArUtil/GeometryHelper.h"
-#include "Clusterer/Linearity.h"
+#include "TwoDimTools/Linearity.h"
 #include "DataFormat/shower.h"
 #include "DataFormat/hit.h"
 #include "DataFormat/cluster.h"
@@ -266,7 +266,7 @@ namespace larlite {
         _length = sqrt( pow( (clus.EndTick() - clus.StartTick())*geomH->TimeToCm(),2) + 
 	                pow( (clus.EndWire() - clus.StartWire())*geomH->WireToCm(),2));
 
-        ::Linearity linear(wire_v,time_v);
+        ::twodimtools::Linearity linear(wire_v,time_v);
         linear._r = 10 ;
    
         linear.linearity(wire_v,time_v) ;

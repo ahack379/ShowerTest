@@ -40,7 +40,7 @@ namespace larlite {
     fMaxCosineAngle          =   0.9;
     fMaxCosy1stTrk           =   0.6;
     fMinTrackLen2ndTrk       =   30.;
-    fMaxCosySingle           =   0.7;
+    fMaxCosySingle           =   0.7; // Track Direction in Y
     fMinTrackLenSingle       =   40.;
     fMindEdxRatioSingle      =   1.5;
     fMaxTrkLengthySingle     =   25.;
@@ -49,9 +49,9 @@ namespace larlite {
     fDebug                   =     0;
     
     // Min on each parameter
-    fMin_DistToEdgeX             =   5.;
-    fMin_DistToEdgeY             =   5.;
-    fMin_DistToEdgeZ             =   0.;
+    fMin_DistToEdgeX             =   10.;
+    fMin_DistToEdgeY             =   10.;
+    fMin_DistToEdgeZ             =   3.;
     fMin_PEThresh                =   40.;
     fMin_Trk2FlashDist           =   55.;
     fMin_MinTrk2VtxDist          =    0.;
@@ -77,12 +77,12 @@ namespace larlite {
     fMax_MaxCosineAngle          =   1.;
     fMax_MaxCosy1stTrk           =   0.85;
     fMax_MinTrackLen2ndTrk       =   50.;
-    fMax_MaxCosySingle           =   0.7;
-    fMax_MinTrackLenSingle       =   40.;
+    fMax_MaxCosySingle           =   0.8;
+    fMax_MinTrackLenSingle       =   50.;
     fMax_MindEdxRatioSingle      =   2. ;
-    fMax_MaxTrkLengthySingle     =   45.;
+    fMax_MaxTrkLengthySingle     =   40.;
     fMax_MinStartdEdx1stTrk      =   3.5;
-    fMax_MaxEnddEdx1stTrk        =   10.0;
+    fMax_MaxEnddEdx1stTrk        =   6.5;
 
     ////////////////////////////////////////////
     // Default values for HitRatio            //
@@ -408,8 +408,10 @@ namespace larlite {
                   fliptrack[i].push_back(false);
                 }
               }
-            }//Loope over all tracks
+            }//Loop over all tracks
         }//Loop over all vertices
+
+
 
         //calculate average dE/dx near the track start and track end
         std::vector<double> trkStartdEdx(tracklist->size());
