@@ -53,18 +53,7 @@ namespace larlite {
   int _signal ;
 
   std::vector<int> _event_list ;
-  std::vector<int> _diff_list;
-  std::vector<int> _fail_list;
-  std::vector<int> _mes_v; 
-  std::vector<int> _pi0_list ;
 
-  int _multpi0 ;
-  int _mesons ;
-  int _leptons ;
-  int _gammas;
-  int _tot_ccpi0;
-  int _nc_pi0;
-    
   };
 }
 #endif
