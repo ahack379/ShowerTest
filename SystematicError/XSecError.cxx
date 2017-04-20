@@ -7,17 +7,9 @@ namespace larlite {
 
   bool XSecError::initialize() {
 
-    //
-    // This function is called in the beggining of event loop
-    // Do all variable initialization you wish to do here.
-    // If you have a histogram to fill in the event loop, for example,
-    // here is a good place to create one on the heap (i.e. "new TH1D"). 
-    //
-
     if(!_tree){
     _tree = new TTree("tree","");
     _tree->Branch("test",&_test,"test/F");
-    _tree->Branch("test_weight",&_test_weight,"test_weight/F");
     }
 
     _hist = new TH1F("hist","hist",20,0,50);
@@ -26,32 +18,27 @@ namespace larlite {
     _histw = new TH1F("histw","histw",20,0,50);
 
     _test = 0;
-    _test_weight = 0;
     return true;
   }
   
   bool XSecError::analyze(storage_manager* storage) {
   
-
     _test++;
-    _test_weight++;
 
     for ( int i = 0; i < 10; i++){
 
       _hist->Fill(_test);
       _hist3->Fill(_test,4);
-      if(i > 6 ){
-      _hist2->Fill(_test);
-      _histw->Fill(_test,4);
-      }
+        if(i > 6 ){
+        _hist2->Fill(_test);
+        _histw->Fill(_test,4);
+        }
       }
   
     return true;
   }
 
   bool XSecError::finalize() {
-
-    //_hist2->Add(_histw);
 
     if(_fout) { _fout->cd(); _hist->Write(); _histw->Write(); _hist2->Write(); _hist3->Write(); }
 
