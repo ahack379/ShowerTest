@@ -12,7 +12,6 @@
 #pragma link C++ class larlite::MakeVtx+;
 #pragma link C++ class larlite::SeparateBNB+;
 #pragma link C++ class larlite::NoMes_SeparateBNB+;
-#pragma link C++ class larlite::SeparateCCNC+;
 #pragma link C++ class larlite::SepTrkShrNearVtx+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
