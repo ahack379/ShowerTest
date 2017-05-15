@@ -9,7 +9,7 @@ namespace larlite {
   bool EvtWeightFilter::initialize() {
 
     _file.open("mcc8_pi0cuts.txt",std::ios_base::in);
-
+    //_file.open("eventweightCheck.txt",std::ios_base::in);
 
     for(std::string line; std::getline(_file, line); )   //read stream line by line
     {
@@ -44,7 +44,7 @@ namespace larlite {
         it++; 
          }
     }
-       if ( !foundit) return false;
+   if ( !foundit) return false;
 
    it = _map.find(storage->subrun_id());
    foundit = false;

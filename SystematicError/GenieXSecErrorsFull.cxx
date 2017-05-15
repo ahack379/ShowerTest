@@ -28,8 +28,11 @@ namespace larlite {
     _final_tree = nullptr;
 
     //_genie_label_v = {"QEMA","QEMA", "NCELaxial", "NCELaxial", "CCResAxial", "CCResAxial", "CCResVector", "CCResVector", "N    CResAxial", "NCResAxial", "NCResVector", "NCResVector", "CohMA", "CohMA", "CohR0", "CohR0", "NonResRvp1pi", "NonResRvp1pi", "NonResRvba    rp1pi", "NonResRvbarp1pi", "NonResRvp2pi", "NonResRvp2pi", "NonResRvbarp2pi", "NonResRvbarp2pi", "ResDecayGamma", "ResDecayGamma", "Res    DecayTheta", "ResDecayTheta", "NC", "NC", "FermiGasModelKf", "FermiGasModelKf", "IntraNukeNmfp", "IntraNukeNmfp", "IntraNukeNcex", "Int    raNukeNcex", "IntraNukeNel", "IntraNukeNel", "IntraNukeNinel", "IntraNukeNinel", "IntraNukeNabs", "IntraNukeNabs", "IntraNukeNpi", "Int    raNukeNpi", "IntraNukePImfp", "IntraNukePImfp", "IntraNukePIcex", "IntraNukePIcex", "IntraNukePIel", "IntraNukePIel", "IntraNukePIinel"    , "IntraNukePIinel", "IntraNukePIabs", "IntraNukePIabs"} ;
-    _genie_label_v = {"QEMA", "NCELaxial", "CCResAxial", "CCResVector", "NCResAxial", "NCResVector", "CohMA", "CohR0", "NonResRvp1pi", "NonResRvbarp1pi", "NonResRvp2pi", "NonResRvbarp2pi", "ResDecayGamma", "ResDecayTheta", "NC", "FermiGasModelKf", "IntraNukeNmfp", "IntraNukeNcex", "IntraNukeNel", "IntraNukeNinel", "IntraNukeNabs", "IntraNukeNpi", "IntraNukePImfp", "IntraNukePIcex", "IntraNukePIel", "IntraNukePIinel", "IntraNukePIabs"} ;
-    
+
+//    _genie_label_v = {"QEMA", "NCELaxial", "CCResAxial", "CCResVector", "NCResAxial", "NCResVector", "CohMA", "CohR0", "NonResRvp1pi", "NonResRvbarp1pi", "NonResRvp2pi", "NonResRvbarp2pi", "ResDecayGamma", "ResDecayTheta", "NC", "FermiGasModelKf", "IntraNukeNmfp", "IntraNukeNcex", "IntraNukeNel", "IntraNukeNinel", "IntraNukeNabs", "IntraNukeNpi", "IntraNukePImfp", "IntraNukePIcex", "IntraNukePIel", "IntraNukePIinel", "IntraNukePIabs"} ;
+
+   _genie_label_v = {"FermiGasModelKf", "FermiGasModelSf", "IntraNukeNabs", "IntraNukeNcex", "IntraNukeNel", "IntraNukeNinel", "IntraNukeNmfp", "IntraNukeNpi", "IntraNukePIabs", "IntraNukePIcex", "IntraNukePIel", "IntraNukePIinel", "IntraNukePImfp", "IntraNukePIpi", "NC", "NonResRvbarp1pi", "NonResRvbarppi", "NonResRvp1pi", "NonResRvppi", "ResDecayEta", "ResDecayGamma", "ResDecayTheta", "ccresAxial", "ccresVector", "cohMA", "cohR0", "ncelAxial", "ncelEta", "ncresAxial", "ncresVector", "qema", "qevec"};
+
     fGeometry = nullptr;
 
   }
@@ -39,9 +42,11 @@ namespace larlite {
     fGeometry = larutil::Geometry::GetME();
     _tot_pot = 0. ;
 
+    int funcs = 32; 
+
     _all_evts_nominal = 0;
-    _all_evts_m1.resize(30,0) ; // 30 weights
-    _all_evts_p1.resize(30,0) ; // 30 weights
+    _all_evts_m1.resize(funcs,0) ; // 30 weights
+    _all_evts_p1.resize(funcs,0) ; // 30 weights
 
     if( !_tree){
        _tree = new TTree("tree","tree");
@@ -66,24 +71,23 @@ namespace larlite {
  
   bool GenieXSecErrorsFull::analyze(storage_manager* storage) {
 
+     bool foundit = false;
+     auto it = _map.find(storage->subrun_id());
 
-  for(std::string line; std::getline(_file, line); )   //read stream line by line
-  {
-      std::istringstream in(line);      //make a stream for the line itself
-  
-      float subrun;
-      in >> subrun;                  //and read the first whitespace-separated token
-  
-      if(subrun == storage->subrun_id() )       //and check its value
-      {
-          float event ;
-          in >> event ;       //now read the whitespace-separated floats
-          if ( storage->event_id() == event )
-             break;
-      }
-      else if( storage->subrun_id() > subrun )
-        return false; 
-   }
+     if( it != _map.end() ){
+       while ( it->first == storage->subrun_id() ){  
+         auto temp_event = it->second ; 
+         if( temp_event == storage->event_id() )
+           foundit = true;
+
+         it++; 
+         }   
+        if ( !foundit)
+         _map.emplace(storage->subrun_id(), storage->event_id() );
+        else return false;
+       }   
+      else 
+         _map.emplace(storage->subrun_id(), storage->event_id() );
 
 
     auto ev_pot = storage->get_subrundata<potsummary>("generator"); 
@@ -155,7 +159,6 @@ namespace larlite {
 
     // We know in the fv at this point 
     if( n_mu == 1 && n_pi0 == 1 && nu_energy > 0.5 ){
-     std::cout<<"WOOOOOOOOOO FOUND ONE "<<std::endl ;
 
       std::vector<int> shr_ids;
       
@@ -189,24 +192,27 @@ namespace larlite {
       _xsec_theta_truth = lep_dcosz_truth;
       _all_evts_nominal ++ ;
 
-      auto w_v = wgt.begin()->second; //
-      std::cout<<"Number of weights : "<<w_v.size()<<std::endl ;
+      //auto w_v = wgt.begin()->second; //
+      //std::cout<<"Number of weights : "<<w_v.size()<<std::endl ;
+      //for ( int function = 0; function < w_v.size()/2; function++ ){ 
+      //  _all_evts_m1[function] += (w_v.at(2*function)) ; 
+      //  _all_evts_p1[function] += (w_v.at(2*function+1)) ;
+      //  _weight_v.emplace_back(w_v.at(2*function));
+      //  _weight_v.emplace_back(w_v.at(2*function+1));
+      //  //xsec_theta_truth_m1[function] -> Fill(lep_dcosz_truth, (m.second.at(2*function)));
+      // }
 
-      for ( int function = 0; function < w_v.size()/2; function++ ){ 
+      int it = 0;
 
-        _all_evts_m1[function] += (w_v.at(2*function)) ; 
-        _all_evts_p1[function] += (w_v.at(2*function+1)) ;
-        
-        _weight_v.emplace_back(w_v.at(2*function));
-        _weight_v.emplace_back(w_v.at(2*function+1));
-        
-        //xsec_mom_truth_p1[function] -> Fill(lep_mom_truth, (m.second.at(2*function+1)));
-        //xsec_mom_truth_m1[function] -> Fill(lep_mom_truth, (m.second.at(2*function))); 
-        //xsec_theta_truth_p1[function] -> Fill(lep_dcosz_truth, (m.second.at(2*function+1)));
-        //xsec_theta_truth_m1[function] -> Fill(lep_dcosz_truth, (m.second.at(2*function)));
-       }
+      for ( auto const & m : wgt ) { 
+         auto w_v = m.second ;
+         //std::cout<<"Parameter: "<<m.first<<", "<<m.second.size() <<std::endl;
+         _all_evts_m1[it] += (w_v.at(0)) ; 
+         _all_evts_p1[it] += (w_v.at(1)) ;
+         it++;
+       }   
 
-      _tree->Fill();
+      //_tree->Fill();
 
       //xsec_mom_truth -> Fill(lep_mom_truth);
       //xsec_theta_truth -> Fill(lep_dcosz_truth);
@@ -227,19 +233,29 @@ namespace larlite {
 
   bool GenieXSecErrorsFull::finalize() {
 
-    std::cout<<"All events: "<<_all_evts_nominal<<std::endl ;
-    for( int i = 0 ; i < _all_evts_m1.size(); i++) {
-      std::cout<<"\nFunction: "<<_genie_label_v[i]<<std::endl ;
-      std::cout<<"All events (-3sig): "<<_all_evts_m1.at(i)<<std::endl ;
-      std::cout<<"All events (+3sig): "<<_all_evts_p1.at(i)<<std::endl ;
-    }
+   // std::cout<<"All events: "<<_all_evts_nominal<<std::endl ;
+   // for( int i = 0 ; i < _all_evts_m1.size(); i++) {
+   //   std::cout<<"\nFunction: "<<_genie_label_v[i]<<std::endl ;
+   //   std::cout<<"All events (-3sig): "<<_all_evts_m1.at(i)<<std::endl ;
+   //   std::cout<<"All events (+3sig): "<<_all_evts_p1.at(i)<<std::endl ;
+   // }
 
+    std::cout<<"All events: "<<_all_evts_nominal<<std::endl ;
+
+    for( int i = 0 ; i < _all_evts_m1.size(); i++) 
+      std::cout<<_all_evts_m1[i]<<", " ;
+
+    std::cout<<std::endl ;
+    for( int i = 0 ; i < _all_evts_p1.size(); i++) 
+      std::cout<<_all_evts_p1[i]<<", " ;
+
+    std::cout<<std::endl ;
 
     _final_tree->Fill();
     if(_fout){
      _fout->cd();
-     _tree->Write();
-     _final_tree->Write();
+     //_tree->Write();
+     //_final_tree->Write();
     }
      
     return true;

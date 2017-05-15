@@ -13,7 +13,7 @@ from larlite import larlite as fmwk
 my_proc = fmwk.ana_processor()
 
 # Set input root file
-for x in xrange(len(sys.argv)-2):
+for x in xrange(len(sys.argv)-1):
     my_proc.add_input_file(sys.argv[x+1])
 
 # Specify IO mode
@@ -21,20 +21,16 @@ my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
-ana = fmwk.GetInteractionInfo()
+ana = fmwk.POTCalc()
 
 my_proc.add_process(ana)
-
-event = sys.argv[-1]
-
-print "\n\n\n EVENT IS ", event
 
 print
 print  "Finished configuring ana_processor. Start event loop!"
 print
 
 # Let's run it.
-my_proc.run(int(event),1);
+my_proc.run()
 
 # done!
 print

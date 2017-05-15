@@ -19,24 +19,24 @@ namespace larlite {
    auto it = _map.find(storage->subrun_id());
    bool foundit = false;
 
-   //if( it != _map.end() ){
-   // while ( it->first == storage->subrun_id() ){ 
-   //   auto temp_event = it->second ; 
-   //   if( temp_event == storage->event_id() )
-   //     foundit = true;
+   if( it != _map.end() ){
+    while ( it->first == storage->subrun_id() ){ 
+      auto temp_event = it->second ; 
+      if( temp_event == storage->event_id() )
+        foundit = true;
 
-   //   it++; 
-   //   }
-   //  if ( !foundit)
-   //   _map.emplace(storage->subrun_id(), storage->event_id() );
+      it++; 
+      }
+     if ( !foundit)
+      _map.emplace(storage->subrun_id(), storage->event_id() );
 
-   // }
-   //else 
-   //   _map.emplace(storage->subrun_id(), storage->event_id() );
+    }
+   else 
+      _map.emplace(storage->subrun_id(), storage->event_id() );
 
    // //std::cout<<storage->run_id()<<", "<<storage->subrun_id()<<", "<<storage->event_id()<<std::endl ;
 
-   _map.emplace(storage->subrun_id(), storage->event_id() );
+   //_map.emplace(storage->subrun_id(), storage->event_id() );
 
     evt++; 
   

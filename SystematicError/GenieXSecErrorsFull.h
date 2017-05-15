@@ -56,6 +56,8 @@ namespace larlite {
 
     float _tot_pot ;
     const larutil::Geometry * fGeometry ;
+
+    std::multimap<float,float> _map ;
     
     /////////// My extra variables
     TTree * _tree ;

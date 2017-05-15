@@ -27,7 +27,9 @@ namespace larlite {
     _tree = nullptr;
     _final_tree = nullptr;
 
-    _genie_label_v = {"QEMA", "NCELaxial", "CCResAxial", "CCResVector", "NCResAxial", "NCResVector", "CohMA", "CohR0", "NonResRvp1pi", "NonResRvbarp1pi", "NonResRvp2pi", "NonResRvbarp2pi", "ResDecayGamma", "ResDecayTheta", "NC", "FermiGasModelKf", "IntraNukeNmfp", "IntraNukeNcex", "IntraNukeNel", "IntraNukeNinel", "IntraNukeNabs", "IntraNukeNpi", "IntraNukePImfp", "IntraNukePIcex", "IntraNukePIel", "IntraNukePIinel", "IntraNukePIabs"} ;
+//    _genie_label_v = {"QEMA", "NCELaxial", "CCResAxial", "CCResVector", "NCResAxial", "NCResVector", "CohMA", "CohR0", "NonResRvp1pi", "NonResRvbarp1pi", "NonResRvp2pi", "NonResRvbarp2pi", "ResDecayGamma", "ResDecayTheta", "NC", "FermiGasModelKf", "IntraNukeNmfp", "IntraNukeNcex", "IntraNukeNel", "IntraNukeNinel", "IntraNukeNabs", "IntraNukeNpi", "IntraNukePImfp", "IntraNukePIcex", "IntraNukePIel", "IntraNukePIinel", "IntraNukePIabs"} ;
+
+   _genie_label_v = {"FermiGasModelKf", "FermiGasModelSf", "IntraNukeNabs", "IntraNukeNcex", "IntraNukeNel", "IntraNukeNinel", "IntraNukeNmfp", "IntraNukeNpi", "IntraNukePIabs", "IntraNukePIcex", "IntraNukePIel", "IntraNukePIinel", "IntraNukePImfp", "IntraNukePIpi", "NC", "NonResRvbarp1pi", "NonResRvbarppi", "NonResRvp1pi", "NonResRvppi", "ResDecayEta", "ResDecayGamma", "ResDecayTheta", "ccresAxial", "ccresVector", "cohMA", "cohR0", "ncelAxial", "ncelEta", "ncresAxial", "ncresVector", "qema", "qevec"}; 
     
     fGeometry = nullptr;
 
@@ -37,14 +39,15 @@ namespace larlite {
 
     fGeometry = larutil::Geometry::GetME();
     _tot_pot = 0. ;
+    int funcs = 32; //64 total, +- for each func
 
     _sel_evts_nominal = 0;
-    _sel_evts_m1.resize(30,0) ; // 30 weights
-    _sel_evts_p1.resize(30,0) ; // 30 weights
+    _sel_evts_m1.resize(funcs,0) ; // 30 weights
+    _sel_evts_p1.resize(funcs,0) ; // 30 weights
 
     _bkgd_evts_nominal = 0;
-    _bkgd_evts_m1.resize(30,0) ; // 30 weights
-    _bkgd_evts_p1.resize(30,0) ; // 30 weights
+    _bkgd_evts_m1.resize(funcs,0) ; // 30 weights
+    _bkgd_evts_p1.resize(funcs,0) ; // 30 weights
 
     if( !_tree){
        _tree = new TTree("tree","tree");
@@ -97,9 +100,6 @@ namespace larlite {
       return false;
       }
   
-    _weight_v.clear();
-
-    auto wgt  = ev_wgt->at(0).GetWeights();
 
     auto nu  = ev_mctruth->at(0).GetNeutrino();
     double xyz[3] = {0.};
@@ -136,9 +136,12 @@ namespace larlite {
         n_mu += 1;
     }
 
+    _weight_v.clear();
+    auto wgt  = ev_wgt->at(0).GetWeights();
+
     // We know in the fv at this point 
     if( n_mu == 1 && n_pi0 == 1 && nu_energy > 0.5 ){
-     std::cout<<"WOOOOOOOOOO FOUND ONE "<<std::endl ;
+     //std::cout<<"WOOOOOOOOOO FOUND ONE "<<std::endl ;
 
       std::vector<int> shr_ids;
       
@@ -172,17 +175,27 @@ namespace larlite {
       _xsec_theta_truth = lep_dcosz_truth;
       _sel_evts_nominal ++ ;
 
-      auto w_v = wgt.begin()->second; //
-      std::cout<<"Number of weights : "<<w_v.size()<<std::endl ;
+      //auto w_v = wgt.begin()->second; //
+      //std::cout<<"Number of weights : "<<w_v.size()<<std::endl ;
 
-      for ( int function = 0; function < w_v.size()/2; function++ ){ 
+      //for ( int function = 0; function < w_v.size()/2; function++ ){ 
 
-        _sel_evts_m1[function] += (w_v.at(2*function)) ; 
-        _sel_evts_p1[function] += (w_v.at(2*function+1)) ;
-        
-        _weight_v.emplace_back(w_v.at(2*function));
-        _weight_v.emplace_back(w_v.at(2*function+1));
-        
+      //  _sel_evts_m1[function] += (w_v.at(2*function)) ; 
+      //  _sel_evts_p1[function] += (w_v.at(2*function+1)) ;
+      //  _weight_v.emplace_back(w_v.at(2*function));
+      //  _weight_v.emplace_back(w_v.at(2*function+1));
+      //  
+      // }
+
+      int it = 0;
+      for ( auto const & m : wgt ) { 
+         auto w_v = m.second ;
+         std::cout<<"Parameter: "<<m.first<<", "<<m.second.size() <<std::endl;
+         //for ( auto const & w : m.second){
+           _sel_evts_m1[it] += (w_v.at(0)) ; 
+           _sel_evts_p1[it] += (w_v.at(1)) ;
+         it++;
+         // }   
        }
 
       _tree->Fill();
@@ -194,14 +207,22 @@ namespace larlite {
 
         _bkgd_evts_nominal ++ ;
 
-        auto w_v = wgt.begin()->second; //
+        int it = 0;
+        for ( auto const & m : wgt ) { 
+           auto w_v = m.second ;
+             _bkgd_evts_m1[it] += (w_v.at(0)) ; 
+             _bkgd_evts_p1[it] += (w_v.at(1)) ;
+           it++;
+         }   
 
-        for ( int function = 0; function < w_v.size()/2; function++ ){ 
+        //auto w_v = wgt.begin()->second; //
 
-          _bkgd_evts_m1[function] += (w_v.at(2*function)) ; 
-          _bkgd_evts_p1[function] += (w_v.at(2*function+1)) ;
-          
-         }
+        //for ( int function = 0; function < w_v.size()/2; function++ ){ 
+
+        //  _bkgd_evts_m1[function] += (w_v.at(2*function)) ; 
+        //  _bkgd_evts_p1[function] += (w_v.at(2*function+1)) ;
+        //  
+        // }
       }
 
     return true;
@@ -209,12 +230,31 @@ namespace larlite {
 
   bool GenieXSecErrorsSelected::finalize() {
 
-    std::cout<<"All events: "<<_sel_evts_nominal<<std::endl ;
-    for( int i = 0 ; i < _sel_evts_m1.size(); i++) {
-      std::cout<<"\nFunction: "<<_genie_label_v[i]<<std::endl ;
-      std::cout<<"All events (-3sig): "<<_sel_evts_m1.at(i)<<std::endl ;
-      std::cout<<"All events (+3sig): "<<_sel_evts_p1.at(i)<<std::endl ;
-    }
+    std::cout<<"All events: "<<_sel_evts_nominal<<", "<<_bkgd_evts_nominal<<std::endl ;
+    //for( int i = 0 ; i < _sel_evts_m1.size(); i++) {
+    //  std::cout<<"\nFunction: "<<_genie_label_v[i]<<std::endl ;
+    //  std::cout<<"All events (-3sig): "<<_sel_evts_m1.at(i)<<std::endl ;
+    //  std::cout<<"All events (+3sig): "<<_sel_evts_p1.at(i)<<std::endl ;
+    //}
+
+    for( int i = 0 ; i < _sel_evts_m1.size(); i++) 
+      std::cout<<_sel_evts_m1[i]<<", " ;
+
+    std::cout<<std::endl ;
+    for( int i = 0 ; i < _sel_evts_m1.size(); i++) 
+      std::cout<<_sel_evts_p1[i]<<", " ;
+
+    std::cout<<std::endl ;
+
+    std::cout<<"BACKGROUND: "<<std::endl ;
+    for( int i = 0 ; i < _sel_evts_m1.size(); i++) 
+      std::cout<<_bkgd_evts_m1[i]<<", " ;
+
+    std::cout<<std::endl ;
+    for( int i = 0 ; i < _sel_evts_m1.size(); i++) 
+      std::cout<<_bkgd_evts_p1[i]<<", " ;
+
+    std::cout<<std::endl ;
 
     _final_tree->Fill();
     if(_fout){

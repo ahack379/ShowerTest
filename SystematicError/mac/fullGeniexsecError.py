@@ -22,7 +22,7 @@ my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 # Specify output root file name
 my_proc.set_ana_output_file("ana.root");
 
-ana = fmwk.GenieXSecErrorsSelected()
+ana = fmwk.GenieXSecErrorsFull()
 my_proc.add_process(ana)
 
 print

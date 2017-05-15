@@ -1,9 +1,9 @@
 /**
- * \file CCpi0Eff.h
+ * \file POTCalc.h
  *
  * \ingroup HitDensity
  * 
- * \brief Class def header for a class CCpi0Eff
+ * \brief Class def header for a class POTCalc
  *
  * @author ah673
  */
@@ -12,37 +12,37 @@
 
     @{*/
 
-#ifndef LARLITE_CCPI0EFF_H
-#define LARLITE_CCPI0EFF_H
+#ifndef LARLITE_POTCALC_H
+#define LARLITE_POTCALC_H
 
 #include "Analysis/ana_base.h"
 
 namespace larlite {
   /**
-     \class CCpi0Eff
+     \class POTCalc
      User custom analysis class made by SHELL_USER_NAME
    */
-  class CCpi0Eff : public ana_base{
+  class POTCalc : public ana_base{
   
   public:
 
     /// Default constructor
-    CCpi0Eff(){ _name="CCpi0Eff"; _fout=0;}
+    POTCalc(){ _name="POTCalc"; _fout=0;}
 
     /// Default destructor
-    virtual ~CCpi0Eff(){}
+    virtual ~POTCalc(){}
 
-    /** IMPLEMENT in CCpi0Eff.cc!
+    /** IMPLEMENT in POTCalc.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in CCpi0Eff.cc! 
+    /** IMPLEMENT in POTCalc.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in CCpi0Eff.cc! 
+    /** IMPLEMENT in POTCalc.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
@@ -50,11 +50,12 @@ namespace larlite {
   protected:
 
   int _event ;
-  int _signal ;
-
+  
   std::vector<int> _event_list ;
-  std::multimap<float,float> _map;
+  std::multimap<float,float> _map ;
 
+  float _tot_pot ;
+    
   };
 }
 #endif
