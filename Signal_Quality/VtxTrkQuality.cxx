@@ -355,10 +355,12 @@ namespace larlite {
                auto recos_i = ev_s->at(reco_id) ;
 
                auto mag_reco = sqrt( pow(recos_i.Direction().Px(),2) + pow(recos_i.Direction().Py(),2) + pow(recos_i.Direction().Pz(),2) );
-               auto dot = mcs_i.Start().Px() * recos_i.Direction().Px() +
-                          mcs_i.Start().Py() * recos_i.Direction().Py() +
-                          mcs_i.Start().Pz() * recos_i.Direction().Pz() ;
+               auto dot = mcs_i.DetProfile().Px() * recos_i.Direction().Px() +
+                          mcs_i.DetProfile().Py() * recos_i.Direction().Py() +
+                          mcs_i.DetProfile().Pz() * recos_i.Direction().Pz() ;
                dot /= ( mag_mcs * mag_reco );
+	       if ( fabs(dot) > 1 ) 
+	       std::cout<<"DOT ! " <<dot <<std::endl ;
 
                if ( dot > max_dot){
                  max_dot = dot;
