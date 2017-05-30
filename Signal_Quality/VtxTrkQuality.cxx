@@ -19,8 +19,11 @@ namespace larlite {
 
   bool VtxTrkQuality::initialize() {
 
+    _pi0s = 0;
+
     if(!_vtx_tree){
      _vtx_tree = new TTree("vtx_tree","vtx_tree"); 
+     _vtx_tree->Branch("event",&_event,"event/I"); 
      _vtx_tree->Branch("vtx_diff",&_vtx_diff,"vtx_diff/F"); 
      _vtx_tree->Branch("mc_vtx_x",&_mc_vtx_x,"mc_vtx_x/F"); 
      _vtx_tree->Branch("mc_vtx_y",&_mc_vtx_y,"mc_vtx_y/F"); 
@@ -69,6 +72,7 @@ namespace larlite {
     SetXOffset(0.0);
     //_offset = 0.;
     _event = 0;
+    _bad_events = 0;
 
     _SCE = new larutil::SpaceChargeMicroBooNE();
     _time2cm = larutil::GeometryHelper::GetME()->TimeToCm();;
@@ -150,8 +154,9 @@ namespace larlite {
     auto e = traj.at(traj.size() - 1).E();
 
     // Only want to consider true ccpi0 events with vertices in the FV
-    if( xvtx < 20 || xvtx > 236.35 || yvtx > 96.5 || yvtx < -96.5 || zvtx < 10 || zvtx > 1026.8 )
-        return false;
+    if( xvtx < 20 || xvtx > 236.35 || yvtx > 96.5 || yvtx < -96.5 || zvtx < 10 || zvtx > 1026.8 ){
+        std::cout<<"EVENT : "<<_event -1 <<" is OUT OF FV "<<std::endl ;
+        return false;}
 
     auto parts = ev_mctruth->at(0).GetParticles();
     int n_pi0 = 0;
@@ -225,6 +230,8 @@ namespace larlite {
       _reco_trk_dir_y = ( t_end.Y() - t_vtx.Y() )/ reco_mag; 
       _reco_trk_dir_z = ( t_end.Z() - t_vtx.Z() )/ reco_mag; 
 
+      std::cout<<std::endl;
+
       int it = 0;
       for (int mc = 0; mc < ev_mctrk->size(); mc++) { // auto const & mct : ev_mctrack ){
         auto ev_t = ev_mctrk->at(mc); 
@@ -266,13 +273,16 @@ namespace larlite {
         auto dist = sqrt( pow(st.X() - xvtx,2) + pow(st.Y() - yvtx,2) + pow(st.Z() - zvtx,2) );
 
         
-        if ( dist < 0.01 && s.DetProfile().E() > 0 ){
+        if ( dist < 0.01 && s.DetProfile().E() > 0 && s.MotherPdgCode() == 111 ){
+	  std::cout<<"ENERGY : "<<s.DetProfile().E()<<std::endl ;
+	  std::cout<<"START INFO : "<<s.DetProfile().X() <<", "<<s.DetProfile().Y()<<", "<<s.DetProfile().Z()<<std::endl ;
+	  _pi0s ++; 
           shr_ids.emplace_back(si) ;
           }
       }
 
      if (shr_ids.size() < 2 ){
-       //std::cout<<"N SHOWERS! "<<shr_ids.size()<<", Event: "<<_event-1<<std::endl ;
+       std::cout<<"N SHOWERS! "<<shr_ids.size()<<", Event: "<<_event-1<<std::endl ;
        return false;
      }
 
@@ -337,6 +347,7 @@ namespace larlite {
 
 
        if( cand_ids.size() == 2 && shr_ids.size() > 1){
+          std::cout<<"SUCCESS! "<<_event -1 <<std::endl ;
 
            auto s1 = ev_s->at(cand_ids[0]) ;
            auto s2 = ev_s->at(cand_ids[1]) ;
@@ -425,6 +436,11 @@ namespace larlite {
            _shr2_st_diff = sqrt( pow(_reco_shr2_st_x - _mc_shr2_st_x,2) + pow(_reco_shr2_st_y - _mc_shr2_st_y,2) + 
                                   pow(_reco_shr2_st_z - _mc_shr2_st_z,2) ); 
 
+	   if ( _shr1_st_diff > 8 || _shr2_st_diff > 8 ){ 
+	     std::cout<<"FAILED EVENT: "<<_event-1<<", "<<_shr1_st_diff<<", "<<_shr2_st_diff<<std::endl ;
+	     _bad_events++;
+	     }
+
            _vtx_tree->Fill();
 
          }
@@ -439,6 +455,9 @@ namespace larlite {
   bool VtxTrkQuality::finalize() {
 
    std::cout<<"Event list: "<<_event_list.size()<<std::endl ; 
+   std::cout<<"Bad events: "<<_bad_events<<std::endl ;
+
+   std::cout<<"N showers with pi0s : (should be 2x evnetlist) "<<_pi0s<<std::endl ;
 
    if(_fout){
      _fout->cd();

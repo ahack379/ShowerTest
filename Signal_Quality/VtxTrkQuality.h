@@ -108,6 +108,11 @@ namespace larlite {
   larutil::SpaceChargeMicroBooNE *_SCE;
 
   geoalgo::GeoAlgo _geoAlgo ;
+
+  int _bad_events ;
+
+  int _pi0s; 
+
   };
 }
 #endif
