@@ -27,10 +27,6 @@ namespace larlite {
     _tree = nullptr;
     _final_tree = nullptr;
 
-    //_genie_label_v = {"QEMA","QEMA", "NCELaxial", "NCELaxial", "CCResAxial", "CCResAxial", "CCResVector", "CCResVector", "N    CResAxial", "NCResAxial", "NCResVector", "NCResVector", "CohMA", "CohMA", "CohR0", "CohR0", "NonResRvp1pi", "NonResRvp1pi", "NonResRvba    rp1pi", "NonResRvbarp1pi", "NonResRvp2pi", "NonResRvp2pi", "NonResRvbarp2pi", "NonResRvbarp2pi", "ResDecayGamma", "ResDecayGamma", "Res    DecayTheta", "ResDecayTheta", "NC", "NC", "FermiGasModelKf", "FermiGasModelKf", "IntraNukeNmfp", "IntraNukeNmfp", "IntraNukeNcex", "Int    raNukeNcex", "IntraNukeNel", "IntraNukeNel", "IntraNukeNinel", "IntraNukeNinel", "IntraNukeNabs", "IntraNukeNabs", "IntraNukeNpi", "Int    raNukeNpi", "IntraNukePImfp", "IntraNukePImfp", "IntraNukePIcex", "IntraNukePIcex", "IntraNukePIel", "IntraNukePIel", "IntraNukePIinel"    , "IntraNukePIinel", "IntraNukePIabs", "IntraNukePIabs"} ;
-
-//    _genie_label_v = {"QEMA", "NCELaxial", "CCResAxial", "CCResVector", "NCResAxial", "NCResVector", "CohMA", "CohR0", "NonResRvp1pi", "NonResRvbarp1pi", "NonResRvp2pi", "NonResRvbarp2pi", "ResDecayGamma", "ResDecayTheta", "NC", "FermiGasModelKf", "IntraNukeNmfp", "IntraNukeNcex", "IntraNukeNel", "IntraNukeNinel", "IntraNukeNabs", "IntraNukeNpi", "IntraNukePImfp", "IntraNukePIcex", "IntraNukePIel", "IntraNukePIinel", "IntraNukePIabs"} ;
-
    _genie_label_v = {"FermiGasModelKf", "FermiGasModelSf", "IntraNukeNabs", "IntraNukeNcex", "IntraNukeNel", "IntraNukeNinel", "IntraNukeNmfp", "IntraNukeNpi", "IntraNukePIabs", "IntraNukePIcex", "IntraNukePIel", "IntraNukePIinel", "IntraNukePImfp", "IntraNukePIpi", "NC", "NonResRvbarp1pi", "NonResRvbarppi", "NonResRvp1pi", "NonResRvppi", "ResDecayEta", "ResDecayGamma", "ResDecayTheta", "ccresAxial", "ccresVector", "cohMA", "cohR0", "ncelAxial", "ncelEta", "ncresAxial", "ncresVector", "qema", "qevec"};
 
     fGeometry = nullptr;
@@ -90,20 +86,10 @@ namespace larlite {
          _map.emplace(storage->subrun_id(), storage->event_id() );
 
 
-    auto ev_pot = storage->get_subrundata<potsummary>("generator"); 
     auto ev_mctruth = storage->get_data<event_mctruth>("generator"); 
-    auto ev_mcs = storage->get_data<event_mcshower>("mcreco");
     auto ev_wgt= storage->get_data<event_mceventweight>("genieeventweight"); 
 
-    if( !ev_pot ){ 
-       std::cout<<"No POT..."<<std::endl ;
-       return false;
-       }
-
-    if( storage->subrun_id() != storage->last_subrun_id() )
-      _tot_pot += ev_pot->totgoodpot ;
-
-    if(!ev_mctruth || !ev_mctruth->size() ){ 
+     if(!ev_mctruth || !ev_mctruth->size() ){ 
        std::cout<<"No Truth..."<<std::endl ;
        return false;
      }
@@ -113,11 +99,6 @@ namespace larlite {
       return false;
      }
 
-    if(!ev_mcs || !ev_mcs->size() ){
-      std::cout<<"No mcshower..." <<std::endl;
-      return false;
-      }
-  
     _weight_v.clear();
 
     auto wgt  = ev_wgt->at(0).GetWeights();
@@ -130,66 +111,28 @@ namespace larlite {
     xyz[2] = traj.at(traj.size() - 1).Z();
     auto nu_energy = traj.at(traj.size() - 1).E();
 
+    bool infv = true;
+
    if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1] > 96.5 || xyz[1] < -96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
-        return false;
+       infv = false ;
 
     auto parts = ev_mctruth->at(0).GetParticles();
 
     int n_pi0 = 0;
     int n_mu = 0;
-    bool isSignal = false ;
-
-    float lep_mom_truth = 0., lep_dcosz_truth = 0. ;
-    std::vector<float> start(3,0) ;
     
     for ( auto const & p : parts ){
     
-      if( p.StatusCode() == 1 && p.PdgCode() == 111 ){
+      if( p.StatusCode() == 1 && p.PdgCode() == 111 )
         n_pi0 += 1;
-        lep_mom_truth = sqrt( pow(p.Trajectory().at(0).Px(),2) + pow(p.Trajectory().at(0).Py(),2) + 
-	                      pow(p.Trajectory().at(0).Pz(),2) )*1000;
-        start[0] = p.Trajectory().at(0).X();
-        start[1] = p.Trajectory().at(0).Y();
-        start[2] = p.Trajectory().at(0).Z();
-        }
 
       if( p.StatusCode() == 1 && p.PdgCode() == 13 )
         n_mu += 1;
     }
 
     // We know in the fv at this point 
-    if( n_mu == 1 && n_pi0 == 1 && nu_energy > 0.5 ){
+    if( n_mu == 1 && n_pi0 == 1 && nu_energy > 0.5 && infv ){
 
-      std::vector<int> shr_ids;
-      
-      for ( int si = 0; si < ev_mcs->size(); si++){ 
-
-        auto s = ev_mcs->at(si);
-
-        if( s.PdgCode() != 22 ) continue; 
-      
-        auto st = s.Start();
-        auto dist = sqrt( pow(st.X() - start[0],2) + pow(st.Y() - start[1],2) + pow(st.Z() - start[2],2) );
-      
-        if ( dist < 0.001 )
-          shr_ids.emplace_back(si) ;
-      }
-      
-      if( shr_ids.size() == 2 ){
-
-        auto s1 = ev_mcs->at(shr_ids[0]).Start();
-        auto s2 = ev_mcs->at(shr_ids[1]).Start();
-
-        auto mag1 = sqrt( s1.Px()*s1.Px()+s1.Py()*s1.Py()+s1.Pz()*s1.Pz() );
-        auto mag2 = sqrt( s2.Px()*s2.Px()+s2.Py()*s2.Py()+s2.Pz()*s2.Pz() );
-        auto dot = s1.Px()*s2.Px() + s1.Py()*s2.Py() + s1.Pz()*s2.Pz() ;
-
-        lep_dcosz_truth = acos( dot / mag1 / mag2 );  
-      }
-
-
-      _xsec_mom_truth = lep_mom_truth; 
-      _xsec_theta_truth = lep_dcosz_truth;
       _all_evts_nominal ++ ;
 
       //auto w_v = wgt.begin()->second; //
@@ -213,7 +156,6 @@ namespace larlite {
        }   
 
       //_tree->Fill();
-
       //xsec_mom_truth -> Fill(lep_mom_truth);
       //xsec_theta_truth -> Fill(lep_dcosz_truth);
       //all_evts_nominal++;
@@ -223,8 +165,6 @@ namespace larlite {
       //  xsec_theta_truth_p1[function] -> Fill(lep_dcosz_truth, (m.second.at(2*function+1)));
       //  xsec_theta_truth_m1[function] -> Fill(lep_dcosz_truth, (m.second.at(2*function)));
       //}
-
-      isSignal = true; 
 
         }
 

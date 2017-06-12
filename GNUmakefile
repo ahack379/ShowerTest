@@ -20,7 +20,7 @@ endif
 #
 # Define directories to be compile upon a global "make"...
 #
-SUBDIRS := Example ShowerSeparation CalcEfficiency Filters Misc FindCutValue EnergyStudy AnsQuestions SystematicError DataMCCompare Signal_Quality #ADD_NEW_SUBDIR ... do not remove this comment from this line
+SUBDIRS := ShowerSeparation CalcEfficiency Filters FindCutValue EnergyStudy SystematicError Signal_Quality #ADD_NEW_SUBDIR ... do not remove this comment from this line
 
 #####################################################################################
 #

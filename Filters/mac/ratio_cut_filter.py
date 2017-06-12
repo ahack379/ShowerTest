@@ -22,12 +22,17 @@ my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
 # Specify output root file name
 #my_proc.set_ana_output_file("density_ana.root") #sys.argv[-1])#"ana.root");
 #my_proc.set_output_file("/Volumes/UBooNEData/mcc8/cosmic_bnb/anafiles/mcc8_bnbcos_post_ratiocut.root")
-my_proc.set_output_file("/Volumes/UBooNEData/mcc8/cosmic_bnb/anafiles/mcc8_bnbcos_post_ratiocut_wpandora.root")
+#my_proc.set_output_file("/Volumes/UBooNEData/mcc8/cosmic_bnb/anafiles/mcc8_bnbcos_post_ratiocut_wpandora.root")
+my_proc.set_output_file("info_post_ratiocut.root")
 
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
 ratio = fmwk.RatioCut()
-ratio.SetRatioCut(0.225) #1875) #0.195) #24)
+ratio.SetRatioCut(0.18) #22) #1875) #0.195) #24)
+ratio.SetRadius(50) #60)
+
+# 0.18 and 50 are for DC's new HR
+# 0.22 and 60 are for old HR on MCC8
 my_proc.add_process(ratio)
 
 my_proc.enable_filter(True)
@@ -36,17 +41,18 @@ print
 print  "Finished configuring ana_processor. Start event loop!"
 print
 
-my_proc.set_data_to_write(fmwk.data.kMCTruth,'generator')
 my_proc.set_data_to_write(fmwk.data.kMCTrack,'mcreco')
 my_proc.set_data_to_write(fmwk.data.kMCShower,'mcreco')
-my_proc.set_data_to_write(fmwk.data.kVertex,'numuCC_vertex')
+my_proc.set_data_to_write(fmwk.data.kMCTruth,'generator')
+my_proc.set_data_to_write(fmwk.data.kVertex,'mcvertex') #numuCC_vertex')
 my_proc.set_data_to_write(fmwk.data.kTrack,'pandoraNu')
-my_proc.set_data_to_write(fmwk.data.kTrack,'numuCC_track')
+my_proc.set_data_to_write(fmwk.data.kCluster,'mccluster')
+my_proc.set_data_to_write(fmwk.data.kAssociation,'mccluster')
+#my_proc.set_data_to_write(fmwk.data.kTrack,'numuCC_track')
 my_proc.set_data_to_write(fmwk.data.kHit,'gaushit')
-#my_proc.set_data_to_write(fmwk.data.kPOTSummmary,'generator')
 
 # Let's run it.
-my_proc.run() #5050)
+my_proc.run()
 
 # done!
 print

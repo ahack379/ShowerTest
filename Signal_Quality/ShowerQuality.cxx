@@ -1,7 +1,7 @@
-#ifndef LARLITE_VTXTRKQUALITY_CXX
-#define LARLITE_VTXTRKQUALITY_CXX
+#ifndef LARLITE_SHOWERQUALITY_CXX
+#define LARLITE_SHOWERQUALITY_CXX
 
-#include "VtxTrkQuality.h"
+#include "ShowerQuality.h"
 #include "DataFormat/mctruth.h"
 #include "DataFormat/vertex.h"
 #include "DataFormat/track.h"
@@ -17,12 +17,10 @@
 
 namespace larlite {
 
-  bool VtxTrkQuality::initialize() {
+  bool ShowerQuality::initialize() {
 
     _pi0s = 0;
     _fv = 0;
-    _thresh_it = 0;
-    _dalitz = 0;
 
     if(!_vtx_tree){
      _vtx_tree = new TTree("vtx_tree","vtx_tree"); 
@@ -34,19 +32,6 @@ namespace larlite {
      _vtx_tree->Branch("reco_vtx_x",&_reco_vtx_x,"reco_vtx_x/F"); 
      _vtx_tree->Branch("reco_vtx_y",&_reco_vtx_y,"reco_vtx_y/F"); 
      _vtx_tree->Branch("reco_vtx_z",&_reco_vtx_z,"reco_vtx_z/F"); 
-
-     _vtx_tree->Branch("trk_st_diff",&_trk_st_diff,"trk_st_diff/F"); 
-     _vtx_tree->Branch("reco_trk_st_x",&_reco_trk_st_x,"reco_trk_st_x/F"); 
-     _vtx_tree->Branch("reco_trk_st_y",&_reco_trk_st_y,"reco_trk_st_y/F"); 
-     _vtx_tree->Branch("reco_trk_st_z",&_reco_trk_st_z,"reco_trk_st_z/F"); 
-
-     _vtx_tree->Branch("reco_trk_dir_x",&_reco_trk_dir_x,"reco_trk_dir_x/F"); 
-     _vtx_tree->Branch("reco_trk_dir_y",&_reco_trk_dir_y,"reco_trk_dir_y/F"); 
-     _vtx_tree->Branch("reco_trk_dir_z",&_reco_trk_dir_z,"reco_trk_dir_z/F"); 
-     _vtx_tree->Branch("mc_trk_dir_x",&_mc_trk_dir_x,"mc_trk_dir_x/F"); 
-     _vtx_tree->Branch("mc_trk_dir_y",&_mc_trk_dir_y,"mc_trk_dir_y/F"); 
-     _vtx_tree->Branch("mc_trk_dir_z",&_mc_trk_dir_z,"mc_trk_dir_z/F"); 
-     _vtx_tree->Branch("trk_dot",&_trk_dot,"trk_dot/F"); 
 
      _vtx_tree->Branch("reco_shr1_e",&_reco_shr1_e,"reco_shr1_e/F"); 
      _vtx_tree->Branch("mc_shr1_e",&_mc_shr1_e,"mc_shr1_e/F"); 
@@ -78,12 +63,12 @@ namespace larlite {
     _bad_events = 0;
 
     _SCE = new larutil::SpaceChargeMicroBooNE();
-    _time2cm = larutil::GeometryHelper::GetME()->TimeToCm();;
+    _time2cm = larutil::GeometryHelper::GetME()->TimeToCm();
 
     return true;
   }
   
-  bool VtxTrkQuality::analyze(storage_manager* storage) {
+  bool ShowerQuality::analyze(storage_manager* storage) {
 
    // Iterate event number here to make event display checking convenient
    _event++;
@@ -120,18 +105,6 @@ namespace larlite {
    auto ev_vtx = storage->get_data<event_vertex>("numuCC_vertex"); 
     if(!ev_vtx || !ev_vtx->size() ) { 
       std::cout<<"Event has no vertex info "<<std::endl;
-      return false;
-      }
-
-   auto ev_trk = storage->get_data<event_track>("numuCC_track"); 
-    if(!ev_trk || !ev_trk->size() ) { 
-      std::cout<<"Event has no track info "<<std::endl;
-      return false;
-      }
-
-   auto ev_mctrk = storage->get_data<event_mctrack>("mcreco"); 
-    if(!ev_mctrk || !ev_mctrk->size() ) { 
-      std::cout<<"Event has no mctrack info "<<std::endl;
       return false;
       }
 
@@ -202,71 +175,6 @@ namespace larlite {
       _vtx_diff = sqrt(pow(_reco_vtx_x - _mc_vtx_x, 2) + pow(_reco_vtx_y - _mc_vtx_y, 2) 
                      + pow(_reco_vtx_z - _mc_vtx_z, 2) ); 
 
-      // Now fill in some MC-reco track info
-      auto t_vtx = ev_trk->at(0).Vertex() ;
-      auto t_end = ev_trk->at(0).End() ;
-    
-      float dist_st = sqrt( pow(t_vtx.X() - _mc_vtx_x,2) + 
-                            pow(t_vtx.Y() - _mc_vtx_y,2) + 
-                            pow(t_vtx.Z() - _mc_vtx_z,2) );  
-
-      float dist_end = sqrt( pow(t_end.X() - _mc_vtx_x,2) + 
-                             pow(t_end.Y() - _mc_vtx_y,2) + 
-                             pow(t_end.Z() - _mc_vtx_z,2) );  
-
-      if( dist_st < dist_end ){
-        _reco_trk_st_x = t_vtx.X();
-        _reco_trk_st_y = t_vtx.Y();
-        _reco_trk_st_z = t_vtx.Z();
-        }
-      else{
-        _reco_trk_st_x = t_end.X();
-        _reco_trk_st_y = t_end.Y();
-        _reco_trk_st_z = t_end.Z();
-        }
-
-      _trk_st_diff = sqrt(pow(_reco_trk_st_x - _mc_vtx_x, 2) + pow(_reco_trk_st_y - _mc_vtx_y, 2) 
-                        + pow(_reco_trk_st_z - _mc_vtx_z, 2) ); 
-
-
-       float reco_mag = sqrt( pow(t_end.X() - t_vtx.X(),2) + 
-                              pow(t_end.Y() - t_vtx.Y(),2) + 
-                              pow(t_end.Z() - t_vtx.Z(),2) );  
-
-      _reco_trk_dir_x = ( t_end.X() - t_vtx.X() )/ reco_mag; 
-      _reco_trk_dir_y = ( t_end.Y() - t_vtx.Y() )/ reco_mag; 
-      _reco_trk_dir_z = ( t_end.Z() - t_vtx.Z() )/ reco_mag; 
-
-      int it = 0;
-      for (int mc = 0; mc < ev_mctrk->size(); mc++) { // auto const & mct : ev_mctrack ){
-        auto ev_t = ev_mctrk->at(mc); 
-        
-	// Origin 1 is neutrino
-        if ( ev_t.Origin() == 1 && ev_t.PdgCode() == 13 ){
-
-          auto end_x = ev_t.End().X(); 
-          auto end_y = ev_t.End().Y(); 
-          auto end_z = ev_t.End().Z(); 
-
-          auto sce_corr = _SCE->GetPosOffsets(end_x,end_y,end_z);
-
-          auto sce_mc_end_x = end_x + vtxtimecm + _offset - sce_corr.at(0); 
-          auto sce_mc_end_y = end_y + sce_corr.at(1); 
-          auto sce_mc_end_z = end_z + sce_corr.at(2);
- 
-          auto norm = sqrt( pow(_mc_vtx_x - sce_mc_end_x,2) + pow(_mc_vtx_y - sce_mc_end_y,2) 
-                          + pow(_mc_vtx_z - sce_mc_end_z,2) ); 
-
-          _mc_trk_dir_x = ( sce_mc_end_x - _mc_vtx_x ) / norm ;
-          _mc_trk_dir_y = ( sce_mc_end_y - _mc_vtx_y ) / norm ;
-          _mc_trk_dir_z = ( sce_mc_end_z - _mc_vtx_z ) / norm ;
-          break; //Should only ever be 1 neutrino-originating muon in this sample
-        }
-      } 
-
-      _trk_dot = _mc_trk_dir_x * _reco_trk_dir_x +  _mc_trk_dir_y * _reco_trk_dir_y + 
-                 _mc_trk_dir_z * _reco_trk_dir_z;
-
 
       // Now deal with shower comparisons
       std::vector<int> shr_ids;
@@ -284,12 +192,6 @@ namespace larlite {
           shr_ids.emplace_back(si) ;
           }
       }
-
-     if (shr_ids.size() < 2 ) 
-       _thresh_it ++ ;
-
-     if (shr_ids.size() == 3 ) 
-       _dalitz ++ ;
 
      if (shr_ids.size() != 2 ) { //< 2){
        std::cout<<"N SHOWERS! "<<shr_ids.size()<<", Event: "<<_event-1<<std::endl ;
@@ -466,16 +368,13 @@ namespace larlite {
     return true;
   }
 
-  bool VtxTrkQuality::finalize() {
+  bool ShowerQuality::finalize() {
 
    std::cout<<"Event list: "<<_event_list.size()<<std::endl ; 
    std::cout<<"Bad events: "<<_bad_events<<std::endl ;
    std::cout<<"Out of FV: "<<_fv<<std::endl ;
-   std::cout<<">= 1 shower below threshold "<<_thresh_it <<std::endl ;
-   std::cout<<"Dalitz:  "<<_dalitz<<std::endl ;
 
-
-   //std::cout<<"N showers with pi0s : (should be 2x evnetlist) "<<_pi0s<<std::endl ;
+   std::cout<<"N showers with pi0s : (should be 2x evnetlist) "<<_pi0s<<std::endl ;
 
    if(_fout){
      _fout->cd();

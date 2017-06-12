@@ -4,6 +4,7 @@
 #include "Pi0Cuts.h"
 #include "DataFormat/shower.h"
 #include "DataFormat/track.h"
+#include "DataFormat/cluster.h"
 
 namespace larlite {
 
@@ -49,15 +50,18 @@ namespace larlite {
     auto ev_s = storage->get_data<event_shower>("showerreco");
     auto ev_t = storage->get_data<event_track>("numuCC_track");
 
+    storage->set_id( ev_s->run(), ev_s->subrun(), ev_s->event_id() );
+    auto new_shower_v = storage->get_data<larlite::event_shower>("pi0_candidate_showers");
+
     if( !ev_s || !ev_s->size() || ev_s->size() < 2 ){
-      std::cout<<"Not enough reco'd showers..." <<std::endl;
+      std::cout<<"Not enough reco'd showers..." <<ev_s->size()<<std::endl;
       return false;
      }
 
-    if( !ev_t || !ev_t->size() ){
-      std::cout<<"No tagged track; what??" <<std::endl;
-      return false;
-     }
+    //if( !ev_t || !ev_t->size() ){
+    //  std::cout<<"No tagged track; what??" <<std::endl;
+    //  return false;
+    // }
 
     std::cout<<"\nEvent : "<<_event <<std::endl;
 
@@ -152,15 +156,48 @@ namespace larlite {
 
       if( candidate_pairs.size() != 1 || cand_ids.size() != 2 ) return false;
 
-      auto tag_trk = ev_t->at(0) ;
+      //auto tag_trk = ev_t->at(0) ;
 
-      //_mu_mom        = tag_trk.VertexMomentum() ;
-      _mu_angle      = cos(tag_trk.Theta());
+      ////_mu_mom        = tag_trk.VertexMomentum() ;
+      //_mu_angle      = cos(tag_trk.Theta());
       
       //std::cout<<"Momentum at 0: "<<tag_trk.MomentumAtPoint(0)<<std::endl ;
+
+      // Store the new shower data product
+      new_shower_v->emplace_back(ev_s->at(cand_ids[0]));
+      new_shower_v->emplace_back(ev_s->at(cand_ids[1]));
+
+      // Now also store the associations
+      event_cluster *ev_cluster = nullptr;
+      auto ass_cluster_v = storage->find_one_ass(ev_s->id(), ev_cluster, ev_s->name());
+
+      std::vector<std::vector<unsigned int> > shower_cluster_v ; 
+      shower_cluster_v.reserve(2) ;
+
+      for( int i = 0; i < ass_cluster_v.size(); i ++ ){
+         if ( i == cand_ids[0] || i == cand_ids[1] ){
+            shower_cluster_v.emplace_back(ass_cluster_v[i] ) ;
+            //std::cout<<"shower : "<<shower_cluster_v[i].size()<<std::endl ;
+            }
+       } 
+
+      ::larlite::event_ass * shower_cluster_ass_v = 0;
+
+      // if associated clusters not found -> quit and exit
+      if ( !ev_cluster or (ev_cluster->size() == 0) ) 
+        print(msg::kERROR, __FUNCTION__, Form("No clusters found associated to shower" ));
+      else 
+        shower_cluster_ass_v = storage->get_data<event_ass>(new_shower_v->name());
+
+
+      std::cout<<"Shower cluste v: "<<shower_cluster_v.size()<<std::endl ;
+      if ( shower_cluster_ass_v ) {
+        shower_cluster_ass_v->set_association(new_shower_v->id(),
+                                              product_id(data::kCluster, ev_cluster->name()),
+                                              shower_cluster_v);
+      }
       
       _pi0_selection->Fill();
-
       _event_list.emplace_back(_event); 
 
     return true;

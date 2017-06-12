@@ -1,62 +1,69 @@
 /**
- * \file XSecError.h
+ * \file ShowerCompleteness.h
  *
- * \ingroup SystematicError
+ * \ingroup Signal_Quality
  * 
- * \brief Class def header for a class XSecError
+ * \brief Class def header for a class ShowerCompleteness
  *
  * @author ah673
  */
 
-/** \addtogroup SystematicError
+/** \addtogroup Signal_Quality
 
     @{*/
 
-#ifndef LARLITE_XSECERROR_H
-#define LARLITE_XSECERROR_H
+#ifndef LARLITE_SHOWERCOMPLETENESS_H
+#define LARLITE_SHOWERCOMPLETENESS_H
 
 #include "Analysis/ana_base.h"
-#include "TH1F.h"
 
 namespace larlite {
   /**
-     \class XSecError
+     \class ShowerCompleteness
      User custom analysis class made by SHELL_USER_NAME
    */
-  class XSecError : public ana_base{
+  class ShowerCompleteness : public ana_base{
   
   public:
 
     /// Default constructor
-    XSecError(){ _name="XSecError"; _fout=0; _tree=nullptr; _hist=0; _hist2 = 0; _hist3=0; _histw = 0;}
+    ShowerCompleteness(){ _name="ShowerCompleteness"; _fout=0; _tree = 0;}
 
     /// Default destructor
-    virtual ~XSecError(){}
+    virtual ~ShowerCompleteness(){}
 
-    /** IMPLEMENT in XSecError.cc!
+    /** IMPLEMENT in ShowerCompleteness.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in XSecError.cc! 
+    /** IMPLEMENT in ShowerCompleteness.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in XSecError.cc! 
+    /** IMPLEMENT in ShowerCompleteness.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
 
   protected:
 
-  TTree * _tree;
-  TH1F * _hist;
-  TH1F * _hist2;
-  TH1F * _hist3;
-  TH1F * _histw;
-  float _test; 
-  float _test_weight ;
+  // Multimap of plane -> hit index
+  std::map<int,int> _mc_hit_map ;
+
+  // First vector is plane, second vector is per cluster
+  std::vector<std::vector<float>> _purity_v ;
+  std::vector<std::vector<float>> _complete_v;
+
+  TTree * _tree ;
+
+  int _p0;
+  int _p1;
+  int _p2 ;
+
+  int _tot_clus ;
+  int _event ;
     
   };
 }

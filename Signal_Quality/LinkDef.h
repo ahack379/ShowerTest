@@ -10,6 +10,9 @@
 #pragma link off all functions;
 
 #pragma link C++ class larlite::VtxTrkQuality+;
+#pragma link C++ class larlite::ShowerQuality+;
+#pragma link C++ class larlite::ShowerCompleteness+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
+
 

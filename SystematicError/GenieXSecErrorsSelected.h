@@ -71,6 +71,8 @@ namespace larlite {
 
     std::vector<std::string> _genie_label_v ;
 
+    int _events ;
+
   };
 }
 #endif

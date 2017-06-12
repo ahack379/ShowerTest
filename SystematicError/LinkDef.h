@@ -10,7 +10,6 @@
 #pragma link off all functions;
 
 #pragma link C++ class larlite::RepoSelectionII+;
-#pragma link C++ class larlite::XSecError+;
 #pragma link C++ class larlite::GenieXSecErrorsFull+;
 #pragma link C++ class larlite::GenieXSecErrorsSelected+;
 #pragma link C++ class larlite::GetEventRunNumbers+;

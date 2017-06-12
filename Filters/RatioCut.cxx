@@ -41,10 +41,10 @@ namespace larlite {
     //std::cout<<"Ratio: "<<_ratio_cut<<std::endl ;
     _event++;
 
-    //auto ev_hit = storage->get_data<event_hit>("hit02"); //shrhits");//hit02");
+    //auto ev_hit = storage->get_data<event_hit>("hit02"); 
     //if ( !ev_hit || !ev_hit->size() ){std::cout<<"Returning..."<<std::endl ; return false; }
 
-    auto ev_hit_g = storage->get_data<event_hit>("gaushit");//hit02");
+    auto ev_hit_g = storage->get_data<event_hit>("gaushit");
     if ( !ev_hit_g || !ev_hit_g->size() ) {std::cout<<"Returning, no hits..."<<std::endl ; return false; }
 
     auto ev_vtx = storage->get_data<event_vertex>("numuCC_vertex");
@@ -61,7 +61,7 @@ namespace larlite {
 
     std::vector<::cv::Point> contour;
 
-    float rad = 60. ;
+    float rad = _radius ; //60. ;
     float offset = 0.;
 
     std::vector<float> x(50,0);

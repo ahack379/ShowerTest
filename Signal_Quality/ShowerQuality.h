@@ -1,9 +1,9 @@
 /**
- * \file VtxTrkQuality.h
+ * \file ShowerQuality.h
  *
  * \ingroup Signal_Quality
  * 
- * \brief Class def header for a class VtxTrkQuality
+ * \brief Class def header for a class ShowerQuality
  *
  * @author ah673
  */
@@ -12,8 +12,8 @@
 
     @{*/
 
-#ifndef LARLITE_VTXTRKQUALITY_H
-#define LARLITE_VTXTRKQUALITY_H
+#ifndef LARLITE_SHOWERQUALITY_H
+#define LARLITE_SHOWERQUALITY_H
 
 #include "Analysis/ana_base.h"
 #include "LArUtil/GeometryHelper.h"
@@ -22,30 +22,30 @@
 
 namespace larlite {
   /**
-     \class VtxTrkQuality
+     \class ShowerQuality
      User custom analysis class made by SHELL_USER_NAME
    */
-  class VtxTrkQuality : public ana_base{
+  class ShowerQuality : public ana_base{
   
   public:
 
     /// Default constructor
-    VtxTrkQuality(){ _name="VtxTrkQuality"; _fout=0; _vtx_tree=0; _offset = 0.7; }
+    ShowerQuality(){ _name="ShowerQuality"; _fout=0; _vtx_tree=0; _offset = 0.7; }
 
     /// Default destructor
-    virtual ~VtxTrkQuality(){}
+    virtual ~ShowerQuality(){}
 
-    /** IMPLEMENT in VtxTrkQuality.cc!
+    /** IMPLEMENT in ShowerQuality.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in VtxTrkQuality.cc! 
+    /** IMPLEMENT in ShowerQuality.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in VtxTrkQuality.cc! 
+    /** IMPLEMENT in ShowerQuality.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
@@ -112,9 +112,7 @@ namespace larlite {
   int _bad_events ;
   int _pi0s; 
   int _fv ;
-  int _thresh_it ; // Study how many ccpi0 below threshold
-  int _dalitz ;
-  
+
   };
 }
 #endif

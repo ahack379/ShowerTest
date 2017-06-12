@@ -33,6 +33,7 @@ namespace larlite {
     
     fGeometry = nullptr;
 
+    _events = 0;
   }
   
   bool GenieXSecErrorsSelected::initialize(){
@@ -72,18 +73,9 @@ namespace larlite {
  
   bool GenieXSecErrorsSelected::analyze(storage_manager* storage) {
 
-    auto ev_pot = storage->get_subrundata<potsummary>("generator"); 
     auto ev_mctruth = storage->get_data<event_mctruth>("generator"); 
-    auto ev_mcs = storage->get_data<event_mcshower>("mcreco");
+    //auto ev_mcs = storage->get_data<event_mcshower>("mcreco");
     auto ev_wgt= storage->get_data<event_mceventweight>("genieeventweight"); 
-
-    if( !ev_pot ){ 
-       std::cout<<"No POT..."<<std::endl ;
-       return false;
-       }
-
-    if( storage->subrun_id() != storage->last_subrun_id() )
-      _tot_pot += ev_pot->totgoodpot ;
 
     if(!ev_mctruth || !ev_mctruth->size() ){ 
        std::cout<<"No Truth..."<<std::endl ;
@@ -95,12 +87,14 @@ namespace larlite {
       return false;
      }
 
-    if(!ev_mcs || !ev_mcs->size() ){
-      std::cout<<"No mcshower..." <<std::endl;
-      return false;
-      }
-  
+    _events ++ ;
 
+
+    //if(!ev_mcs || !ev_mcs->size() ){
+    //  std::cout<<"No mcshower..." <<std::endl;
+    //  return false;
+    //  }
+  
     auto nu  = ev_mctruth->at(0).GetNeutrino();
     double xyz[3] = {0.};
     auto traj = nu.Nu().Trajectory();
@@ -109,14 +103,15 @@ namespace larlite {
     xyz[2] = traj.at(traj.size() - 1).Z();
     auto nu_energy = traj.at(traj.size() - 1).E();
 
+    bool infv = true;
+
    if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1] > 96.5 || xyz[1] < -96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
-        return false;
+      infv = false; 
 
     auto parts = ev_mctruth->at(0).GetParticles();
 
     int n_pi0 = 0;
     int n_mu = 0;
-    bool isSignal = false ;
 
     float lep_mom_truth = 0., lep_dcosz_truth = 0. ;
     std::vector<float> start(3,0) ;
@@ -138,38 +133,33 @@ namespace larlite {
 
     _weight_v.clear();
     auto wgt  = ev_wgt->at(0).GetWeights();
+//    _events++ ;
 
     // We know in the fv at this point 
-    if( n_mu == 1 && n_pi0 == 1 && nu_energy > 0.5 ){
-     //std::cout<<"WOOOOOOOOOO FOUND ONE "<<std::endl ;
+    if( n_mu == 1 && n_pi0 == 1 && nu_energy > 0.5 && infv){
 
-      std::vector<int> shr_ids;
-      
-      for ( int si = 0; si < ev_mcs->size(); si++){ 
+      //std::vector<int> shr_ids;
+      //for ( int si = 0; si < ev_mcs->size(); si++){ 
 
-        auto s = ev_mcs->at(si);
+      //  auto s = ev_mcs->at(si);
+      //  if( s.PdgCode() != 22 ) continue; 
+      //
+      //  auto st = s.Start();
+      //  auto dist = sqrt( pow(st.X() - start[0],2) + pow(st.Y() - start[1],2) + pow(st.Z() - start[2],2) );
+      //
+      //  if ( dist < 0.001 )
+      //    shr_ids.emplace_back(si) ;
+      //}
+      //
+      //if( shr_ids.size() == 2 ){
 
-        if( s.PdgCode() != 22 ) continue; 
-      
-        auto st = s.Start();
-        auto dist = sqrt( pow(st.X() - start[0],2) + pow(st.Y() - start[1],2) + pow(st.Z() - start[2],2) );
-      
-        if ( dist < 0.001 )
-          shr_ids.emplace_back(si) ;
-      }
-      
-      if( shr_ids.size() == 2 ){
-
-        auto s1 = ev_mcs->at(shr_ids[0]).Start();
-        auto s2 = ev_mcs->at(shr_ids[1]).Start();
-
-        auto mag1 = sqrt( s1.Px()*s1.Px()+s1.Py()*s1.Py()+s1.Pz()*s1.Pz() );
-        auto mag2 = sqrt( s2.Px()*s2.Px()+s2.Py()*s2.Py()+s2.Pz()*s2.Pz() );
-        auto dot = s1.Px()*s2.Px() + s1.Py()*s2.Py() + s1.Pz()*s2.Pz() ;
-
-        lep_dcosz_truth = acos( dot / mag1 / mag2 );  
-      }
-
+      //  auto s1 = ev_mcs->at(shr_ids[0]).Start();
+      //  auto s2 = ev_mcs->at(shr_ids[1]).Start();
+      //  auto mag1 = sqrt( s1.Px()*s1.Px()+s1.Py()*s1.Py()+s1.Pz()*s1.Pz() );
+      //  auto mag2 = sqrt( s2.Px()*s2.Px()+s2.Py()*s2.Py()+s2.Pz()*s2.Pz() );
+      //  auto dot = s1.Px()*s2.Px() + s1.Py()*s2.Py() + s1.Pz()*s2.Pz() ;
+      //  lep_dcosz_truth = acos( dot / mag1 / mag2 );  
+      //}
 
       _xsec_mom_truth = lep_mom_truth; 
       _xsec_theta_truth = lep_dcosz_truth;
@@ -200,11 +190,8 @@ namespace larlite {
 
       _tree->Fill();
 
-      isSignal = true; 
-
       }
       else{
-
         _bkgd_evts_nominal ++ ;
 
         int it = 0;
@@ -216,9 +203,7 @@ namespace larlite {
          }   
 
         //auto w_v = wgt.begin()->second; //
-
         //for ( int function = 0; function < w_v.size()/2; function++ ){ 
-
         //  _bkgd_evts_m1[function] += (w_v.at(2*function)) ; 
         //  _bkgd_evts_p1[function] += (w_v.at(2*function+1)) ;
         //  
@@ -231,6 +216,8 @@ namespace larlite {
   bool GenieXSecErrorsSelected::finalize() {
 
     std::cout<<"All events: "<<_sel_evts_nominal<<", "<<_bkgd_evts_nominal<<std::endl ;
+
+    std::cout<<"Events: "<<_events <<std::endl ;
     //for( int i = 0 ; i < _sel_evts_m1.size(); i++) {
     //  std::cout<<"\nFunction: "<<_genie_label_v[i]<<std::endl ;
     //  std::cout<<"All events (-3sig): "<<_sel_evts_m1.at(i)<<std::endl ;

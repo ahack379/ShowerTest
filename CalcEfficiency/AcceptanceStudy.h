@@ -1,72 +1,65 @@
 /**
- * \file RatioCut.h
+ * \file AcceptanceStudy.h
  *
- * \ingroup SumCharge
+ * \ingroup CalcEfficiency 
  * 
- * \brief Class def header for a class RatioCut
+ * \brief Class def header for a class AcceptanceStudy
  *
  * @author ah673
  */
 
-/** \addtogroup SumCharge
+/** \addtogroup CalcEfficiency 
 
     @{*/
 
-#ifndef LARLITE_RATIOCUT_H
-#define LARLITE_RATIOCUT_H
+#ifndef LARLITE_ACCEPTANCESTUDY_H
+#define LARLITE_ACCEPTANCESTUDY_H
 
 #include "Analysis/ana_base.h"
+#include "LArUtil/GeometryHelper.h"
+#include "LArUtil/SpaceChargeMicroBooNE.h"
+#include "GeoAlgo/GeoAlgo.h"
 
 namespace larlite {
   /**
-     \class RatioCut
+     \class AcceptanceStudy
      User custom analysis class made by SHELL_USER_NAME
    */
-  class RatioCut : public ana_base{
+  class AcceptanceStudy : public ana_base{
   
   public:
 
     /// Default constructor
-    RatioCut(){ _name="RatioCut"; _fout=0; _tree=nullptr; _hits_tot=0.; _hits_in_rad=0; 
-                  _ratio_cut=0.2; _radius = 60.; }
+    AcceptanceStudy(){ _name="AcceptanceStudy"; _fout=0; }
 
     /// Default destructor
-    virtual ~RatioCut(){}
+    virtual ~AcceptanceStudy(){}
 
-    /** IMPLEMENT in RatioCut.cc!
+    /** IMPLEMENT in AcceptanceStudy.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in RatioCut.cc! 
+    /** IMPLEMENT in AcceptanceStudy.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in RatioCut.cc! 
+    /** IMPLEMENT in AcceptanceStudy.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
 
-    void SetRatioCut(float ratio ) { _ratio_cut = ratio ; } 
-    void SetRadius(float rad ) { _radius = rad ; } 
-
   protected:
 
-  float _ratio_cut ;
-  float _radius ;
+  std::multimap<float,float> _map;
+  int _event ; 
 
-  TTree * _tree ;
-  float _hits_tot;
-  float _hits_in_rad; 
-  float _hits_in_rad_g;
-
-  int _event ;
-
-  std::vector<float> _radii;
-  std::vector<float> _density;
-  std::vector<float> _hits_per_r;
-    
+  int _infv_ccpi0 ; 
+  int _thresh ; // Study how many ccpi0 below threshold
+  int _dalitz ;
+  int _out_of_vol;
+  
   };
 }
 #endif
