@@ -15,6 +15,15 @@ namespace larlite {
       _tree = new TTree("tree","tree");
       _tree->Branch("_purity_v","std::vector<std::vector<float>>",&_purity_v);
       _tree->Branch("_complete_v","std::vector<std::vector<float>>",&_complete_v);
+      _tree->Branch("_cw_purity_v","std::vector<std::vector<float>>",&_cw_purity_v);
+      _tree->Branch("_cw_complete_v","std::vector<std::vector<float>>",&_cw_complete_v);
+    }
+
+    if ( !_pi0 ){
+      _pi0 = new TTree("pi0","pi0");
+      _pi0->Branch("mass",&_mass,"mass/F");
+      _pi0->Branch("min_pur",&_min_pur,"min_pur/F");
+      _pi0->Branch("min_com",&_min_com,"min_com/F");
     }
 
    _p0 = 0;
@@ -26,6 +35,9 @@ namespace larlite {
    _purity_v.resize(3) ;
    _complete_v.resize(3) ;
 
+   _cw_purity_v.resize(3) ;
+   _cw_complete_v.resize(3) ;
+
     return true;
   }
   
@@ -33,8 +45,6 @@ namespace larlite {
 
     _event++;
     //std::cout<<"EVENT "<<std::endl ;
-
-    _mc_hit_map.clear();
 
     auto ev_ass = storage->get_data<larlite::event_ass>("mccluster");
     auto const& ass_keys = ev_ass->association_keys();
@@ -63,16 +73,31 @@ namespace larlite {
       return false;
     }   
 
+   // Keep track of the charge-weighted hit count as well  
+   std::map<int,float> tot_mc_cw_hits_v ; 
+
+   _mc_hit_map.clear();
+
+   // Fill map with hits from mccluster : clusterID
    for( int i = 0; i < ass_mcclus_v.size(); i ++ ){
+
+     //std::cout<<"MCCluster id + hits : "<<i<<", "<<ass_mcclus_v[i].size()<<std::endl ;
      for ( int j = 0; j < ass_mcclus_v[i].size(); j++ ){
 
        auto hid = ass_mcclus_v[i][j];
        _mc_hit_map[hid] = i ; 
-     }
 
+       auto h = ev_hit->at(hid);
+
+       if ( tot_mc_cw_hits_v.find(i) == tot_mc_cw_hits_v.end() )
+         tot_mc_cw_hits_v[i] = h.Integral() ;
+       else
+         tot_mc_cw_hits_v[i] += h.Integral() ;
+        
+     }
    }
 
-   // Now we have the mc hit info in a map compute purity and completeness
+   // Now we have the mc hit info in a map, compute purity and completeness
 
    // Get the association from cluster -> hit
    auto const & ev_clus = storage->get_data<event_cluster>("ImageClusterHit");
@@ -87,7 +112,6 @@ namespace larlite {
    if ( !ev_clus || ev_clus->size() == 0 || !ev_ass_c || ev_ass_c->size() == 0 ){
      std::cout<<"No cluster..." <<std::endl; return false;
      }   
-   //if ( !ass_imageclus_v || ass_imageclus_v.size() == 0 ){ std::cout<<"No imageclus ass..." <<std::endl; return false; }   
 
    if( !ev_s || !ev_s->size() ) { 
      std::cout<<"No shower..." <<std::endl;
@@ -96,15 +120,18 @@ namespace larlite {
 
    // for each reco cluster, find the origin of all hits and calc purity/completeness 
    std::vector<int> pur_ctr_v ;
+   std::vector<float> cw_pur_ctr_v ;
 
-   std::cout<<std::endl ;
+   _mass = -10;
+   _min_pur = 1e12; 
+   _min_com = 1e12; 
 
-   // Loop over showers. I think.
+   // Loop over showers
    for (size_t i = 0; i < ass_showerreco_v.size(); i++ ){
      
      _tot_clus += ass_showerreco_v.at(i).size() ;
-     //std::cout<<"Number of clusters assoc to shower: "<<ass_showerreco_v.at(i).size()<<std::endl ;
-     // Loop over clusters associated to this shower. Again, I think.
+
+     // Loop over clusters associated to this shower
      for (size_t j = 0; j < ass_showerreco_v.at(i).size(); j++ ){
 
          auto clus_id = ass_showerreco_v.at(i).at(j); 
@@ -112,30 +139,50 @@ namespace larlite {
      
          int plane = iclus.Plane().Plane ;
 
+         pur_ctr_v.clear();
+         cw_pur_ctr_v.clear();
+
          pur_ctr_v.resize(ass_mcclus_v.size(),0) ;
+         cw_pur_ctr_v.resize(ass_mcclus_v.size(),0) ;
 
          int max_hits = -1;
+         int max_cw_hits = -1;
          int max_cid = -1 ;
-
-         //auto const & ass_clus_hit = ass_imageclus_v.at(clus_id) ;
-
+         float tot_reco_cw_hits = 0;
+         
+         //for (int i = 0; i <  pur_ctr_v.size(); i++ )
+         //  std::cout<<"I and pur ctr size: "<<i<<", "<<pur_ctr_v[i]<<std::endl ;
+         
+         // Loop through all hits associared to the cluster 
          for ( int k = 0; k < ass_imageclus_v.at(clus_id).size(); k++ ){
 
-           //auto hid = ass_imageclus_v[j][k] ;
            auto hid = ass_imageclus_v.at(clus_id).at(k) ; 
            auto h = ev_hit->at(hid);
+           tot_reco_cw_hits += h.Integral() ;
            
            if ( _mc_hit_map.find(hid) != _mc_hit_map.end() ){
-             pur_ctr_v[_mc_hit_map[hid]]++ ; 
-             if( pur_ctr_v[ _mc_hit_map[hid]] > max_hits ){
-               max_hits = pur_ctr_v[_mc_hit_map[hid]];
-               max_cid = _mc_hit_map[hid] ;
+
+             auto mcclus_id = _mc_hit_map[hid] ;
+
+             pur_ctr_v[mcclus_id]++ ; 
+             cw_pur_ctr_v[mcclus_id] += h.Integral() ; 
+
+             if( pur_ctr_v[ mcclus_id] > max_hits ){
+              
+	       //std::cout<<"Reco cluster id + hits: "<<max_cid<<", "<<max_hits<<std::endl;  
+               max_hits = pur_ctr_v[mcclus_id];
+               max_cid = mcclus_id ; 
+               max_cw_hits = cw_pur_ctr_v[mcclus_id] ;
              }
            }
          }
 
-	 float purity = 0 ;
-	 float complete = 0;
+	 float purity = 0. ;
+	 float complete = 0. ;
+
+	 float cw_purity = 0. ;
+	 float cw_complete = 0.;
+
 
          if ( max_cid != -1 ){
 
@@ -145,19 +192,28 @@ namespace larlite {
            purity   = float(max_hits) / tot_reco_hits ;
            complete = float(max_hits) / tot_mc_hits ;
 
+           cw_purity   = float(max_cw_hits) / tot_reco_cw_hits ;
+           cw_complete = float(max_cw_hits) / tot_mc_cw_hits_v[max_cid]; 
 
 	   if ( purity > 1 ){ 
-	     std::cout<<"****************************************************************"<<std::endl;
-	     }
-	     //std::cout<<"CID: "<<max_cid <<std::endl ;
-	     std::cout<<"Event: "<<_event<<", plane: "<<plane<<std::endl ;
+             std::cout<<"*****************************"<<std::endl;
+	     std::cout<<"Event: "<<_event<<", clusid: "<<max_cid<<", plane: "<<plane<<std::endl ;
 	     std::cout<<"Purtiy : "<<purity<<", "<<complete<<std::endl ;
 	     std::cout<<"Max hits, Reco Tot, MC Tot : "<<max_hits<<", "<<tot_reco_hits<<", "<<tot_mc_hits<<std::endl ;
-	  //}
+           }
 	}
+
+         if( purity < _min_pur )
+           _min_pur = purity ;
+
+         if( complete < _min_com )
+           _min_com = complete ;
 
          _purity_v[plane].emplace_back(purity) ;
          _complete_v[plane].emplace_back(complete) ;
+
+         _cw_purity_v[plane].emplace_back(cw_purity) ;
+         _cw_complete_v[plane].emplace_back(cw_complete) ;
 
 	 if( plane == 0 )
 	   _p0++ ;
@@ -170,46 +226,14 @@ namespace larlite {
       }
    }
 
-   //for ( int j = 0; j < ass_imageclus_v.size(); j++ ){
+   auto const& shr1 = ev_s->at(0);
+   auto const& shr2 = ev_s->at(1);
 
-   //  pur_ctr_v.resize(ass_mcclus_v.size(),0) ;
+   // Calc the Opening angle of the showers
+   double oangle = acos( shr1.Direction().Dot(shr2.Direction())) ;
+   _mass      = sqrt(2 * shr1.Energy() * shr2.Energy() *(1.-cos(oangle)));
 
-   //  int max_hits = -1;
-   //  int max_cid = -1 ;
-   //  int plane = -1 ;
-
-   //  for ( int k = 0; k < ass_imageclus_v[j].size(); k++ ){
-
-   //    auto hid = ass_imageclus_v[j][k] ;
-   //    auto h = ev_hit->at(hid); 
-   //    plane = h.WireID().Plane ;
-   //    
-   //    if ( _mc_hit_map.find(hid) != _mc_hit_map.end() ){
-   //      pur_ctr_v[_mc_hit_map[hid]]++ ; 
-   //      if( pur_ctr_v[ _mc_hit_map[hid]] > max_hits ){
-   //        max_hits = pur_ctr_v[_mc_hit_map[hid]];
-   //        max_cid = _mc_hit_map[hid] ;
-   //      }
-   //    }
-   //  }
-   //  auto tot_mc_hits =  ass_mcclus_v[max_cid].size(); 
-   //  auto tot_reco_hits = ass_imageclus_v[j].size();
-   //  
-   //  auto purity   = float(max_hits) / tot_reco_hits ;
-   //  auto complete = float(max_hits) / tot_mc_hits ;
-
-   //  
-   //  _purity_v[plane].emplace_back(purity) ;
-   //  _complete_v[plane].emplace_back(complete) ;
-   //}
-
-   //
-   // 0) Loop through MC pi0 showers that live in the file 
-   // 1) For each MC shower, fill an mc hit map per plane 
-   // 2) Next find the corresponding reco shower to the MC by taking dot product
-   // 3) Compare the hits in the reco shower to the hits filled in the map 
-   // 4) For each plane and for each cluster in each plane, compute the purity + completeness 
-   //    of the cluster
+   _pi0->Fill(); 
 
     return true;
   }
@@ -224,6 +248,7 @@ namespace larlite {
     if( _fout ){
       _fout->cd();
       _tree->Write();
+      _pi0->Write();
     }
   
     return true;

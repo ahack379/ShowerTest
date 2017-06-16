@@ -27,7 +27,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    ShowerCompleteness(){ _name="ShowerCompleteness"; _fout=0; _tree = 0;}
+    ShowerCompleteness(){ _name="ShowerCompleteness"; _fout=0; _tree = 0; _pi0 = 0 ;}
 
     /// Default destructor
     virtual ~ShowerCompleteness(){}
@@ -49,14 +49,20 @@ namespace larlite {
 
   protected:
 
-  // Multimap of plane -> hit index
+  // Map of plane -> hit index
   std::map<int,int> _mc_hit_map ;
 
+  TTree * _tree ;
   // First vector is plane, second vector is per cluster
   std::vector<std::vector<float>> _purity_v ;
   std::vector<std::vector<float>> _complete_v;
+  std::vector<std::vector<float>> _cw_purity_v ;
+  std::vector<std::vector<float>> _cw_complete_v;
 
-  TTree * _tree ;
+  TTree * _pi0 ;
+  float _mass ;
+  float _min_pur ;
+  float _min_com ;
 
   int _p0;
   int _p1;
