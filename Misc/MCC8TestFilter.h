@@ -16,6 +16,7 @@
 #define LARLITE_MCC8TESTFILTER_H
 
 #include "Analysis/ana_base.h"
+#include <map>
 
 namespace larlite {
   /**
