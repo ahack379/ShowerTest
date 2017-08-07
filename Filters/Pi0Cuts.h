@@ -30,7 +30,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    Pi0Cuts(){ _name="Pi0Cuts"; _fout=0; _pi0_selection=0; }
+    Pi0Cuts(){ _name="Pi0Cuts"; _fout=0; _pi0_selection=0; _chain_modules=false; }
 
     /// Default destructor
     virtual ~Pi0Cuts(){}
@@ -52,7 +52,11 @@ namespace larlite {
 
     void clear();
 
+    void UseChainedModules(bool doityouwont){ _chain_modules = doityouwont; } 
+
   protected:
+
+    bool _chain_modules ;
 
     TTree * _pi0_selection;
     int _event;
@@ -68,6 +72,8 @@ namespace larlite {
 
     ::geoalgo::GeoAlgo _geoAlgo ;
     std::vector<int> _event_list ;    
+    std::vector<int> _one_shower_list ;
+
   };
 }
 #endif

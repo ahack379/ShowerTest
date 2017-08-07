@@ -13,10 +13,13 @@ OBJECTS = $(SOURCES:.cxx=.o)
 # include options for this package
 INCFLAGS  = -I.                       #Include itself
 INCFLAGS += $(shell larlite-config --includes)
+INCFLAGS += $(shell basictool-config --includes)
 INCFLAGS += -I$(OPENCV_INCDIR)
 
 LDFLAGS += $(shell larlite-config --libs)
+LDFLAGS += $(shell basictool-config --libs)
 LDFLAGS += -L$(OPENCV_LIBDIR) -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc
+
 
 
 # platform-specific options

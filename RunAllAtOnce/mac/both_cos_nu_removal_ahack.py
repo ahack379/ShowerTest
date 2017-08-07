@@ -81,6 +81,7 @@ shr_unit.SetOutputProducer("showerreco")
 my_proc.add_process(shr_unit)
 
 pi0 = fmwk.Pi0Cuts()
+pi0.UseChainedModules(True)
 my_proc.add_process(pi0,True)
 
 # Output we save
@@ -121,7 +122,7 @@ print
 print  "Finished configuring ana_processor. Start event loop!"
 print
 
-my_proc.run(0,20) 
+my_proc.run(0,100) 
 
 sys.exit()
 

@@ -51,15 +51,17 @@ namespace larlite {
     auto ev_s = storage->get_data<event_shower>("showerreco");
     //auto ev_t = storage->get_data<event_track>("numuCC_track");
 
-    auto ev_c = storage->get_data<event_cluster>("ImageClusterHit");
-    auto ev_p = storage->get_data<event_pfpart>("ImageClusterHit");
-
     if( !ev_s || !ev_s->size() || ev_s->size() < 2 ){
 
-      //std::cout<<"Clus size before: "<<ev_c->size()<<", "<<ev_p->size()<<std::endl ;
+      if( ev_s->size() == 1)
+        _one_shower_list.emplace_back(_event) ;
 
-      ev_c->clear();
-      ev_p->clear();
+      if( _chain_modules ){
+        auto ev_c = storage->get_data<event_cluster>("ImageClusterHit");
+        auto ev_p = storage->get_data<event_pfpart>("ImageClusterHit");
+        ev_c->clear();
+        ev_p->clear();
+      }
       
       std::cout<<"Not enough reco'd showers..." <<ev_s->size()<<std::endl;
       return false;
@@ -165,14 +167,17 @@ namespace larlite {
       }// shower ID 1 
 
       if( candidate_pairs.size() != 1 || cand_ids.size() != 2 ){
-        
-        //ev_c->clear();
-        //ev_p->clear();
+
+        if( _chain_modules ){
+          auto ev_c = storage->get_data<event_cluster>("ImageClusterHit");
+          auto ev_p = storage->get_data<event_pfpart>("ImageClusterHit");
+          ev_c->clear();
+          ev_p->clear();
+	}
         return false;
       }
 
       std::cout<<"Pi0Cuts - Found a candidate! "<<std::endl ;
-
 
       //auto tag_trk = ev_t->at(0) ;
 
@@ -207,8 +212,6 @@ namespace larlite {
       else 
         shower_cluster_ass_v = storage->get_data<event_ass>(new_shower_v->name());
 
-
-      //std::cout<<"Shower cluste v: "<<shower_cluster_v.size()<<std::endl ;
       if ( shower_cluster_ass_v ) {
         shower_cluster_ass_v->set_association(new_shower_v->id(),
                                               product_id(data::kCluster, ev_cluster->name()),
@@ -229,9 +232,12 @@ namespace larlite {
     }
 
    std::cout<<"\n\n****** "<<_event_list.size()<<" events found by 2 Shower Pi0Reco Module! ******"<<std::endl; 
-
    for ( auto const & e : _event_list )
      std::cout<<e <<", "; 
+
+   //std::cout<<"\n\n****** "<<_one_shower_list.size()<<" events found by 2 Shower Pi0Reco Module! ******"<<std::endl; 
+   //for ( auto const & e : _one_shower_list)
+   //  std::cout<<e <<", "; 
 
   std::cout<<"\n\n\n";
   

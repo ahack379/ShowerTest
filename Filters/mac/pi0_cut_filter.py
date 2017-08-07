@@ -26,10 +26,11 @@ my_proc.set_output_file("mcc8_post_pi0cut.root") #/Volumes/UBooNEData/mcc8/intim
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
 pi0 = fmwk.Pi0Cuts()
+pi0.UseChainedModules(False)
 my_proc.add_process(pi0)
 
 my_proc.enable_filter(True)
-my_proc.enable_event_alignment(False)
+#my_proc.enable_event_alignment(False)
 
 print
 print  "Finished configuring ana_processor. Start event loop!"
