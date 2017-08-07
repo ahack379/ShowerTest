@@ -28,3 +28,4 @@ Plots/*.png
 *.C
 *.C
 DataMCCompare/*
+*.pyc
