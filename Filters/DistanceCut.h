@@ -28,7 +28,7 @@ namespace larlite {
 
     /// Default constructor
     DistanceCut(){ _name="DistanceCut"; _fout=0; _dist_cut_tree=nullptr; _hits_tot=0.; _hits_in_rad=0; 
-                  _ratio_cut=0.2; _radius = 60.; }
+                  _ratio_cut=0.2; _radius=60.; _vtx_producer="numuCC_vertex"; }
 
     /// Default destructor
     virtual ~DistanceCut(){}
@@ -49,12 +49,16 @@ namespace larlite {
     virtual bool finalize();
 
     void SetRatioCut(float ratio ) { _ratio_cut = ratio ; } 
+
     void SetRadius(float rad ) { _radius = rad ; } 
+
+    void SetVtxProducer(std::string vtx){ _vtx_producer = vtx ; }
 
   protected:
 
   float _ratio_cut ;
   float _radius ;
+  std::string _vtx_producer;
 
   TTree * _dist_cut_tree ;
   float _hits_tot;

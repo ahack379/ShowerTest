@@ -11,14 +11,8 @@ if len(sys.argv) < 2:
     sys.stderr.write(msg)
     sys.exit(1)
 
-
 from larlite import larlite as fmwk
-
-#from ROOT import twodimtools
 from ROOT import protoshower
-
-#a = twodimtools.Linearity()
-#print a
 
 def DefaultShowerReco3D():
 
@@ -67,6 +61,7 @@ my_proc.add_process(loadAlgo_nu("RemoveHitsNearVtx") )
 ratio = fmwk.DistanceCut()
 ratio.SetRatioCut(0.22) 
 ratio.SetRadius(60)
+ratio.SetVtxProducer("mcvertex")
 my_proc.add_process(ratio,True)
 
 myunit = fmwk.LArImageHit()
