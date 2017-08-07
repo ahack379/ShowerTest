@@ -27,7 +27,7 @@ my_proc.set_output_file("info_post_ratiocut.root")
 
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
-ratio = fmwk.RatioCut()
+ratio = fmwk.DistanceCut()
 ratio.SetRatioCut(0.22) #1875) #0.195) #24)
 ratio.SetRadius(60)
 

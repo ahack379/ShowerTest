@@ -17,6 +17,8 @@
 
 #pragma link C++ class larlite::TrackMultiplicity+;
 #pragma link C++ class larlite::Pi0Cuts+;
+#pragma link C++ class larlite::SingleShowerPi0Cuts+;
+#pragma link C++ class larlite::DistanceCut+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
 

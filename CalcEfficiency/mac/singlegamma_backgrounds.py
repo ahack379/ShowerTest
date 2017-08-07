@@ -17,28 +17,21 @@ for x in xrange(len(sys.argv)-1):
     my_proc.add_input_file(sys.argv[x+1])
 
 # Specify IO mode
-my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
-
-# Specify output root file name
-my_proc.set_ana_output_file("pi0_selection.root") 
-my_proc.set_output_file("mcc8_post_pi0cut.root") #/Volumes/UBooNEData/mcc8/intime/anafiles/mcc8_intime_post_pi0cut.root")
+my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
-pi0 = fmwk.Pi0Cuts()
-my_proc.add_process(pi0)
+ana = fmwk.SingleGammaBackgroundCalc()
 
-my_proc.enable_filter(True)
-my_proc.enable_event_alignment(False)
+my_proc.set_ana_output_file('singlegamma_minRL_backgrounds.root')
+my_proc.add_process(ana)
 
 print
 print  "Finished configuring ana_processor. Start event loop!"
 print
 
-#my_proc.set_data_to_write(fmwk.data.kTrack,'numuCC_track')
-
 # Let's run it.
-my_proc.run() #5050);
+my_proc.run()
 
 # done!
 print

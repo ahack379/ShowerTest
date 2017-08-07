@@ -63,6 +63,8 @@ namespace larlite {
   float _mass ;
   float _min_pur ;
   float _min_com ;
+  float _shr1_dot ;
+  float _shr2_dot ;
 
   int _p0;
   int _p1;
@@ -70,6 +72,8 @@ namespace larlite {
 
   int _tot_clus ;
   int _event ;
+
+  std::vector<int> shit_v ;
     
   };
 }

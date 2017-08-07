@@ -41,13 +41,10 @@ namespace larlite {
     //std::cout<<"Ratio: "<<_ratio_cut<<std::endl ;
     _event++;
 
-    //auto ev_hit = storage->get_data<event_hit>("hit02"); 
-    //if ( !ev_hit || !ev_hit->size() ){std::cout<<"Returning..."<<std::endl ; return false; }
-
     auto ev_hit_g = storage->get_data<event_hit>("gaushit");
     if ( !ev_hit_g || !ev_hit_g->size() ) {std::cout<<"Returning, no hits..."<<std::endl ; return false; }
 
-    auto ev_vtx = storage->get_data<event_vertex>("numuCC_vertex");
+    auto ev_vtx = storage->get_data<event_vertex>("mcvertex"); //numuCC_vertex");
     if ( !ev_vtx || !ev_vtx->size() ) {std::cout<<"Returning, no vertex..."<<std::endl ; return false; }
 
     auto vtx = ev_vtx->at(0); 
@@ -126,6 +123,8 @@ namespace larlite {
   }
 
   bool RatioCut::finalize() {
+
+    std::cout<<"\n\n****** "<<_tree->GetEntries()<<" entries have passed the ratio cut ******\n"<<std::endl ;
 
     if(_fout){
       _fout->cd(); 

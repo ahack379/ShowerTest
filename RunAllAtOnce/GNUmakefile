@@ -3,8 +3,8 @@
 #
 
 # specific names for this package
-DICT  = FindNeutrinos_FindCutValueDict
-SHLIB = libFindNeutrinos_FindCutValue.so
+DICT  = FindNeutrinos_RunAllAtOnceDict
+SHLIB = libFindNeutrinos_RunAllAtOnce.so
 SOURCES = $(filter-out $(DICT).cxx, $(wildcard *.cxx))
 FMWK_HEADERS = LinkDef.h $(DICT).h
 HEADERS = $(filter-out $(FMWK_HEADERS), $(wildcard *.h))
@@ -12,15 +12,6 @@ OBJECTS = $(SOURCES:.cxx=.o)
 
 # include options for this package
 INCFLAGS  = -I.                       #Include itself
-INCFLAGS += $(shell larlite-config --includes)
-INCFLAGS += -I$(OPENCV_INCDIR)
-
-INCFLAGS += $(shell basictool-config --includes)
-
-LDFLAGS += $(shell larlite-config --libs)
-LDFLAGS += -L$(OPENCV_LIBDIR) -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc
-
-LDFLAGS += $(shell basictool-config --libs)
 
 # platform-specific options
 OSNAME          = $(shell uname -s)

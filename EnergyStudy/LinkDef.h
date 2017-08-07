@@ -20,8 +20,10 @@
 #pragma link C++ class larlite::HitThreshStudy+;
 #pragma link C++ class larlite::MCVariableStudy+;
 #pragma link C++ class larlite::NueVariableStudy+;
+#pragma link C++ class larlite::ShowerResolution+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
+
 
 
 

@@ -27,3 +27,4 @@ Plots/*.png
 *.png
 *.C
 *.C
+DataMCCompare/*

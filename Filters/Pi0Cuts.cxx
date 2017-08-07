@@ -5,6 +5,7 @@
 #include "DataFormat/shower.h"
 #include "DataFormat/track.h"
 #include "DataFormat/cluster.h"
+#include "DataFormat/pfpart.h"
 
 namespace larlite {
 
@@ -48,15 +49,24 @@ namespace larlite {
     _event++;
 
     auto ev_s = storage->get_data<event_shower>("showerreco");
-    auto ev_t = storage->get_data<event_track>("numuCC_track");
+    //auto ev_t = storage->get_data<event_track>("numuCC_track");
 
-    storage->set_id( ev_s->run(), ev_s->subrun(), ev_s->event_id() );
-    auto new_shower_v = storage->get_data<larlite::event_shower>("pi0_candidate_showers");
+    auto ev_c = storage->get_data<event_cluster>("ImageClusterHit");
+    auto ev_p = storage->get_data<event_pfpart>("ImageClusterHit");
 
     if( !ev_s || !ev_s->size() || ev_s->size() < 2 ){
+
+      //std::cout<<"Clus size before: "<<ev_c->size()<<", "<<ev_p->size()<<std::endl ;
+
+      ev_c->clear();
+      ev_p->clear();
+      
       std::cout<<"Not enough reco'd showers..." <<ev_s->size()<<std::endl;
       return false;
      }
+
+    storage->set_id( ev_s->run(), ev_s->subrun(), ev_s->event_id() );
+    auto new_shower_v = storage->get_data<larlite::event_shower>("pi0_candidate_showers");
 
     //if( !ev_t || !ev_t->size() ){
     //  std::cout<<"No tagged track; what??" <<std::endl;
@@ -154,7 +164,15 @@ namespace larlite {
         }// shower ID 2 
       }// shower ID 1 
 
-      if( candidate_pairs.size() != 1 || cand_ids.size() != 2 ) return false;
+      if( candidate_pairs.size() != 1 || cand_ids.size() != 2 ){
+        
+        //ev_c->clear();
+        //ev_p->clear();
+        return false;
+      }
+
+      std::cout<<"Pi0Cuts - Found a candidate! "<<std::endl ;
+
 
       //auto tag_trk = ev_t->at(0) ;
 
@@ -190,7 +208,7 @@ namespace larlite {
         shower_cluster_ass_v = storage->get_data<event_ass>(new_shower_v->name());
 
 
-      std::cout<<"Shower cluste v: "<<shower_cluster_v.size()<<std::endl ;
+      //std::cout<<"Shower cluste v: "<<shower_cluster_v.size()<<std::endl ;
       if ( shower_cluster_ass_v ) {
         shower_cluster_ass_v->set_association(new_shower_v->id(),
                                               product_id(data::kCluster, ev_cluster->name()),
@@ -210,12 +228,13 @@ namespace larlite {
       _pi0_selection->Write(); 
     }
 
-   std::cout<<_event_list.size()<<" events found! "<<std::endl; 
+   std::cout<<"\n\n****** "<<_event_list.size()<<" events found by 2 Shower Pi0Reco Module! ******"<<std::endl; 
 
    for ( auto const & e : _event_list )
      std::cout<<e <<", "; 
+
+  std::cout<<"\n\n\n";
   
-   std::cout<<std::endl ;
     return true;
   }
 
