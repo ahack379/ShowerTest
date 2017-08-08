@@ -4,6 +4,7 @@
 #include "Pi0Cuts.h"
 #include "DataFormat/shower.h"
 #include "DataFormat/track.h"
+#include "DataFormat/vertex.h"
 #include "DataFormat/cluster.h"
 #include "DataFormat/pfpart.h"
 
@@ -59,8 +60,12 @@ namespace larlite {
       if( _chain_modules ){
         auto ev_c = storage->get_data<event_cluster>("ImageClusterHit");
         auto ev_p = storage->get_data<event_pfpart>("ImageClusterHit");
+        auto ev_v = storage->get_data<event_vertex>("numuCC_vertex");
+        auto ev_t = storage->get_data<event_track>("numuCC_track");
         ev_c->clear();
         ev_p->clear();
+        ev_v->clear();
+        ev_t->clear();
       }
       
       std::cout<<"Not enough reco'd showers..." <<ev_s->size()<<std::endl;
@@ -171,8 +176,13 @@ namespace larlite {
         if( _chain_modules ){
           auto ev_c = storage->get_data<event_cluster>("ImageClusterHit");
           auto ev_p = storage->get_data<event_pfpart>("ImageClusterHit");
+          auto ev_v = storage->get_data<event_vertex>("numuCC_vertex");
+          auto ev_t = storage->get_data<event_track>("numuCC_track");
+
           ev_c->clear();
           ev_p->clear();
+	  ev_v->clear();
+	  ev_t->clear();
 	}
         return false;
       }

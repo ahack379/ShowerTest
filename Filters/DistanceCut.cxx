@@ -4,6 +4,7 @@
 #include "DistanceCut.h"
 #include "DataFormat/hit.h"
 #include "DataFormat/vertex.h"
+#include "DataFormat/track.h"
 #include "LArUtil/GeometryHelper.h"
 #include <math.h>
 
@@ -78,7 +79,16 @@ namespace larlite {
 
      //std::cout<<"Event "<<_event-1<<" has Gaus and shr hits: "<<_hits_in_rad_g <<", "<<_hits_in_rad <<std::endl ;
 
-    if( ratio < _ratio_cut ) return false ;
+    if( ratio < _ratio_cut ){
+
+      if( _chain_modules ){
+        auto ev_trk = storage->get_data<event_track>("numuCC_track"); 
+        ev_trk->clear() ;      
+        ev_vtx->clear();
+      }
+
+      return false ;
+    }
 
     _hits_tot = ev_hit_g->size() ;
     _dist_cut_tree->Fill();
