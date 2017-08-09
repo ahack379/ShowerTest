@@ -8,7 +8,7 @@ VTXSMEAR = 0.0
 
 def VPR():
 
-    vtx_producer = 'mcvertex'
+    vtx_producer = 'numuCC_vertex'
 
     algo = fmwk.VertexProximityRemoval()
     algo.setClusterProducer("pandoraCosmic")
@@ -23,7 +23,7 @@ def VPR():
 # 0th step: removal of pandoraCosmic tracks
 def PLR():
     
-    vtx_producer = 'mcvertex'
+    vtx_producer = 'numuCC_vertex'
 
     algo = fmwk.PandoraLinearRemoval()
     algo.setClusterProducer("pandoraCosmic")
@@ -44,7 +44,7 @@ def PLR():
 # 1st: remove delta-rays
 def TDR():
 
-    vtx_producer = 'mcvertex'
+    vtx_producer = 'numuCC_vertex'
     
     algo = fmwk.TrackDeltaRayRemoval()
     algo.setClusterProducer("pandoraCosmic")
@@ -61,7 +61,7 @@ def TDR():
 # 2nd step: simple clustering
 def SC():
 
-    vtx_producer = 'mcvertex'
+    vtx_producer = 'numuCC_vertex'
     
     algo = fmwk.SimpleClusterer()
     algo.setHitProducer("gaushit")
@@ -80,7 +80,7 @@ def SC():
 # Vertex Track Removal
 def VTR():
 
-    vtx_producer = 'mcvertex'
+    vtx_producer = 'numuCC_vertex'
 
     algo = fmwk.VertexTrackRemoval()
     algo.setClusterProducer("sc")
@@ -122,7 +122,7 @@ def LIN():
 # 5th: remove hits near vertex
 def RHNV():
 
-    vtx_producer = 'mcvertex'
+    vtx_producer = 'numuCC_vertex'
     
     algo = fmwk.RemoveHitsNearVtx()
     algo.setHitProducer("gaushit")

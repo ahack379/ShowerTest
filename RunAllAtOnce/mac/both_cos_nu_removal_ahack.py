@@ -46,9 +46,9 @@ my_proc.set_ana_output_file("analysis.root");
 
 # Extract numuCC_vertex product from selectionII output
 # Only uncomment if vertex needs to be extracted
-#search = fmwk.SearchPFPartHierarchy()
-#search.SetVerbose(False)
-#my_proc.add_process(search)
+search = fmwk.SearchPFPartHierarchy()
+search.SetVerbose(False)
+my_proc.add_process(search)
 
 # prepare the various hit removal stages
 my_proc.add_process( loadAlgo("ROIRemoval") )
@@ -67,7 +67,7 @@ my_proc.add_process(loadAlgo_nu("RemoveHitsNearVtx") )
 ratio = fmwk.DistanceCut()
 ratio.SetRatioCut(0.22) 
 ratio.SetRadius(60)
-ratio.SetVtxProducer("mcvertex")
+ratio.SetVtxProducer("numuCC_vertex")
 ratio.UseChainedModules(True)
 my_proc.add_process(ratio,True)
 
