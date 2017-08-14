@@ -25,12 +25,11 @@ def DefaultShowerReco3D():
 
 my_proc = fmwk.ana_processor()
 
-for x in xrange(len(sys.argv)-1 - 1): 
-    print sys.argv[x+2]
-    my_proc.add_input_file(sys.argv[x+2])
+for x in xrange(len(sys.argv)-1): 
+    my_proc.add_input_file(sys.argv[x+1])
 
 cfg  = 'MCBNB_cosmics_BBox.fcl'
-name = sys.argv[1]
+name = 'test' # sys.argv[1]
 
 # Specify IO mode
 my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
@@ -46,9 +45,9 @@ my_proc.set_ana_output_file("analysis.root");
 
 # Extract numuCC_vertex product from selectionII output
 # Only uncomment if vertex needs to be extracted
-#search = fmwk.SearchPFPartHierarchy()
-#search.SetVerbose(False)
-#my_proc.add_process(search)
+search = fmwk.SearchPFPartHierarchy()
+search.SetVerbose(False)
+my_proc.add_process(search)
 
 # prepare the various hit removal stages
 my_proc.add_process( loadAlgo("ROIRemoval") )
@@ -67,8 +66,8 @@ my_proc.add_process(loadAlgo_nu("RemoveHitsNearVtx") )
 ratio = fmwk.DistanceCut()
 ratio.SetRatioCut(0.22) 
 ratio.SetRadius(60)
-ratio.SetVtxProducer("mcvertex")
-ratio.UseChainedModules(True)
+ratio.SetVtxProducer("numuCC_vertex")
+ratio.UseChainedModules(False)
 my_proc.add_process(ratio,True)
 
 myunit = fmwk.LArImageHit()
