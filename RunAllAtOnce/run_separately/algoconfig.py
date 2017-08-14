@@ -9,7 +9,7 @@ VTXSMEAR = 0.0
 # ROI REMOVAL
 def ROI():
 
-    vtx_producer = 'mcvertex'
+    vtx_producer = 'numuCC_vertex'
     
     algo = fmwk.ROIRemoval()
     algo.setClusterProducer("pandoraCosmic")
@@ -24,7 +24,7 @@ def ROI():
 
 def VSC():
 
-    vtx_producer = 'mcvertex'
+    vtx_producer = 'numuCC_vertex'
     
     algo = fmwk.VertexSlopeCorrelation()
     algo.setClusterProducer("pandoraCosmic")
@@ -41,7 +41,7 @@ def VSC():
 
 def VAC():
 
-    vtx_producer = 'mcvertex'
+    vtx_producer = 'numuCC_vertex'
 
     algo = fmwk.VertexAngleCorrelation()
     algo.setClusterProducer("pandoraCosmic")
@@ -58,7 +58,7 @@ def VAC():
 
 def RDR():
 
-    vtx_producer = 'mcvertex'
+    vtx_producer = 'numuCC_vertex'
     
     algo = fmwk.RemoveDeltaRays()
     algo.setClusterProducer("pandoraCosmic")

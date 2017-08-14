@@ -67,7 +67,7 @@ ratio = fmwk.DistanceCut()
 ratio.SetRatioCut(0.22) 
 ratio.SetRadius(60)
 ratio.SetVtxProducer("numuCC_vertex")
-ratio.UseChainedModules(False)
+ratio.UseChainedModules(True)
 my_proc.add_process(ratio,True)
 
 myunit = fmwk.LArImageHit()
