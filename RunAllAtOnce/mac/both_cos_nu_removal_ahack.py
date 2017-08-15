@@ -26,11 +26,10 @@ def DefaultShowerReco3D():
 my_proc = fmwk.ana_processor()
 
 for x in xrange(len(sys.argv)-1): 
-    print sys.argv[x+1]
     my_proc.add_input_file(sys.argv[x+1])
 
 cfg  = 'MCBNB_cosmics_BBox.fcl'
-name = 'test' #sys.argv[1]
+name = 'test' # sys.argv[1]
 
 # Specify IO mode
 my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
