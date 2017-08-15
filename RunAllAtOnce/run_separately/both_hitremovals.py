@@ -27,6 +27,10 @@ my_proc.set_output_file("hitremoval_out.root");
 
 my_proc.set_ana_output_file("") #hitremoval.root");
 
+search = fmwk.SaveSel2VtxTrkMCC82()
+search.SetVerbose(False)
+my_proc.add_process(search)
+
 # prepare the various hit removal stages
 my_proc.add_process( loadAlgo("ROIRemoval") )
 my_proc.add_process( loadAlgo("VertexSlopeCorrelation") )

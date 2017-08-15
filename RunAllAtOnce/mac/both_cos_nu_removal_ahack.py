@@ -25,12 +25,12 @@ def DefaultShowerReco3D():
 
 my_proc = fmwk.ana_processor()
 
-for x in xrange(len(sys.argv)-1 - 1): 
-    print sys.argv[x+2]
-    my_proc.add_input_file(sys.argv[x+2])
+for x in xrange(len(sys.argv)-1): 
+    print sys.argv[x+1]
+    my_proc.add_input_file(sys.argv[x+1])
 
 cfg  = 'MCBNB_cosmics_BBox.fcl'
-name = sys.argv[1]
+name = 'test' #sys.argv[1]
 
 # Specify IO mode
 my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
@@ -46,9 +46,9 @@ my_proc.set_ana_output_file("analysis.root");
 
 # Extract numuCC_vertex product from selectionII output
 # Only uncomment if vertex needs to be extracted
-search = fmwk.SearchPFPartHierarchy()
-search.SetVerbose(False)
-my_proc.add_process(search)
+ana = fmwk.SaveSel2VtxTrkMCC82()
+ana.SetVerbose(False)
+my_proc.add_process(ana)
 
 # prepare the various hit removal stages
 my_proc.add_process( loadAlgo("ROIRemoval") )
@@ -124,7 +124,7 @@ print
 print  "Finished configuring ana_processor. Start event loop!"
 print
 
-my_proc.run(0,500) 
+my_proc.run() 
 
 sys.exit()
 
