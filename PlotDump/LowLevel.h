@@ -49,6 +49,8 @@ namespace larlite {
 
     void clear();
 
+    void UseMCSample( bool usemc=true ){ _mc_sample = usemc ; }
+
   protected:
     
     // One entry per event
@@ -108,6 +110,7 @@ namespace larlite {
     TTree * _shower_tree ;
 
     int _entry ;
+    bool _mc_sample;
     
   };
 }

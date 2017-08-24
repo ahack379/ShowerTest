@@ -142,25 +142,28 @@ namespace larlite {
 
     auto geomH = ::larutil::GeometryHelper::GetME();
 
-    // Store some truth info
-    auto ev_mctruth= storage->get_data<event_mctruth>("generator"); 
-    if(!ev_mctruth || !ev_mctruth->size() ) { 
-      std::cout<<"Event has no mctruth info "<<std::endl;
-      return false;
-    }   
 
-    auto & truth = ev_mctruth->at(0);
-    auto & nu  = truth.GetNeutrino();
+    if ( _mc_sample ){
+      // Store some truth info
+      auto ev_mctruth= storage->get_data<event_mctruth>("generator"); 
+      if(!ev_mctruth || !ev_mctruth->size() ) { 
+        std::cout<<"Event has no mctruth info "<<std::endl;
+        return false;
+      }   
 
-    auto traj = nu.Nu().Trajectory();
-    _mc_vtxx = traj.at(traj.size() - 1).X();
-    _mc_vtxy = traj.at(traj.size() - 1).Y();
-    _mc_vtxz = traj.at(traj.size() - 1).Z();
+      auto & truth = ev_mctruth->at(0);
+      auto & nu  = truth.GetNeutrino();
 
-    std::vector<float> mc_to_proj = { _mc_vtxx, _mc_vtxy, _mc_vtxz } ;
-    auto mc2d = geomH->Point_3Dto2D(mc_to_proj,2) ;
-    _mc_vtxw = mc2d.w ; 
-    _mc_vtxt = mc2d.t ; 
+      auto traj = nu.Nu().Trajectory();
+      _mc_vtxx = traj.at(traj.size() - 1).X();
+      _mc_vtxy = traj.at(traj.size() - 1).Y();
+      _mc_vtxz = traj.at(traj.size() - 1).Z();
+
+      std::vector<float> mc_to_proj = { _mc_vtxx, _mc_vtxy, _mc_vtxz } ;
+      auto mc2d = geomH->Point_3Dto2D(mc_to_proj,2) ;
+      _mc_vtxw = mc2d.w ; 
+      _mc_vtxt = mc2d.t ; 
+    }
  
     // Store hit info
     auto ev_hit = storage->get_data<event_hit>("gaushit");
