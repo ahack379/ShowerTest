@@ -63,7 +63,10 @@ namespace larlite {
   float _true_RL_minE ;
   float _true_pi0_mom ;
   float _true_nu_e ;
-
+  float _true_mu_mom ;
+  float _true_mu_len ;
+  float _true_mu_theta;
+  float _true_mu_phi;
 
   float _reco_pi0_e ;
   int _n_true_pi0;
