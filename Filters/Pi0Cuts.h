@@ -68,6 +68,7 @@ namespace larlite {
     float _pi0_low_radL;
     float _pi0_high_radL;
     float _mu_mom;
+    float _mu_len;
     float _mu_angle;
 
     ::geoalgo::GeoAlgo _geoAlgo ;

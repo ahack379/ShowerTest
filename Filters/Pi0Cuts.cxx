@@ -23,6 +23,7 @@ namespace larlite {
       _pi0_selection->Branch("_pi0_low_radL",&_pi0_low_radL,"pi0_low_radL/F");
       _pi0_selection->Branch("_pi0_high_radL",&_pi0_high_radL,"pi0_high_radL/F");
       _pi0_selection->Branch("_mu_mom",&_mu_mom,"mu_mom/F");
+      _pi0_selection->Branch("_mu_len",&_mu_len,"mu_len/F");
       _pi0_selection->Branch("_mu_angle",&_mu_angle,"mu_angle/F");
       }
 
@@ -40,6 +41,7 @@ namespace larlite {
     _pi0_high_shrE = -10;
     _pi0_low_radL  = -10;
     _pi0_high_radL = -10;
+    _mu_len        = -10;
     _mu_mom        = -10;
     _mu_angle      = -10;
   
@@ -50,7 +52,7 @@ namespace larlite {
     _event++;
 
     auto ev_s = storage->get_data<event_shower>("showerreco");
-    //auto ev_t = storage->get_data<event_track>("numuCC_track");
+    auto ev_t = storage->get_data<event_track>("numuCC_track");
 
     if( !ev_s || !ev_s->size() || ev_s->size() < 2 ){
 
@@ -75,10 +77,10 @@ namespace larlite {
     storage->set_id( ev_s->run(), ev_s->subrun(), ev_s->event_id() );
     auto new_shower_v = storage->get_data<larlite::event_shower>("pi0_candidate_showers");
 
-    //if( !ev_t || !ev_t->size() ){
-    //  std::cout<<"No tagged track; what??" <<std::endl;
-    //  return false;
-    // }
+    if( !ev_t || !ev_t->size() ){
+      std::cout<<"No tagged track; what??" <<std::endl;
+      return false;
+     }
 
     std::cout<<"\nEvent : "<<_event <<std::endl;
 
@@ -189,10 +191,11 @@ namespace larlite {
 
       std::cout<<"Pi0Cuts - Found a candidate! "<<std::endl ;
 
-      //auto tag_trk = ev_t->at(0) ;
+      auto tag_trk = ev_t->at(0) ;
 
-      ////_mu_mom        = tag_trk.VertexMomentum() ;
-      //_mu_angle      = cos(tag_trk.Theta());
+      _mu_mom        = tag_trk.VertexMomentum() ;
+      _mu_angle      = cos(tag_trk.Theta());
+      _mu_len        = tag_trk.Length(0); // Calculates the length from point 0 to end
       
       //std::cout<<"Momentum at 0: "<<tag_trk.MomentumAtPoint(0)<<std::endl ;
 

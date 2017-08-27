@@ -81,6 +81,8 @@ namespace larlite {
     float _mc_vtxz;
     float _mc_vtxw;
     float _mc_vtxt;
+
+    int _nshrs; 
     
     float _shr_startx;
     float _shr_starty;

@@ -43,6 +43,10 @@ namespace larlite {
       _low_level_tree->Branch("mc_vtxz",&_mc_vtxz,"mc_vtxz/F");
       _low_level_tree->Branch("mc_vtxw",&_mc_vtxw,"mc_vtxw/F");
       _low_level_tree->Branch("mc_vtxt",&_mc_vtxt,"mc_vtxt/F");
+
+      // Shower info
+      _low_level_tree->Branch("nshrs",&_nshrs,"nshrs/I");
+      
     
       // Flash info is not saved :(
     }
@@ -58,7 +62,7 @@ namespace larlite {
     }
 
     if(!_shower_tree){
-      _shower_tree = new TTree("shr_tree","");
+      _shower_tree = new TTree("shower_tree","");
       _shower_tree->Branch("entry",&_entry,"entry/I");
       _shower_tree->Branch("shr_startx",&_shr_startx,"shr_startx/F");
       _shower_tree->Branch("shr_starty",&_shr_starty,"shr_starty/F");
@@ -118,6 +122,8 @@ namespace larlite {
     _mc_vtxw = -999;
     _mc_vtxt = -999;
 
+    _nshrs = -999;
+
     _shr_startx = -999;
     _shr_starty = -999;
     _shr_startz = -999;
@@ -142,6 +148,8 @@ namespace larlite {
 
     auto geomH = ::larutil::GeometryHelper::GetME();
 
+
+    auto ev_shr = storage->get_data<event_shower>("showerreco");
 
     if ( _mc_sample ){
       // Store some truth info
@@ -231,13 +239,15 @@ namespace larlite {
       _vtx_trk_dist = st_dist < end_dist ? st_dist : end_dist ;
       _vtx_mc_reco_dist = sqrt( pow(_mc_vtxx - _vtxx,2) + pow(_mc_vtxy - _vtxy,2) + pow(_mc_vtxz - _vtxz,2) );
 
+     if ( ev_shr ) _nshrs = ev_shr->size() ;
+
      }
 
     _low_level_tree->Fill();
 
-    auto ev_shr = storage->get_data<event_shower>("showerreco");
+    if ( !ev_shr || ev_shr->size() == 0) return false ;
 
-    if ( ev_shr && ev_shr->size() ){
+    if ( ev_shr->size() != 0 ){
 
       for( auto const & s : *ev_shr ){
         _shr_startx = s.ShowerStart().X();
@@ -253,7 +263,7 @@ namespace larlite {
         _shr_diry = s.Direction().Y();
         _shr_dirz = s.Direction().Z();
 
-        _shr_dedx = s.Energy(2);
+        _shr_energy = s.Energy(2);
         _shr_oangle = s.OpeningAngle();
         _shr_dedx = s.dEdx(2);
 
@@ -264,7 +274,7 @@ namespace larlite {
         _shr_trk_delta_theta = s.Direction().Theta() - _theta ;
         _shr_trk_delta_phi = s.Direction().Phi() - _phi ;
 
-        _shower_tree->Write() ;
+        _shower_tree->Fill() ;
       }
     }
 
