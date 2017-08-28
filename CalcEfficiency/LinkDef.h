@@ -15,6 +15,7 @@
 #pragma link C++ class larlite::SingleGammaBackgroundCalc+;
 #pragma link C++ class larlite::POTCalc+;
 #pragma link C++ class larlite::AcceptanceStudy+;
+#pragma link C++ class larlite::BackgroundCCNC+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
 

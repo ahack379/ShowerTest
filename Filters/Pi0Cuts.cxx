@@ -47,7 +47,7 @@ namespace larlite {
     _mu_mom        = -10;
     _mu_angle      = -10;
     _mu_phi        = -10;
-    _mult          = -10;
+    _mult          = 0;
   
   }
   
