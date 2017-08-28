@@ -68,6 +68,7 @@ namespace larlite {
     float _length;
     float _theta;
     float _phi;
+    float _mult;
     
     float _vtxx;
     float _vtxy;

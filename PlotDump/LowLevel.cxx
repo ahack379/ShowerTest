@@ -28,6 +28,7 @@ namespace larlite {
       _low_level_tree->Branch("length",&_length,"length/F");
       _low_level_tree->Branch("theta",&_theta,"theta/F");
       _low_level_tree->Branch("phi",&_phi,"phi/F");
+      _low_level_tree->Branch("mult",&_mult,"mult/F");
 
       // Vertex info
       _low_level_tree->Branch("vtxx",&_vtxx,"vtxx/F");
@@ -107,6 +108,7 @@ namespace larlite {
     _length = -999;
     _theta = -999;
     _phi = -999;
+    _mult = 0 ;
 
     _vtxx = -999;
     _vtxy = -999;
@@ -239,8 +241,21 @@ namespace larlite {
       _vtx_trk_dist = st_dist < end_dist ? st_dist : end_dist ;
       _vtx_mc_reco_dist = sqrt( pow(_mc_vtxx - _vtxx,2) + pow(_mc_vtxy - _vtxy,2) + pow(_mc_vtxz - _vtxz,2) );
 
-     if ( ev_shr ) _nshrs = ev_shr->size() ;
+      if ( ev_shr ) _nshrs = ev_shr->size() ;
 
+      auto ev_trk = storage->get_data<event_track>("pandoraNu");
+
+      for ( auto const & pt : *ev_trk ){
+        
+        auto st = pt.Vertex() ;
+        auto end = pt.Vertex() ;
+
+        auto dist_st = sqrt( pow(st.X() - v.X(),2) + pow(st.Y() - v.Y(),2) + pow(st.Z() - v.Z(),2) );
+        auto dist_end = sqrt( pow(end.X() - v.X(),2) + pow(end.Y() - v.Y(),2) + pow(end.Z() - v.Z(),2) );
+
+        if (dist_st < 3 || dist_end < 3)
+          _mult ++ ;
+      }   
      }
 
     _low_level_tree->Fill();
