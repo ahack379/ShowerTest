@@ -48,6 +48,7 @@ namespace larlite {
       _tree->Branch("_mult",&_mult,"mult/F");
   
       _tree->Branch("bkgd_id",&_bkgd_id,"bkgd_id/I");
+      _tree->Branch("nshrs",&_nshrs,"nshrs/I");
     }
 
     _event = -1;
@@ -79,86 +80,13 @@ namespace larlite {
     _mult          = 0;
     
     _bkgd_id       = -1 ;
+    _nshrs         = -1;
   }
   
   bool JustifyPi0Cuts::analyze(storage_manager* storage) {
 
     _event++;
-
-    auto ev_s = storage->get_data<event_shower>("showerreco");
-
-    if( !ev_s || !ev_s->size() || ev_s->size() < 2 ){
-
-      std::cout<<"Not enough reco'd showers..." <<ev_s->size()<<std::endl;
-      return false;
-     }
-
     std::cout<<"\nEvent : "<<_event <<std::endl;
-
-    clear();
-
-    std::vector<std::pair<int,int>> candidate_pairs;
-    std::vector<int> cand_ids;
-
-    for ( int s1 = 0; s1 < ev_s->size(); s1++ ){
-
-        auto const& shr1 = ev_s->at(s1);
-
-        for ( int s2 = 0; s2 < ev_s->size(); s2++ ){
-
-            if (s2 <= s1) continue;
-
-            auto const& shr2 = ev_s->at(s2);
-
-            geoalgo::Vector_t rev_shr1(-1.*shr1.Direction()) ;
-            geoalgo::Vector_t rev_shr2(-1.*shr2.Direction()) ;
-
-            // Make the backwards projection for the showers
-            auto shr1_bkwrd_hl = ::geoalgo::HalfLine_t(shr1.ShowerStart(),rev_shr1);
-            auto shr2_bkwrd_hl = ::geoalgo::HalfLine_t(shr2.ShowerStart(),rev_shr2);
-
-            // Calc the Opening angle of the showers
-            double oangle = acos( shr1.Direction().Dot(shr2.Direction())) ;
-
-            // Calc the vertex point of the two showers. the true designated backwards project
-            geoalgo::Point_t vertex(3);
-
-            auto st1 = shr1.ShowerStart();
-            auto st2 = shr2.ShowerStart();
-            auto dir1 = shr1.Direction();
-            auto dir2 = shr2.Direction();
-            geoalgo::HalfLine_t shr1_hl(st1.X(),st1.Y(),st1.Z(),dir1.X(),dir1.Y(), dir1.Z() );
-            geoalgo::HalfLine_t shr2_hl(st2.X(),st2.Y(),st2.Z(),dir2.X(),dir2.Y(), dir2.Z() );
-
-            _geoAlgo.commonOrigin(shr1_hl, shr2_hl, vertex, true);
-
-            // Calc Diretion of two correlated shower
-            geoalgo::Vector_t momentum(3);// need to fill out
-            geoalgo::Vector_t mom_vect(shr2.Direction()*shr1.Energy(2) +shr1.Direction()*shr2.Energy(2)) ;
-
-            auto tot_pi0_mom = sqrt(pow(mom_vect[0],2) + pow(mom_vect[1],2) + pow(mom_vect[2],2) );
-            //===========================================
-            auto IP = pow(_geoAlgo.SqDist(shr1_bkwrd_hl,shr2_bkwrd_hl),0.5);
-            auto radL_shr1 = vertex.Dist(shr1.ShowerStart());
-            auto radL_shr2 = vertex.Dist(shr2.ShowerStart());
-
-            //if( oangle < 0.35 ) continue;
-            //if( pow( _geoAlgo.SqDist(shr1_bkwrd_hl, shr2_bkwrd_hl), 0.5 ) > 4.) continue; 
-            //if( radL_shr1 > 62 || radL_shr2 > 62 ) continue;
-
-            _pi0_mass      = sqrt(2 * shr1.Energy() * shr2.Energy() *(1.-cos(oangle))); 
-            _pi0_mom       = tot_pi0_mom;
-            _pi0_oangle    = oangle;
-            _pi0_low_shrE  = shr1.Energy() < shr2.Energy() ? shr1.Energy() : shr2.Energy() ;
-            _pi0_high_shrE = shr1.Energy() < shr2.Energy() ? shr2.Energy() : shr1.Energy() ;
-            _pi0_low_radL  = shr1.Energy() < shr2.Energy() ? radL_shr1 : radL_shr2 ;
-            _pi0_high_radL = shr1.Energy() < shr2.Energy() ? radL_shr2 : radL_shr1 ;
-            _pi0_IP = IP;
-	    _pi0_selection->Fill() ;
-        }// shower ID 2 
-      }// shower ID 1 
-
-      std::cout<<"JustifyPi0Cuts - Found a candidate! "<<std::endl ;
 
       auto ev_v = storage->get_data<event_vertex>("numuCC_vertex");
       auto ev_t = storage->get_data<event_track>("numuCC_track");
@@ -350,7 +278,81 @@ namespace larlite {
         }
       }
 
-      _tree->Fill();
+    auto ev_s = storage->get_data<event_shower>("showerreco");
+    _nshrs = ev_s->size() ;
+   
+    _tree->Fill();
+
+    if( !ev_s || !ev_s->size() || ev_s->size() < 2 ){
+
+      std::cout<<"Not enough reco'd showers..." <<ev_s->size()<<std::endl;
+      return false;
+     }
+
+    clear();
+
+    std::vector<std::pair<int,int>> candidate_pairs;
+    std::vector<int> cand_ids;
+
+    for ( int s1 = 0; s1 < ev_s->size(); s1++ ){
+
+        auto const& shr1 = ev_s->at(s1);
+
+        for ( int s2 = 0; s2 < ev_s->size(); s2++ ){
+
+            if (s2 <= s1) continue;
+
+            auto const& shr2 = ev_s->at(s2);
+
+            geoalgo::Vector_t rev_shr1(-1.*shr1.Direction()) ;
+            geoalgo::Vector_t rev_shr2(-1.*shr2.Direction()) ;
+
+            // Make the backwards projection for the showers
+            auto shr1_bkwrd_hl = ::geoalgo::HalfLine_t(shr1.ShowerStart(),rev_shr1);
+            auto shr2_bkwrd_hl = ::geoalgo::HalfLine_t(shr2.ShowerStart(),rev_shr2);
+
+            // Calc the Opening angle of the showers
+            double oangle = acos( shr1.Direction().Dot(shr2.Direction())) ;
+
+            // Calc the vertex point of the two showers. the true designated backwards project
+            geoalgo::Point_t vertex(3);
+
+            auto st1 = shr1.ShowerStart();
+            auto st2 = shr2.ShowerStart();
+            auto dir1 = shr1.Direction();
+            auto dir2 = shr2.Direction();
+            geoalgo::HalfLine_t shr1_hl(st1.X(),st1.Y(),st1.Z(),dir1.X(),dir1.Y(), dir1.Z() );
+            geoalgo::HalfLine_t shr2_hl(st2.X(),st2.Y(),st2.Z(),dir2.X(),dir2.Y(), dir2.Z() );
+
+            _geoAlgo.commonOrigin(shr1_hl, shr2_hl, vertex, true);
+
+            // Calc Diretion of two correlated shower
+            geoalgo::Vector_t momentum(3);// need to fill out
+            geoalgo::Vector_t mom_vect(shr2.Direction()*shr1.Energy(2) +shr1.Direction()*shr2.Energy(2)) ;
+
+            auto tot_pi0_mom = sqrt(pow(mom_vect[0],2) + pow(mom_vect[1],2) + pow(mom_vect[2],2) );
+            //===========================================
+            auto IP = pow(_geoAlgo.SqDist(shr1_bkwrd_hl,shr2_bkwrd_hl),0.5);
+            auto radL_shr1 = vertex.Dist(shr1.ShowerStart());
+            auto radL_shr2 = vertex.Dist(shr2.ShowerStart());
+
+            //if( oangle < 0.35 ) continue;
+            //if( pow( _geoAlgo.SqDist(shr1_bkwrd_hl, shr2_bkwrd_hl), 0.5 ) > 4.) continue; 
+            //if( radL_shr1 > 62 || radL_shr2 > 62 ) continue;
+
+            _pi0_mass      = sqrt(2 * shr1.Energy() * shr2.Energy() *(1.-cos(oangle))); 
+            _pi0_mom       = tot_pi0_mom;
+            _pi0_oangle    = oangle;
+            _pi0_low_shrE  = shr1.Energy() < shr2.Energy() ? shr1.Energy() : shr2.Energy() ;
+            _pi0_high_shrE = shr1.Energy() < shr2.Energy() ? shr2.Energy() : shr1.Energy() ;
+            _pi0_low_radL  = shr1.Energy() < shr2.Energy() ? radL_shr1 : radL_shr2 ;
+            _pi0_high_radL = shr1.Energy() < shr2.Energy() ? radL_shr2 : radL_shr1 ;
+            _pi0_IP = IP;
+	    _pi0_selection->Fill() ;
+        }// shower ID 2 
+      }// shower ID 1 
+
+      std::cout<<"JustifyPi0Cuts - Found a candidate! "<<std::endl ;
       
       _event_list.emplace_back(_event); 
 

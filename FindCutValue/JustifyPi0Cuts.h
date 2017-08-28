@@ -78,6 +78,7 @@ namespace larlite {
     float _mu_phi;
     float _mult;
     int _bkgd_id;
+    int _nshrs ;
 
     int _n_other ;
     int _n_cosmic ;
