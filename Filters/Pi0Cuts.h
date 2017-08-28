@@ -67,9 +67,18 @@ namespace larlite {
     float _pi0_high_shrE;
     float _pi0_low_radL;
     float _pi0_high_radL;
+
+    float _mu_startx ;
+    float _mu_starty ;
+    float _mu_startz ;
+    float _mu_endx ;
+    float _mu_endy ;
+    float _mu_endz ;
     float _mu_mom;
     float _mu_len;
     float _mu_angle;
+    float _mu_phi;
+    float _mult;
 
     ::geoalgo::GeoAlgo _geoAlgo ;
     std::vector<int> _event_list ;    

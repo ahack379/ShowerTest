@@ -25,6 +25,8 @@ namespace larlite {
       _pi0_selection->Branch("_mu_mom",&_mu_mom,"mu_mom/F");
       _pi0_selection->Branch("_mu_len",&_mu_len,"mu_len/F");
       _pi0_selection->Branch("_mu_angle",&_mu_angle,"mu_angle/F");
+      _pi0_selection->Branch("_mu_phi",&_mu_phi,"mu_phi/F");
+      _pi0_selection->Branch("_mult",&_mult,"mult/F");
       }
 
     _event = -1;
@@ -44,6 +46,8 @@ namespace larlite {
     _mu_len        = -10;
     _mu_mom        = -10;
     _mu_angle      = -10;
+    _mu_phi        = -10;
+    _mult          = -10;
   
   }
   
@@ -52,7 +56,6 @@ namespace larlite {
     _event++;
 
     auto ev_s = storage->get_data<event_shower>("showerreco");
-    auto ev_t = storage->get_data<event_track>("numuCC_track");
 
     if( !ev_s || !ev_s->size() || ev_s->size() < 2 ){
 
@@ -77,10 +80,6 @@ namespace larlite {
     storage->set_id( ev_s->run(), ev_s->subrun(), ev_s->event_id() );
     auto new_shower_v = storage->get_data<larlite::event_shower>("pi0_candidate_showers");
 
-    if( !ev_t || !ev_t->size() ){
-      std::cout<<"No tagged track; what??" <<std::endl;
-      return false;
-     }
 
     std::cout<<"\nEvent : "<<_event <<std::endl;
 
@@ -191,14 +190,62 @@ namespace larlite {
 
       std::cout<<"Pi0Cuts - Found a candidate! "<<std::endl ;
 
-      auto tag_trk = ev_t->at(0) ;
+      auto ev_v = storage->get_data<event_vertex>("numuCC_vertex");
+      auto ev_t = storage->get_data<event_track>("numuCC_track");
 
-      _mu_mom        = tag_trk.VertexMomentum() ;
-      _mu_angle      = cos(tag_trk.Theta());
-      _mu_len        = tag_trk.Length(0); // Calculates the length from point 0 to end
+      if( !ev_t || !ev_t->size() ){
+        std::cout<<"No tagged track; what??" <<std::endl;
+        return false;
+      }
+
+      if( !ev_v || !ev_v->size() ){
+        std::cout<<"No tagged vertex; what??" <<std::endl;
+        return false;
+      }
+
+      auto t = ev_t->at(0) ;
+      auto v = ev_v->at(0) ;
+
+      _mu_startx = t.Vertex().X() ;
+      _mu_starty = t.Vertex().Y() ;
+      _mu_startz = t.Vertex().Z() ;
+      _mu_endx = t.End().X() ;
+      _mu_endy = t.End().Y() ;
+      _mu_endz = t.End().Z() ;
+      _mu_mom  = t.VertexMomentum() ;
+      _mu_len  = t.Length(0); // Calculates the length from point 0 to end
+      _mu_angle = t.Theta() ;
+      _mu_phi = t.Phi() ; 
+
+      std::vector<double> dir = { (_mu_endx - _mu_startx) / _mu_len,
+                                  (_mu_endy - _mu_starty) / _mu_len,
+                                  (_mu_endz - _mu_startz) / _mu_len };
+
+      auto dir_start = t.VertexDirection();
+      std::vector<double> other_dir = { dir_start.X(), dir_start.Y(), dir_start.Z() };  
+
+      float dotProd = dir.at(0) * other_dir.at(0) + dir.at(1) * other_dir.at(1) +  dir.at(2) * other_dir.at(2) ;
+
+      if( dotProd < 0 ) { 
+         TVector3 new_dir(-dir_start.X(),-dir_start.Y(),-dir_start.Z());
+         _mu_angle = new_dir.Theta();
+         _mu_phi = new_dir.Phi();
+      }   
       
-      //std::cout<<"Momentum at 0: "<<tag_trk.MomentumAtPoint(0)<<std::endl ;
 
+      auto ev_trk = storage->get_data<event_track>("pandoraNu");
+
+      for ( auto const & t : *ev_trk ){
+        auto st = t.Vertex() ;
+        auto end = t.Vertex() ;
+
+        auto dist_st = sqrt( pow(st.X() - v.X(),2) + pow(st.Y() - v.Y(),2) + pow(st.Z() - v.Z(),2) );
+        auto dist_end = sqrt( pow(end.X() - v.X(),2) + pow(end.Y() - v.Y(),2) + pow(end.Z() - v.Z(),2) );
+
+        if (dist_st < 3 || dist_end < 3)
+          _mult ++ ;
+      }
+      
       // Store the new shower data product
       new_shower_v->emplace_back(ev_s->at(cand_ids[0]));
       new_shower_v->emplace_back(ev_s->at(cand_ids[1]));
