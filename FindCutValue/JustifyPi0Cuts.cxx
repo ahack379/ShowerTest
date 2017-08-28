@@ -51,6 +51,7 @@ namespace larlite {
       _tree->Branch("nshrs",&_nshrs,"nshrs/I");
     }
 
+    _miss_trk = 0;
     _event = -1;
 
     return true;
@@ -88,13 +89,15 @@ namespace larlite {
     _event++;
     std::cout<<"\nEvent : "<<_event <<std::endl;
 
-      auto ev_v = storage->get_data<event_vertex>("numuCC_vertex");
       auto ev_t = storage->get_data<event_track>("numuCC_track");
 
       if( !ev_t || !ev_t->size() ){
+        _miss_trk ++ ;
         std::cout<<"No tagged track; what??" <<std::endl;
         return false;
       }
+
+      auto ev_v = storage->get_data<event_vertex>("numuCC_vertex");
 
       if( !ev_v || !ev_v->size() ){
         std::cout<<"No tagged vertex; what??" <<std::endl;
@@ -380,6 +383,8 @@ namespace larlite {
     std::cout<<"6) Other   : "<<_n_other<<std::endl; 
 
     std::cout<<"Total accounted backgrounds: "<< _n_other + _n_cosmic + _n_nc1pi0 + _n_nc0pi0 + _n_cc0pi0 <<std::endl ;
+
+    std::cout<<"MIssS:" <<_miss_trk<<std::endl ;
 
 
    //std::cout<<"\n\n****** "<<_event_list.size()<<" events found by 2 Shower Pi0Reco Module! ******"<<std::endl; 

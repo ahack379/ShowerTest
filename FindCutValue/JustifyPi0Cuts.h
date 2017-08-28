@@ -92,6 +92,8 @@ namespace larlite {
     ::geoalgo::GeoAlgo _geoAlgo ;
     std::vector<int> _event_list ;    
 
+    int _miss_trk ;
+
   };
 }
 #endif
