@@ -63,6 +63,7 @@ namespace larlite {
     float _pi0_high_shrE;
     float _pi0_low_radL;
     float _pi0_high_radL;
+    float _pi0_IP;
 
     TTree * _tree ;
     float _mu_startx ;
@@ -76,10 +77,19 @@ namespace larlite {
     float _mu_angle;
     float _mu_phi;
     float _mult;
+    int _bkgd_id;
+
+    int _n_other ;
+    int _n_cosmic ;
+    int _n_cc1pi0 ; // This is the signal
+    int _n_cc0pi0 ;
+    int _n_nc1pi0 ; 
+    int _n_nc0pi0 ;
+
+
 
     ::geoalgo::GeoAlgo _geoAlgo ;
     std::vector<int> _event_list ;    
-    std::vector<int> _one_shower_list ;
 
   };
 }

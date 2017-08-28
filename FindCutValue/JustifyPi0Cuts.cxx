@@ -6,11 +6,20 @@
 #include "DataFormat/track.h"
 #include "DataFormat/vertex.h"
 #include "DataFormat/cluster.h"
-#include "DataFormat/pfpart.h"
+#include "DataFormat/mctruth.h"
+#include "DataFormat/mctrack.h"
 
 namespace larlite {
 
   bool JustifyPi0Cuts::initialize() {
+
+    _n_other = 0;    // 0 
+    _n_cosmic = 0;   // 1
+    _n_cc1pi0 = 0;   // 2 
+    _n_cc0pi0 = 0;   // 3
+    _n_nc1pi0 = 0;   // 4 
+    _n_nc0pi0 = 0;   // 5
+
     
     if( !_pi0_selection ){
       _pi0_selection = new TTree("pi0_selection","");
@@ -22,6 +31,7 @@ namespace larlite {
       _pi0_selection->Branch("_pi0_high_shrE",&_pi0_high_shrE,"pi0_high_shrE/F");
       _pi0_selection->Branch("_pi0_low_radL",&_pi0_low_radL,"pi0_low_radL/F");
       _pi0_selection->Branch("_pi0_high_radL",&_pi0_high_radL,"pi0_high_radL/F");
+      _pi0_selection->Branch("_pi0_IP",&_pi0_IP,"pi0_IP/F");
       }
     if(!_tree){
       _tree = new TTree("tree","");
@@ -36,6 +46,8 @@ namespace larlite {
       _tree->Branch("_mu_angle",&_mu_angle,"mu_angle/F");
       _tree->Branch("_mu_phi",&_mu_phi,"mu_phi/F");
       _tree->Branch("_mult",&_mult,"mult/F");
+  
+      _tree->Branch("bkgd_id",&_bkgd_id,"bkgd_id/I");
     }
 
     _event = -1;
@@ -52,6 +64,7 @@ namespace larlite {
     _pi0_high_shrE = -10;
     _pi0_low_radL  = -10;
     _pi0_high_radL = -10;
+    _pi0_IP = -10;
     _mu_startx     = -1000;
     _mu_starty     = -1000;
     _mu_startz     = -1000;
@@ -64,7 +77,8 @@ namespace larlite {
     _mu_angle      = -10;
     _mu_phi        = -10;
     _mult          = 0;
-  
+    
+    _bkgd_id       = -1 ;
   }
   
   bool JustifyPi0Cuts::analyze(storage_manager* storage) {
@@ -139,6 +153,7 @@ namespace larlite {
             _pi0_high_shrE = shr1.Energy() < shr2.Energy() ? shr2.Energy() : shr1.Energy() ;
             _pi0_low_radL  = shr1.Energy() < shr2.Energy() ? radL_shr1 : radL_shr2 ;
             _pi0_high_radL = shr1.Energy() < shr2.Energy() ? radL_shr2 : radL_shr1 ;
+            _pi0_IP = IP;
 	    _pi0_selection->Fill() ;
         }// shower ID 2 
       }// shower ID 1 
@@ -200,6 +215,141 @@ namespace larlite {
           _mult ++ ;
       }
 
+      ///////////////////////////////////////////////////////////////////////////////////////////////
+      // Want to be able to access the origin of the tagged muon. Thus, need to find it, and 
+      // Ask for its origin.  Need to match to MCtrack to do this
+      auto ev_mctruth= storage->get_data<event_mctruth>("generator"); 
+      if(!ev_mctruth || !ev_mctruth->size() ) {
+        std::cout<<"Event has no mctruth info "<<std::endl;
+        return false;
+        }
+
+      auto ev_mctrk = storage->get_data<event_mctrack>("mcreco");
+      if ( !ev_mctrk || !ev_mctrk->size() ) {std::cout<<"No MCTrack!" <<std::endl ; return false; }
+
+
+      auto & truth = ev_mctruth->at(0);
+      auto & nu  = truth.GetNeutrino();
+
+      double xyz[3] = {0.};
+      auto traj = nu.Nu().Trajectory();
+      xyz[0] = traj.at(traj.size() - 1).X();
+      xyz[1] = traj.at(traj.size() - 1).Y();
+      xyz[2] = traj.at(traj.size() - 1).Z();
+
+      //Map of lengths -> track id
+      std::multimap<float,int> trk_map ;
+
+      // Grab the origin of the track and assess backgrounds properly
+      std::multimap<float,int> mctrk_map ;
+      auto tag_st = t.Vertex() ;
+      auto tag_end = t.End() ;
+      float mc_min_dist = 1e9;
+
+      for ( size_t ti = 0; ti < ev_mctrk->size(); ti++ ) { 
+
+        auto mc_vtx = ev_mctrk->at(ti).Start() ;
+        auto mc_end = ev_mctrk->at(ti).End() ;
+      
+        float dist_st = sqrt(  pow(mc_vtx.X() - _mu_startx,2) + 
+                               pow(mc_vtx.Y() - _mu_starty,2) + 
+                               pow(mc_vtx.Z() - _mu_startz,2) );  
+
+        float dist_end = sqrt( pow(mc_vtx.X() - _mu_endx,2) + 
+                               pow(mc_vtx.Y() - _mu_endx,2) + 
+                               pow(mc_vtx.Z() - _mu_endx,2) );  
+
+         
+         if ( dist_st < 25 || dist_end < 25){
+            float length = sqrt( pow(mc_end.X() - mc_vtx.X(),2) + 
+                             pow(mc_end.Y() - mc_vtx.Y(),2) + 
+                             pow(mc_end.Z() - mc_vtx.Z(),2) );  
+
+            mctrk_map.emplace(1./length,ti);
+            mc_min_dist = dist_st < dist_end ? dist_st : dist_end ; 
+         }   
+       }   
+       
+       int mc_max_it = -1;
+       float mc_max_dot = -1.;
+
+       if( mctrk_map.size() ) { 
+
+        auto tag_st = t.VertexDirection();     
+        auto tag_norm = sqrt( pow(tag_st.Px(),2) + pow(tag_st.Py(),2) + pow(tag_st.Pz(),2)); 
+
+        for( auto & ti : mctrk_map ){
+              
+          auto mc = ev_mctrk->at(ti.second);
+          auto mc_st = mc.Start();
+          auto mc_norm = sqrt( pow(mc_st.Px(),2) + pow(mc_st.Py(),2) + pow(mc_st.Pz(),2) );
+          
+          auto dot = (tag_st.Px() * mc_st.Px() + tag_st.Py() * mc_st.Py() + tag_st.Pz() * mc_st.Pz())/tag_norm / mc_norm ;
+
+          if ( fabs(dot) > mc_max_dot ){
+               mc_max_dot = dot;
+               mc_max_it = ti.second ;
+          }
+        }
+      }   
+      // If no true tracks aligned with reco track, mark it as cosmic 
+      else {
+         std::cout<<"\nEvent is : "<<_event <<", mult: "<<trk_map.size()<<", "<<storage->event_id()<<", "<<storage->subrun_id()<<std::endl ;
+        _n_cosmic++;
+        _bkgd_id = 1 ;
+        _tree->Fill();
+
+       return false;
+      }
+
+      auto mc_vtx = ev_mctrk->at(mc_max_it).Start() ;
+      auto mc_end = ev_mctrk->at(mc_max_it).End() ;
+      bool infv = true;
+
+      if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1] > 96.5 || xyz[1] < -96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
+        infv = false;
+
+      ///////////////////////////////////////////////////////////////////////////////////////////////
+      /// Now count the number of backgrounds and signals
+      ///////////////////////////////////////////////////////////////////////////////////////////////
+      auto parts = ev_mctruth->at(0).GetParticles();
+      int n_pi0 = 0;
+
+      if( ev_mctrk->at(mc_max_it).Origin() == 2 ){
+        _n_cosmic++;
+        _bkgd_id = 1; 
+      }
+
+      if( _bkgd_id == -1 ){
+        for ( auto const & p : parts ){
+          if( p.StatusCode() == 1 && p.PdgCode() == 111 )
+            n_pi0 ++;
+        }   
+
+        if( nu.CCNC() == 0 && n_pi0 == 1 && infv ) {
+          _bkgd_id = 2;
+          _n_cc1pi0 ++; 
+          _event_list.emplace_back(_event);
+        }
+        else if( nu.CCNC() == 0 && n_pi0 == 0 ) {
+          _bkgd_id = 3;
+          _n_cc0pi0++;
+        }
+        else if( nu.CCNC() == 1 && n_pi0 == 1 ) {
+          _bkgd_id = 4;
+          _n_nc1pi0 ++; 
+        }
+        else if( nu.CCNC() == 1 && n_pi0 == 0 ) {
+          _bkgd_id = 5;
+          _n_nc0pi0++;
+        }
+        else {
+          _bkgd_id = 6;
+          _n_other ++;   
+
+        }
+      }
+
       _tree->Fill();
       
       _event_list.emplace_back(_event); 
@@ -215,11 +365,26 @@ namespace larlite {
       _tree->Write();
     }
 
-   std::cout<<"\n\n****** "<<_event_list.size()<<" events found by 2 Shower Pi0Reco Module! ******"<<std::endl; 
-   for ( auto const & e : _event_list )
-     std::cout<<e <<", "; 
+    std::cout<<"Signals: "<<std::endl ;
+    std::cout<<"Total CCpi0 : "<<_n_cc1pi0<<"/"<<_event_list.size()<<std::endl; 
 
-  std::cout<<"\n\n\n";
+    // Note that cc other includes secondary pi0s.
+    std::cout<<"\nBackgrounds: "<<std::endl;
+    std::cout<<"1) Cosmic : "<<_n_cosmic<< std::endl;
+    std::cout<<"2) CC 1pi0 : "<<_n_cc1pi0<<std::endl;
+    std::cout<<"3) CC 0pi0 : "<<_n_cc0pi0<<std::endl;
+    std::cout<<"4) NC 1pi0 : "<<_n_nc1pi0<<std::endl;
+    std::cout<<"5) NC 0pi0 : "<<_n_nc0pi0<<std::endl;
+    std::cout<<"6) Other   : "<<_n_other<<std::endl; 
+
+    std::cout<<"Total accounted backgrounds: "<< _n_other + _n_cosmic + _n_nc1pi0 + _n_nc0pi0 + _n_cc0pi0 <<std::endl ;
+
+
+   //std::cout<<"\n\n****** "<<_event_list.size()<<" events found by 2 Shower Pi0Reco Module! ******"<<std::endl; 
+   //for ( auto const & e : _event_list )
+   //  std::cout<<e <<", "; 
+
+   //std::cout<<"\n\n\n";
   
     return true;
   }

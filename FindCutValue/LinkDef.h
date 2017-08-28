@@ -17,6 +17,8 @@
 #pragma link C++ class larlite::TrackStitcher+;
 #pragma link C++ class larlite::RLEnergyCutStudy+;
 #pragma link C++ class larlite::RecoRLEnergyCutStudy+;
+#pragma link C++ class larlite::JustifyPi0Cuts+;
+
 //ADD_NEW_CLASS ... do not change this line
 #endif
 
