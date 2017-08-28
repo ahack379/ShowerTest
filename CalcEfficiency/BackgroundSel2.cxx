@@ -237,20 +237,20 @@ namespace larlite {
           n_pi0 ++;
       }   
 
-      if( nu.Sel2() == 0 && n_pi0 == 1 && infv ) {
+      if( nu.CCNC() == 0 && n_pi0 == 1 && infv ) {
         _bkgd_id = 2;
         _n_cc1pi0 ++; 
         _event_list.emplace_back(_event);
       }
-      else if( nu.Sel2() == 0 && n_pi0 == 0 ) {
+      else if( nu.CCNC() == 0 && n_pi0 == 0 ) {
         _bkgd_id = 3;
         _n_cc0pi0++;
       }
-      else if( nu.Sel2() == 1 && n_pi0 == 1 ) {
+      else if( nu.CCNC() == 1 && n_pi0 == 1 ) {
         _bkgd_id = 4;
         _n_nc1pi0 ++; 
       }
-      else if( nu.Sel2() == 1 && n_pi0 == 0 ) {
+      else if( nu.CCNC() == 1 && n_pi0 == 0 ) {
         _bkgd_id = 5;
         _n_nc0pi0++;
       }
