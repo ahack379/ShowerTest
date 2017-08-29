@@ -141,7 +141,7 @@ namespace larlite {
 
     for ( auto const & t : *ev_trk ){
         auto st = t.Vertex() ;
-        auto end = t.Vertex() ;
+        auto end = t.End() ;
 
         auto dist_st = sqrt( pow(st.X() - vtx.X(),2) + pow(st.Y() - vtx.Y(),2) + pow(st.Z() - vtx.Z(),2) );
         auto dist_end = sqrt( pow(end.X() - vtx.X(),2) + pow(end.Y() - vtx.Y(),2) + pow(end.Z() - vtx.Z(),2) );
@@ -150,8 +150,12 @@ namespace larlite {
           _mult ++ ;
    }
 
-   if ( _mult == 0 ) 
-     std::cout<<"Weird...Origin? "<<_event <<std::endl ;
+   if ( _mult == 0 ){ 
+     std::cout<<"Weird...Origin? "<<_event<<", "<<storage->run_id()<<", "<<storage->subrun_id()<<", "<<storage->event_id()<<std::endl ;
+
+     std::cout<<"Track size: " <<ev_trk->size() <<std::endl;
+
+   }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Want to be able to access the origin of the tagged muon. Thus, need to find it, and 
@@ -243,7 +247,7 @@ namespace larlite {
       }   
       // If no true tracks aligned with reco track, mark it as cosmic 
       else {
-         std::cout<<"\nEvent is : "<<_event <<", mult: "<<trk_map.size()<<", "<<storage->event_id()<<", "<<storage->subrun_id()<<std::endl ;
+         //std::cout<<"\nEvent is : "<<_event <<", mult: "<<trk_map.size()<<", "<<storage->event_id()<<", "<<storage->subrun_id()<<std::endl ;
         _n_cosmic++;
         _bkgd_id = 1 ;
 
