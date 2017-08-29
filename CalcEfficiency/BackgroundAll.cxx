@@ -149,6 +149,7 @@ namespace larlite {
         if (dist_st < 3 || dist_end < 3)
           _mult ++ ;
    }
+
    if ( _mult == 0 ) 
      std::cout<<"Weird...Origin? "<<_event <<std::endl ;
 
@@ -245,36 +246,26 @@ namespace larlite {
          std::cout<<"\nEvent is : "<<_event <<", mult: "<<trk_map.size()<<", "<<storage->event_id()<<", "<<storage->subrun_id()<<std::endl ;
         _n_cosmic++;
         _bkgd_id = 1 ;
-        _tree->Fill();
 
-       return false;
       }
-
-      auto mc_vtx = ev_mctrk->at(mc_max_it).Start() ;
-      auto mc_end = ev_mctrk->at(mc_max_it).End() ;
-
-      ///////////////////////////////////////////////////////////////////////////////////////////////
-      // Now have only events with true tagged tracks.  Next check containment of vertex
-      ///////////////////////////////////////////////////////////////////////////////////////////////
-
-
-      bool infv = true;
-
-      if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1] > 96.5 || xyz[1] < -96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
-        infv = false;
 
       ///////////////////////////////////////////////////////////////////////////////////////////////
       /// Now count the number of backgrounds and signals
       ///////////////////////////////////////////////////////////////////////////////////////////////
-      auto parts = ev_mctruth->at(0).GetParticles();
-      int n_pi0 = 0;
-
-      if( ev_mctrk->at(mc_max_it).Origin() == 2 ){
-        _n_cosmic++;
-        _bkgd_id = 1; 
-      }
-
       if( _bkgd_id == -1 ){
+
+        bool infv = true;
+        if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1] > 96.5 || xyz[1] < -96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
+          infv = false;
+
+        auto parts = ev_mctruth->at(0).GetParticles();
+        int n_pi0 = 0;
+
+        if( ev_mctrk->at(mc_max_it).Origin() == 2 ){
+          _n_cosmic++;
+          _bkgd_id = 1; 
+        }
+
         for ( auto const & p : parts ){
           if( p.StatusCode() == 1 && p.PdgCode() == 111 )
             n_pi0 ++;
