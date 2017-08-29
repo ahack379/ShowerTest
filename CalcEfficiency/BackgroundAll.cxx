@@ -95,7 +95,12 @@ namespace larlite {
     if(!ev_vtx || !ev_vtx->size() ) {
       std::cout<<"Event has no recovertex info "<<std::endl;
       return false;
-      }
+    }
+
+    auto vtx = ev_vtx->at(0); 
+    _vtx_x = vtx.X();
+    _vtx_y = vtx.Y();
+    _vtx_z = vtx.Z();
 
     auto ev_tagged_trk = storage->get_data<event_track>("numuCC_track");
     if ( !ev_tagged_trk || !ev_tagged_trk->size() ){ std::cout<<"No Tagged Track!" <<std::endl ; return false; }
@@ -134,8 +139,6 @@ namespace larlite {
     // Fill multiplicity info 
     auto ev_trk = storage->get_data<event_track>("pandoraNu");
 
-    auto vtx = ev_vtx->at(0); 
-
     for ( auto const & t : *ev_trk ){
         auto st = t.Vertex() ;
         auto end = t.Vertex() ;
@@ -173,9 +176,6 @@ namespace larlite {
       xyz[2] = traj.at(traj.size() - 1).Z();
 
       std::vector<double> vtxXYZ = { vtx.X(), vtx.Y(), vtx.Z() };
-      _vtx_x = vtx.X();
-      _vtx_y = vtx.Y();
-      _vtx_z = vtx.Z();
 
       auto vtx_diff = sqrt(pow(xyz[0] - _vtx_x,2) + pow(xyz[1] - _vtx_y,2) + pow(xyz[2] - _vtx_z,2));
 
