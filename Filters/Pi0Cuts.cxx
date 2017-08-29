@@ -214,7 +214,7 @@ namespace larlite {
       _mu_endz = t.End().Z() ;
       _mu_mom  = t.VertexMomentum() ;
       _mu_len  = t.Length(0); // Calculates the length from point 0 to end
-      _mu_angle = t.Theta() ;
+      _mu_angle = cos(t.Theta()) ;
       _mu_phi = t.Phi() ; 
 
       std::vector<double> dir = { (_mu_endx - _mu_startx) / _mu_len,
@@ -228,7 +228,7 @@ namespace larlite {
 
       if( dotProd < 0 ) { 
          TVector3 new_dir(-dir_start.X(),-dir_start.Y(),-dir_start.Z());
-         _mu_angle = new_dir.Theta();
+         _mu_angle = cos(new_dir.Theta());
          _mu_phi = new_dir.Phi();
       }   
       

@@ -1,9 +1,9 @@
 /**
- * \file BackgroundSel2.h
+ * \file BackgroundAll.h
  *
  * \ingroup HitDensity
  * 
- * \brief Class def header for a class BackgroundSel2
+ * \brief Class def header for a class BackgroundAll
  *
  * @author ah673
  */
@@ -12,41 +12,47 @@
 
     @{*/
 
-#ifndef LARLITE_BACKGROUNDSEL2_H
-#define LARLITE_BACKGROUNDSEL2_H
+#ifndef LARLITE_BACKGROUNDALL_H
+#define LARLITE_BACKGROUNDALL_H
 
 #include "Analysis/ana_base.h"
 #include "GeoAlgo/GeoAlgo.h"
 
 namespace larlite {
   /**
-     \class BackgroundSel2
+     \class BackgroundAll
      User custom analysis class made by SHELL_USER_NAME
    */
-  class BackgroundSel2 : public ana_base{
+  class BackgroundAll : public ana_base{
   
   public:
 
     /// Default constructor
-    BackgroundSel2(){ _name="BackgroundSel2"; _fout=0; _tree=0; }
+    BackgroundAll(){ _name="BackgroundAll"; _fout=0; _tree=0; }
 
     /// Default destructor
-    virtual ~BackgroundSel2(){}
+    virtual ~BackgroundAll(){}
 
-    /** IMPLEMENT in BackgroundSel2.cc!
+    /** IMPLEMENT in BackgroundAll.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in BackgroundSel2.cc! 
+    /** IMPLEMENT in BackgroundAll.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in BackgroundSel2.cc! 
+    /** IMPLEMENT in BackgroundAll.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
+
+    void UseMCSample ( bool useit=false ) { _mc_sample = useit; }
+
+    void GetPi0Info  ( bool getit=false ) { _get_pi0_info = getit; }
+
+    void clear() ;
 
   protected:
 
@@ -66,6 +72,14 @@ namespace larlite {
   float _vtx_y ;
   float _vtx_z ;
 
+  float _pi0_mass ;
+  float _pi0_mom ;
+  float _pi0_oangle ;
+  float _pi0_low_shrE;
+  float _pi0_high_shrE;
+  float _pi0_low_radL;
+  float _pi0_high_radL;
+
   float _mu_angle ;
   float _mu_len ;
   float _mu_startx ;
@@ -79,6 +93,10 @@ namespace larlite {
   float _mult;
 
   ::geoalgo::GeoAlgo _geoAlgo ;
+
+  bool _mc_sample ;
+  bool _get_pi0_info ;
+  
     
   };
 }
