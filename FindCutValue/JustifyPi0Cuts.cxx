@@ -21,7 +21,7 @@ namespace larlite {
     _n_nc1pi0 = 0;   // 4 
     _n_nc0pi0 = 0;   // 5
 
-    if( _gamma_tree ){
+    if( !_gamma_tree ){
       _gamma_tree = new TTree("gamma_tree","");
       _gamma_tree->Branch("_event",&_event,"event/I");
       _gamma_tree->Branch("_gamma_low_E",&_gamma_low_E,"gamma_low_E/F");
@@ -159,7 +159,7 @@ namespace larlite {
       if(!ev_mctruth || !ev_mctruth->size() ) {
         std::cout<<"Event has no mctruth info "<<std::endl;
         return false;
-        }
+      }
 
       auto ev_mctrk = storage->get_data<event_mctrack>("mcreco");
       if ( !ev_mctrk || !ev_mctrk->size() ) {std::cout<<"No MCTrack!" <<std::endl ; return false; }
@@ -181,7 +181,6 @@ namespace larlite {
       std::multimap<float,int> mctrk_map ;
       auto tag_st = t.Vertex() ;
       auto tag_end = t.End() ;
-      float mc_min_dist = 1e9;
 
       for ( size_t ti = 0; ti < ev_mctrk->size(); ti++ ) { 
 
@@ -203,7 +202,6 @@ namespace larlite {
                              pow(mc_end.Z() - mc_vtx.Z(),2) );  
 
             mctrk_map.emplace(1./length,ti);
-            mc_min_dist = dist_st < dist_end ? dist_st : dist_end ; 
          }   
        }   
        
@@ -281,7 +279,7 @@ namespace larlite {
    
     _tree->Fill();
 
-    if( !ev_s || !ev_s->size() || ev_s->size() < 2 ){
+    if( !ev_s || !ev_s->size() || ev_s->size() < 1 ){
       std::cout<<"Not enough reco'd showers..." <<ev_s->size()<<std::endl;
       return false;
     } 
@@ -332,7 +330,7 @@ namespace larlite {
      } 
 
     int reco_g1_id = -1, reco_g2_id = -1;
-    int mc_g1_id = -1, mc_g2_id = -1;
+    int mc_g1_id = -1;
 
     for ( auto const & m : mc_reco_map ){
       auto score = 1./m.first ;
@@ -346,9 +344,8 @@ namespace larlite {
       else{
         if ( m.second.first == mc_g1_id || m.second.second == reco_g1_id ) continue;
         
-        mc_g2_id = m.second.first ;       
         reco_g2_id = m.second.second ;       
- 
+        break;
       }
     }
 

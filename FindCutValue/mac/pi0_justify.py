@@ -18,7 +18,7 @@ my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 
 my_proc.set_ana_output_file("cutjustify_pi0.root") 
 
-ana = fmwk.JustifyGetPi0Cuts()
+ana = fmwk.JustifyPi0Cuts()
 my_proc.add_process(ana)
 
 print
