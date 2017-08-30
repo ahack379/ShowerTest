@@ -30,7 +30,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    JustifyPi0Cuts(){ _name="JustifyPi0Cuts"; _fout=0; _pi0_selection=0; _tree=0; }
+    JustifyPi0Cuts(){ _name="JustifyPi0Cuts"; _fout=0; _gamma_tree=0; _tree=0; }
 
     /// Default destructor
     virtual ~JustifyPi0Cuts(){}
@@ -54,16 +54,18 @@ namespace larlite {
 
   protected:
 
-    TTree * _pi0_selection;
+    TTree * _gamma_tree ;
     int _event;
     float _pi0_mass;
     float _pi0_mom;
-    float _pi0_oangle;
-    float _pi0_low_shrE;
-    float _pi0_high_shrE;
-    float _pi0_low_radL;
-    float _pi0_high_radL;
-    float _pi0_IP;
+    float _gamma_oangle;
+    float _gamma_low_E;
+    float _gamma_high_E;
+    float _gamma_low_RL;
+    float _gamma_high_RL;
+    float _gamma_IP;
+    bool _gamma_low_matched ;
+    bool _gamma_high_matched ;
 
     TTree * _tree ;
     float _mu_startx ;
@@ -88,11 +90,7 @@ namespace larlite {
     int _n_nc0pi0 ;
 
 
-
     ::geoalgo::GeoAlgo _geoAlgo ;
-    std::vector<int> _event_list ;    
-
-    int _miss_trk ;
 
   };
 }

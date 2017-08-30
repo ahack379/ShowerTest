@@ -8,6 +8,7 @@
 #include "DataFormat/cluster.h"
 #include "DataFormat/mctruth.h"
 #include "DataFormat/mctrack.h"
+#include "DataFormat/mcshower.h"
 
 namespace larlite {
 
@@ -20,19 +21,21 @@ namespace larlite {
     _n_nc1pi0 = 0;   // 4 
     _n_nc0pi0 = 0;   // 5
 
+    if( _gamma_tree ){
+      _gamma_tree = new TTree("gamma_tree","");
+      _gamma_tree->Branch("_event",&_event,"event/I");
+      _gamma_tree->Branch("_gamma_low_E",&_gamma_low_E,"gamma_low_E/F");
+      _gamma_tree->Branch("_gamma_high_E",&_gamma_high_E,"gamma_high_E/F");
+      _gamma_tree->Branch("_gamma_low_RL",&_gamma_low_RL,"gamma_low_RL/F");
+      _gamma_tree->Branch("_gamma_high_RL",&_gamma_high_RL,"gamma_high_RL/F");
+      _gamma_tree->Branch("_gamma_oangle",&_gamma_oangle,"gamma_oangle/F");
+      _gamma_tree->Branch("_gamma_IP",&_gamma_IP,"gamma_IP/F");
+      _gamma_tree->Branch("_gamma_low_matched",&_gamma_low_matched,"gamma_low_matched/B");
+      _gamma_tree->Branch("_gamma_high_matched",&_gamma_high_matched,"gamma_high_matched/B");
+      _gamma_tree->Branch("_pi0_mass",&_pi0_mass,"pi0_mass/F");
+      _gamma_tree->Branch("_pi0_mom",&_pi0_mom,"pi0_mom/F");
+    }
     
-    if( !_pi0_selection ){
-      _pi0_selection = new TTree("pi0_selection","");
-      _pi0_selection->Branch("_event",&_event,"event/I");
-      _pi0_selection->Branch("_pi0_mass",&_pi0_mass,"pi0_mass/F");
-      _pi0_selection->Branch("_pi0_mom",&_pi0_mom,"pi0_mom/F");
-      _pi0_selection->Branch("_pi0_oangle",&_pi0_oangle,"pi0_oangle/F");
-      _pi0_selection->Branch("_pi0_low_shrE",&_pi0_low_shrE,"pi0_low_shrE/F");
-      _pi0_selection->Branch("_pi0_high_shrE",&_pi0_high_shrE,"pi0_high_shrE/F");
-      _pi0_selection->Branch("_pi0_low_radL",&_pi0_low_radL,"pi0_low_radL/F");
-      _pi0_selection->Branch("_pi0_high_radL",&_pi0_high_radL,"pi0_high_radL/F");
-      _pi0_selection->Branch("_pi0_IP",&_pi0_IP,"pi0_IP/F");
-      }
     if(!_tree){
       _tree = new TTree("tree","");
       _tree->Branch("_mu_startx",&_mu_startx,"mu_startx/F");
@@ -51,7 +54,6 @@ namespace larlite {
       _tree->Branch("nshrs",&_nshrs,"nshrs/I");
     }
 
-    _miss_trk = 0;
     _event = -1;
 
     return true;
@@ -61,12 +63,15 @@ namespace larlite {
   
     _pi0_mass      = -10;
     _pi0_mom       = -10;
-    _pi0_oangle    = -10;
-    _pi0_low_shrE  = -10;
-    _pi0_high_shrE = -10;
-    _pi0_low_radL  = -10;
-    _pi0_high_radL = -10;
-    _pi0_IP = -10;
+    _gamma_oangle    = -10;
+    _gamma_low_E  = -10;
+    _gamma_high_E = -10;
+    _gamma_low_RL  = -10;
+    _gamma_high_RL = -10;
+    _gamma_IP = -10;
+    _gamma_low_matched = false;
+    _gamma_high_matched = false;
+
     _mu_startx     = -1000;
     _mu_starty     = -1000;
     _mu_startz     = -1000;
@@ -87,12 +92,13 @@ namespace larlite {
   bool JustifyPi0Cuts::analyze(storage_manager* storage) {
 
     _event++;
+    clear();
+
     std::cout<<"\nEvent : "<<_event <<std::endl;
 
       auto ev_t = storage->get_data<event_track>("numuCC_track");
 
       if( !ev_t || !ev_t->size() ){
-        _miss_trk ++ ;
         std::cout<<"No tagged track; what??" <<std::endl;
         return false;
       }
@@ -225,33 +231,23 @@ namespace larlite {
       }   
       // If no true tracks aligned with reco track, mark it as cosmic 
       else {
-         std::cout<<"\nEvent is : "<<_event <<", mult: "<<trk_map.size()<<", "<<storage->event_id()<<", "<<storage->subrun_id()<<std::endl ;
         _n_cosmic++;
         _bkgd_id = 1 ;
-        _tree->Fill();
-
-       return false;
-      }
-
-      auto mc_vtx = ev_mctrk->at(mc_max_it).Start() ;
-      auto mc_end = ev_mctrk->at(mc_max_it).End() ;
-      bool infv = true;
-
-      if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1] > 96.5 || xyz[1] < -96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
-        infv = false;
-
-      ///////////////////////////////////////////////////////////////////////////////////////////////
-      /// Now count the number of backgrounds and signals
-      ///////////////////////////////////////////////////////////////////////////////////////////////
-      auto parts = ev_mctruth->at(0).GetParticles();
-      int n_pi0 = 0;
-
-      if( ev_mctrk->at(mc_max_it).Origin() == 2 ){
-        _n_cosmic++;
-        _bkgd_id = 1; 
       }
 
       if( _bkgd_id == -1 ){
+
+        bool infv = true;
+        if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1] > 96.5 || xyz[1] < -96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
+          infv = false;
+
+        auto parts = ev_mctruth->at(0).GetParticles();
+        int n_pi0 = 0;
+
+        if( ev_mctrk->at(mc_max_it).Origin() == 2 ){
+          _n_cosmic++;
+          _bkgd_id = 1; 
+        }
         for ( auto const & p : parts ){
           if( p.StatusCode() == 1 && p.PdgCode() == 111 )
             n_pi0 ++;
@@ -260,7 +256,6 @@ namespace larlite {
         if( nu.CCNC() == 0 && n_pi0 == 1 && infv ) {
           _bkgd_id = 2;
           _n_cc1pi0 ++; 
-          _event_list.emplace_back(_event);
         }
         else if( nu.CCNC() == 0 && n_pi0 == 0 ) {
           _bkgd_id = 3;
@@ -287,23 +282,87 @@ namespace larlite {
     _tree->Fill();
 
     if( !ev_s || !ev_s->size() || ev_s->size() < 2 ){
-
       std::cout<<"Not enough reco'd showers..." <<ev_s->size()<<std::endl;
       return false;
-     }
+    } 
 
-    clear();
+    auto ev_mcshr = storage->get_data<event_mcshower>("mcreco");
 
-    std::vector<std::pair<int,int>> candidate_pairs;
-    std::vector<int> cand_ids;
+    // Now deal with shower comparisons
+    std::vector<int> shr_ids;
+
+    for ( int si = 0; si < ev_mcshr->size(); si++){
+
+      auto s = ev_mcshr->at(si);
+      auto st = s.Start();
+      auto dist = sqrt( pow(st.X() - xyz[0],2) + pow(st.Y() - xyz[1],2) + pow(st.Z() - xyz[2],2) );
+
+      if ( dist < 0.0001 && s.DetProfile().E() > 0 && s.MotherPdgCode() == 111 )
+        shr_ids.emplace_back(si) ;
+      
+    }
+
+     if (shr_ids.size() != 2 ) { 
+       std::cout<<"N SHOWERS! "<<shr_ids.size()<<", Event: "<<_event-1<<std::endl ;
+       return false;
+     }   
+
+     std::multimap<float,std::pair<int,int>> mc_reco_map ;    
+
+     // Match showers
+     for( auto const & mc_id : shr_ids ){
+       auto mcs_i = ev_mcshr->at(mc_id);
+       auto mag_mcs = sqrt( pow(mcs_i.DetProfile().Px(),2) + pow(mcs_i.DetProfile().Py(),2) + pow(mcs_i.DetProfile().Pz(),2) );
+
+       for( int reco_id = 0; reco_id < shr_ids.size(); reco_id++ ){
+
+         auto recos_i = ev_s->at(reco_id) ;
+
+         auto mag_reco = sqrt( pow(recos_i.Direction().Px(),2) + pow(recos_i.Direction().Py(),2) + pow(recos_i.Direction().Pz(),2) );
+         auto dot = mcs_i.DetProfile().Px() * recos_i.Direction().Px() +
+                    mcs_i.DetProfile().Py() * recos_i.Direction().Py() +
+                    mcs_i.DetProfile().Pz() * recos_i.Direction().Pz() ;
+         dot /= ( mag_mcs * mag_reco );
+
+         if ( fabs(dot) > 1 ) std::cout<<"DOT ! " <<dot <<std::endl ;
+
+         mc_reco_map.emplace(1./dot,std::make_pair(mc_id,reco_id)) ;
+
+       }
+     } 
+
+    int reco_g1_id = -1, reco_g2_id = -1;
+    int mc_g1_id = -1, mc_g2_id = -1;
+
+    for ( auto const & m : mc_reco_map ){
+      auto score = 1./m.first ;
+    
+      if ( score < 0.95 ) break; 
+
+      if ( reco_g1_id == -1 ){
+        mc_g1_id   = m.second.first ;
+        reco_g1_id = m.second.second ;
+      }
+      else{
+        if ( m.second.first == mc_g1_id || m.second.second == reco_g1_id ) continue;
+        
+        mc_g2_id = m.second.first ;       
+        reco_g2_id = m.second.second ;       
+ 
+      }
+    }
 
     for ( int s1 = 0; s1 < ev_s->size(); s1++ ){
 
         auto const& shr1 = ev_s->at(s1);
 
+        if ( s1 == reco_g1_id ) _gamma_high_matched = true ;
+
         for ( int s2 = 0; s2 < ev_s->size(); s2++ ){
 
             if (s2 <= s1) continue;
+
+            if ( s2 == reco_g2_id ) _gamma_low_matched = true ;
 
             auto const& shr2 = ev_s->at(s2);
 
@@ -339,26 +398,20 @@ namespace larlite {
             auto radL_shr1 = vertex.Dist(shr1.ShowerStart());
             auto radL_shr2 = vertex.Dist(shr2.ShowerStart());
 
-            //if( oangle < 0.35 ) continue;
-            //if( pow( _geoAlgo.SqDist(shr1_bkwrd_hl, shr2_bkwrd_hl), 0.5 ) > 4.) continue; 
-            //if( radL_shr1 > 62 || radL_shr2 > 62 ) continue;
-
             _pi0_mass      = sqrt(2 * shr1.Energy() * shr2.Energy() *(1.-cos(oangle))); 
             _pi0_mom       = tot_pi0_mom;
-            _pi0_oangle    = oangle;
-            _pi0_low_shrE  = shr1.Energy() < shr2.Energy() ? shr1.Energy() : shr2.Energy() ;
-            _pi0_high_shrE = shr1.Energy() < shr2.Energy() ? shr2.Energy() : shr1.Energy() ;
-            _pi0_low_radL  = shr1.Energy() < shr2.Energy() ? radL_shr1 : radL_shr2 ;
-            _pi0_high_radL = shr1.Energy() < shr2.Energy() ? radL_shr2 : radL_shr1 ;
-            _pi0_IP = IP;
-	    _pi0_selection->Fill() ;
+            _gamma_oangle    = oangle;
+            _gamma_low_E  = shr1.Energy() < shr2.Energy() ? shr1.Energy() : shr2.Energy() ;
+            _gamma_high_E = shr1.Energy() < shr2.Energy() ? shr2.Energy() : shr1.Energy() ;
+            _gamma_low_RL  = shr1.Energy() < shr2.Energy() ? radL_shr1 : radL_shr2 ;
+            _gamma_high_RL = shr1.Energy() < shr2.Energy() ? radL_shr2 : radL_shr1 ;
+            _gamma_IP = IP;
+            _gamma_tree->Fill() ;
         }// shower ID 2 
       }// shower ID 1 
 
       std::cout<<"JustifyPi0Cuts - Found a candidate! "<<std::endl ;
       
-      _event_list.emplace_back(_event); 
-
     return true;
   }
 
@@ -366,12 +419,12 @@ namespace larlite {
 
     if(_fout) { 
       _fout->cd(); 
-      _pi0_selection->Write(); 
+      _gamma_tree->Write(); 
       _tree->Write();
     }
 
     std::cout<<"Signals: "<<std::endl ;
-    std::cout<<"Total CCpi0 : "<<_n_cc1pi0<<"/"<<_event_list.size()<<std::endl; 
+    std::cout<<"Total CCpi0 : "<<_n_cc1pi0<<std::endl; 
 
     // Note that cc other includes secondary pi0s.
     std::cout<<"\nBackgrounds: "<<std::endl;
@@ -384,15 +437,6 @@ namespace larlite {
 
     std::cout<<"Total accounted backgrounds: "<< _n_other + _n_cosmic + _n_nc1pi0 + _n_nc0pi0 + _n_cc0pi0 <<std::endl ;
 
-    std::cout<<"MIssS:" <<_miss_trk<<std::endl ;
-
-
-   //std::cout<<"\n\n****** "<<_event_list.size()<<" events found by 2 Shower Pi0Reco Module! ******"<<std::endl; 
-   //for ( auto const & e : _event_list )
-   //  std::cout<<e <<", "; 
-
-   //std::cout<<"\n\n\n";
-  
     return true;
   }
 
