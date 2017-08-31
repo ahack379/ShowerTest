@@ -369,55 +369,51 @@ namespace larlite {
       
     }
 
-    //if (shr_ids.size() != 2 ) { 
-    //   std::cout<<"N SHOWERS! "<<shr_ids.size()<<", Event: "<<_event-1<<std::endl ;
-    //   return false;
-    // }   
+    std::multimap<float,std::pair<int,int>> mc_reco_map ;    
 
-     std::multimap<float,std::pair<int,int>> mc_reco_map ;    
+    // Match showers
+    for( auto const & mc_id : shr_ids ){
+      auto mcs_i = ev_mcshr->at(mc_id);
+      auto mag_mcs = sqrt( pow(mcs_i.DetProfile().Px(),2) + pow(mcs_i.DetProfile().Py(),2) + pow(mcs_i.DetProfile().Pz(),2) );
 
-     // Match showers
-     for( auto const & mc_id : shr_ids ){
-       auto mcs_i = ev_mcshr->at(mc_id);
-       auto mag_mcs = sqrt( pow(mcs_i.DetProfile().Px(),2) + pow(mcs_i.DetProfile().Py(),2) + pow(mcs_i.DetProfile().Pz(),2) );
+      for( int reco_id = 0; reco_id < ev_s->size(); reco_id++ ){
 
-       for( int reco_id = 0; reco_id < ev_s->size(); reco_id++ ){
+        auto recos_i = ev_s->at(reco_id) ;
 
-         auto recos_i = ev_s->at(reco_id) ;
+        auto mag_reco = sqrt( pow(recos_i.Direction().Px(),2) + pow(recos_i.Direction().Py(),2) + pow(recos_i.Direction().Pz(),2) );
+        auto dot = mcs_i.DetProfile().Px() * recos_i.Direction().Px() +
+                   mcs_i.DetProfile().Py() * recos_i.Direction().Py() +
+                   mcs_i.DetProfile().Pz() * recos_i.Direction().Pz() ;
+        dot /= ( mag_mcs * mag_reco );
 
-         auto mag_reco = sqrt( pow(recos_i.Direction().Px(),2) + pow(recos_i.Direction().Py(),2) + pow(recos_i.Direction().Pz(),2) );
-         auto dot = mcs_i.DetProfile().Px() * recos_i.Direction().Px() +
-                    mcs_i.DetProfile().Py() * recos_i.Direction().Py() +
-                    mcs_i.DetProfile().Pz() * recos_i.Direction().Pz() ;
-         dot /= ( mag_mcs * mag_reco );
+        if ( fabs(dot) > 1 ) std::cout<<"DOT ! " <<dot <<std::endl ;
 
-         if ( fabs(dot) > 1 ) std::cout<<"DOT ! " <<dot <<std::endl ;
-
-         mc_reco_map.emplace(1./dot,std::make_pair(mc_id,reco_id)) ;
-
-       }
-     } 
+        mc_reco_map.emplace(1./dot,std::make_pair(mc_id,reco_id)) ;
+      }
+    } 
 
     int reco_g1_id = -1, reco_g2_id = -1;
     int mc_g1_id = -1, mc_g2_id = -1;
     int dot_g1 = -10, dot_g2 = -10;
 
     for ( auto const & m : mc_reco_map ){
+
       auto score = 1./m.first ;
+      std::cout<<"Some scores are..." <<score<<std::endl;
     
       if ( score < 0.9 ) break; 
 
       if ( reco_g1_id == -1 ){
         mc_g1_id   = m.second.first ;
         reco_g1_id = m.second.second ;
-        dot_g1 = m.first ;
+        dot_g1 = score ;
       }
       else{
         if ( m.second.first == mc_g1_id || m.second.second == reco_g1_id ) continue;
         
         mc_g2_id = m.second.first;       
         reco_g2_id = m.second.second ;       
-        dot_g2 = m.first ;
+        dot_g2 = score ;
         break;
       }
     }
@@ -460,9 +456,6 @@ namespace larlite {
          _mc_startz = st_z + sce_corr.at(2);
 
          _mc_E = mcs.DetProfile().E();  
-         _mc_startx = mcs.Start().X();  
-         _mc_starty = mcs.Start().Y();  
-         _mc_startz = mcs.Start().Z();  
          _mc_dirx = mcs.DetProfile().Px();  
          _mc_diry = mcs.DetProfile().Py();  
          _mc_dirz = mcs.DetProfile().Pz();  
@@ -486,9 +479,6 @@ namespace larlite {
          _mc_startz = st_z + sce_corr.at(2);
 
          _mc_E = mcs.DetProfile().E();  
-         _mc_startx = mcs.Start().X();  
-         _mc_starty = mcs.Start().Y();  
-         _mc_startz = mcs.Start().Z();  
          _mc_dirx = mcs.DetProfile().Px();  
          _mc_diry = mcs.DetProfile().Py();  
          _mc_dirz = mcs.DetProfile().Pz();  
