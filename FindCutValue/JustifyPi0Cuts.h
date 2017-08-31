@@ -30,7 +30,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    JustifyPi0Cuts(){ _name="JustifyPi0Cuts"; _fout=0; _gamma_tree=0; _tree=0; _one_gamma_tree = 0; }
+    JustifyPi0Cuts(){ _name="JustifyPi0Cuts"; _fout=0; _gamma_tree=0; _tree=0; _one_gamma_tree = 0; _compare_tree = 0; }
 
     /// Default destructor
     virtual ~JustifyPi0Cuts(){}
@@ -51,6 +51,8 @@ namespace larlite {
     virtual bool finalize();
 
     void clear();
+
+    void clearCompare();
 
   protected:
 
@@ -90,6 +92,26 @@ namespace larlite {
     float _mult;
     int _bkgd_id;
     int _nshrs ;
+
+    TTree * _compare_tree ;
+    float _reco_E ;
+    float _reco_start3D ;
+    float _reco_startx ;
+    float _reco_starty ;
+    float _reco_startz ;
+    float _reco_dot ;
+    float _reco_dirx ;
+    float _reco_diry ;
+    float _reco_dirz ;
+
+    float _mc_E ;
+    float _mc_startx ;
+    float _mc_starty ;
+    float _mc_startz ;
+    float _mc_dirx ;
+    float _mc_diry ;
+    float _mc_dirz ;
+
 
     int _n_other ;
     int _n_cosmic ;

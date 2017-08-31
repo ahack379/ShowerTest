@@ -65,6 +65,28 @@ namespace larlite {
       _tree->Branch("nshrs",&_nshrs,"nshrs/I");
     }
 
+    if(!_compare_tree){
+      _compare_tree = new TTree("compare_tree","");
+      _compare_tree->Branch("_event",&_event,"event/I");
+      _compare_tree->Branch("_reco_E",&_reco_E,"reco_E/F");
+      _compare_tree->Branch("_reco_startx",&_reco_startx,"reco_startx/F");
+      _compare_tree->Branch("_reco_starty",&_reco_starty,"reco_starty/F");
+      _compare_tree->Branch("_reco_startz",&_reco_startz,"reco_startz/F");
+      _compare_tree->Branch("_reco_start3D",&_reco_start3D,"reco_start3D/F");
+      _compare_tree->Branch("_reco_dirx",&_reco_dirx,"reco_dirx/F");
+      _compare_tree->Branch("_reco_diry",&_reco_diry,"reco_diry/F");
+      _compare_tree->Branch("_reco_dirz",&_reco_dirz,"reco_dirz/F");
+      _compare_tree->Branch("_reco_dot",&_reco_dot,"reco_dot/F");
+
+      _compare_tree->Branch("_mc_E",&_mc_E,"mc_E/F");
+      _compare_tree->Branch("_mc_startx",&_mc_startx,"mc_startx/F");
+      _compare_tree->Branch("_mc_starty",&_mc_starty,"mc_starty/F");
+      _compare_tree->Branch("_mc_startz",&_mc_startz,"mc_startz/F");
+      _compare_tree->Branch("_mc_dirx",&_mc_dirx,"mc_dirx/F");
+      _compare_tree->Branch("_mc_diry",&_mc_diry,"mc_diry/F");
+      _compare_tree->Branch("_mc_dirz",&_mc_dirz,"mc_dirz/F");
+    }
+
     _event = -1;
 
     return true;
@@ -105,6 +127,27 @@ namespace larlite {
     
     _bkgd_id       = -1 ;
     _nshrs         = -1;
+  }
+
+  void JustifyPi0Cuts::clearCompare(){
+  
+    _reco_E = -999;
+    _reco_dot = -999;
+    _reco_start3D = -999;
+    _reco_startx = -999;
+    _reco_starty = -999;
+    _reco_startz = -999;
+    _reco_dirx = -999;
+    _reco_diry = -999;
+    _reco_dirz = -999;
+
+    _mc_startx = -999;
+    _mc_starty = -999;
+    _mc_startz = -999;
+    _mc_dirx = -999;
+    _mc_diry = -999;
+    _mc_dirz = -999;
+  
   }
   
   bool JustifyPi0Cuts::analyze(storage_manager* storage) {
@@ -348,7 +391,8 @@ namespace larlite {
      } 
 
     int reco_g1_id = -1, reco_g2_id = -1;
-    int mc_g1_id = -1;
+    int mc_g1_id = -1, mc_g2_id = -1;
+    int dot_g1 = -10, dot_g2 = -10;
 
     for ( auto const & m : mc_reco_map ){
       auto score = 1./m.first ;
@@ -358,35 +402,78 @@ namespace larlite {
       if ( reco_g1_id == -1 ){
         mc_g1_id   = m.second.first ;
         reco_g1_id = m.second.second ;
+        dot_g1 = m.first ;
       }
       else{
         if ( m.second.first == mc_g1_id || m.second.second == reco_g1_id ) continue;
         
+        mc_g2_id = m.second.first;       
         reco_g2_id = m.second.second ;       
+        dot_g2 = m.first ;
         break;
       }
     }
 
     for ( int s1 = 0; s1 < ev_s->size(); s1++ ){
 
+       clearCompare();
+
        auto const& shr1 = ev_s->at(s1);
 
        _gamma_E  = shr1.Energy()  ;
-
        ::geoalgo::Point_t vertex_reco(v.X(),v.Y(),v.Z());
         _gamma_RL = vertex_reco.Dist(shr1.ShowerStart());
 
        geoalgo::Vector_t rev_shr(-1.*shr1.Direction()) ;
        auto shr_bkwrd_hl = ::geoalgo::HalfLine_t(shr1.ShowerStart(),rev_shr);
-
        _gamma_vtx_IP = _geoAlgo.SqDist(vertex_reco, shr_bkwrd_hl) ;
-       //std::cout<<"  "<<_gamma_vtx_IP<<std::endl ;
+
+       _reco_E = _gamma_E ;
+       _reco_startx = shr1.ShowerStart().X();  
+       _reco_starty = shr1.ShowerStart().Y();  
+       _reco_startz = shr1.ShowerStart().Z();  
+       _reco_dirx = shr1.Direction().Px();  
+       _reco_diry = shr1.Direction().Py();  
+       _reco_dirz = shr1.Direction().Pz();  
 
        if ( s1 == reco_g1_id ){
           _gamma_high_matched = true ;
           _gamma_matched = true; 
+
+	 auto mcs = ev_mcshr->at(mc_g1_id);
+
+         _mc_E = mcs.DetProfile().E();  
+         _mc_startx = mcs.Start().X();  
+         _mc_starty = mcs.Start().Y();  
+         _mc_startz = mcs.Start().Z();  
+         _mc_dirx = mcs.DetProfile().Px();  
+         _mc_diry = mcs.DetProfile().Py();  
+         _mc_dirz = mcs.DetProfile().Pz();  
+
+	 _reco_dot = dot_g1 ;
+	 _reco_start3D = sqrt( pow(_mc_startx - _reco_startx,2) + pow(_mc_starty - _reco_starty,2) + pow(_mc_startz - _reco_startx,2)); 
+
+         _compare_tree->Fill();
        }
-       
+       else if ( s1 == reco_g2_id ){
+
+	 auto mcs = ev_mcshr->at(mc_g2_id);
+
+         _mc_E = mcs.DetProfile().E();  
+         _mc_startx = mcs.Start().X();  
+         _mc_starty = mcs.Start().Y();  
+         _mc_startz = mcs.Start().Z();  
+         _mc_dirx = mcs.DetProfile().Px();  
+         _mc_diry = mcs.DetProfile().Py();  
+         _mc_dirz = mcs.DetProfile().Pz();  
+	 
+	 _reco_dot = dot_g2 ;
+	 _reco_start3D = sqrt( pow(_mc_startx - _reco_startx,2) + pow(_mc_starty - _reco_starty,2) + pow(_mc_startz - _reco_startx,2)); 
+
+         _compare_tree->Fill();
+       }
+
+
        _one_gamma_tree->Fill();
 
        for ( int s2 = 0; s2 < ev_s->size(); s2++ ){
@@ -463,6 +550,7 @@ namespace larlite {
 
     if(_fout) { 
       _fout->cd(); 
+      _compare_tree->Write(); 
       _gamma_tree->Write(); 
       _one_gamma_tree->Write(); 
       _tree->Write();
