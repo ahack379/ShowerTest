@@ -30,7 +30,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    JustifyPi0Cuts(){ _name="JustifyPi0Cuts"; _fout=0; _gamma_tree=0; _tree=0; }
+    JustifyPi0Cuts(){ _name="JustifyPi0Cuts"; _fout=0; _gamma_tree=0; _tree=0; _one_gamma_tree = 0; }
 
     /// Default destructor
     virtual ~JustifyPi0Cuts(){}
@@ -66,6 +66,15 @@ namespace larlite {
     float _gamma_IP;
     bool _gamma_low_matched ;
     bool _gamma_high_matched ;
+    float _gamma1_vtx_IP ;
+    float _gamma2_vtx_IP ;
+
+    TTree * _one_gamma_tree ;
+    float _gamma_E;
+    float _gamma_RL;
+    float _gamma_vtx_IP ;
+    bool _gamma_matched ;
+
 
     TTree * _tree ;
     float _mu_startx ;

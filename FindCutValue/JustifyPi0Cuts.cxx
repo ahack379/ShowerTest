@@ -32,10 +32,21 @@ namespace larlite {
       _gamma_tree->Branch("_gamma_IP",&_gamma_IP,"gamma_IP/F");
       _gamma_tree->Branch("_gamma_low_matched",&_gamma_low_matched,"gamma_low_matched/B");
       _gamma_tree->Branch("_gamma_high_matched",&_gamma_high_matched,"gamma_high_matched/B");
+      _gamma_tree->Branch("_gamma1_vtx_IP",&_gamma1_vtx_IP,"gamma1_vtx_IP/F");
+      _gamma_tree->Branch("_gamma2_vtx_IP",&_gamma2_vtx_IP,"gamma2_vtx_IP/F");
       _gamma_tree->Branch("_pi0_mass",&_pi0_mass,"pi0_mass/F");
       _gamma_tree->Branch("_pi0_mom",&_pi0_mom,"pi0_mom/F");
     }
-    
+
+    if( !_one_gamma_tree ){
+      _one_gamma_tree = new TTree("one_gamma_tree","");
+      _one_gamma_tree->Branch("_event",&_event,"event/I");
+      _one_gamma_tree->Branch("_gamma_E",&_gamma_E,"gamma_E/F");
+      _one_gamma_tree->Branch("_gamma_RL",&_gamma_RL,"gamma_RL/F");
+      _one_gamma_tree->Branch("_gamma_vtx_IP",&_gamma_vtx_IP,"gamma_vtx_IP/F");
+      _one_gamma_tree->Branch("_gamma_matched",&_gamma_matched,"gamma_matched/B");
+    }
+
     if(!_tree){
       _tree = new TTree("tree","");
       _tree->Branch("_mu_startx",&_mu_startx,"mu_startx/F");
@@ -69,8 +80,15 @@ namespace larlite {
     _gamma_low_RL  = -10;
     _gamma_high_RL = -10;
     _gamma_IP = -10;
+    _gamma1_vtx_IP = -10;
+    _gamma2_vtx_IP = -10;
     _gamma_low_matched = false;
     _gamma_high_matched = false;
+
+    _gamma_E = -10;
+    _gamma_RL = -10;
+    _gamma_vtx_IP = -10;
+    _gamma_matched =false;
 
     _mu_startx     = -1000;
     _mu_starty     = -1000;
@@ -94,7 +112,7 @@ namespace larlite {
     _event++;
     clear();
 
-    std::cout<<"\nEvent : "<<_event <<std::endl;
+    //std::cout<<"\nEvent : "<<_event <<std::endl;
 
       auto ev_t = storage->get_data<event_track>("numuCC_track");
 
@@ -300,10 +318,10 @@ namespace larlite {
       
     }
 
-     if (shr_ids.size() != 2 ) { 
-       std::cout<<"N SHOWERS! "<<shr_ids.size()<<", Event: "<<_event-1<<std::endl ;
-       return false;
-     }   
+    //if (shr_ids.size() != 2 ) { 
+    //   std::cout<<"N SHOWERS! "<<shr_ids.size()<<", Event: "<<_event-1<<std::endl ;
+    //   return false;
+    // }   
 
      std::multimap<float,std::pair<int,int>> mc_reco_map ;    
 
@@ -312,7 +330,7 @@ namespace larlite {
        auto mcs_i = ev_mcshr->at(mc_id);
        auto mag_mcs = sqrt( pow(mcs_i.DetProfile().Px(),2) + pow(mcs_i.DetProfile().Py(),2) + pow(mcs_i.DetProfile().Pz(),2) );
 
-       for( int reco_id = 0; reco_id < shr_ids.size(); reco_id++ ){
+       for( int reco_id = 0; reco_id < ev_s->size(); reco_id++ ){
 
          auto recos_i = ev_s->at(reco_id) ;
 
@@ -335,7 +353,7 @@ namespace larlite {
     for ( auto const & m : mc_reco_map ){
       auto score = 1./m.first ;
     
-      if ( score < 0.95 ) break; 
+      if ( score < 0.9 ) break; 
 
       if ( reco_g1_id == -1 ){
         mc_g1_id   = m.second.first ;
@@ -351,11 +369,27 @@ namespace larlite {
 
     for ( int s1 = 0; s1 < ev_s->size(); s1++ ){
 
-        auto const& shr1 = ev_s->at(s1);
+       auto const& shr1 = ev_s->at(s1);
 
-        if ( s1 == reco_g1_id ) _gamma_high_matched = true ;
+       _gamma_E  = shr1.Energy()  ;
 
-        for ( int s2 = 0; s2 < ev_s->size(); s2++ ){
+       ::geoalgo::Point_t vertex_reco(v.X(),v.Y(),v.Z());
+        _gamma_RL = vertex_reco.Dist(shr1.ShowerStart());
+
+       geoalgo::Vector_t rev_shr(-1.*shr1.Direction()) ;
+       auto shr_bkwrd_hl = ::geoalgo::HalfLine_t(shr1.ShowerStart(),rev_shr);
+
+       _gamma_vtx_IP = _geoAlgo.SqDist(vertex_reco, shr_bkwrd_hl) ;
+       //std::cout<<"  "<<_gamma_vtx_IP<<std::endl ;
+
+       if ( s1 == reco_g1_id ){
+          _gamma_high_matched = true ;
+          _gamma_matched = true; 
+       }
+       
+       _one_gamma_tree->Fill();
+
+       for ( int s2 = 0; s2 < ev_s->size(); s2++ ){
 
             if (s2 <= s1) continue;
 
@@ -392,8 +426,16 @@ namespace larlite {
             auto tot_pi0_mom = sqrt(pow(mom_vect[0],2) + pow(mom_vect[1],2) + pow(mom_vect[2],2) );
             //===========================================
             auto IP = pow(_geoAlgo.SqDist(shr1_bkwrd_hl,shr2_bkwrd_hl),0.5);
-            auto radL_shr1 = vertex.Dist(shr1.ShowerStart());
-            auto radL_shr2 = vertex.Dist(shr2.ShowerStart());
+            auto radL_shr1 = vertex_reco.Dist(shr1.ShowerStart());
+            auto radL_shr2 = vertex_reco.Dist(shr2.ShowerStart());
+
+            auto dist_temp = sqrt( pow(v.X() - vertex.at(0),2) + pow(v.Y() - vertex.at(1),2) +pow(v.Z() - vertex.at(2),2));
+
+            // Make the backwards projection for the showers
+            _gamma1_vtx_IP = _geoAlgo.SqDist(vertex_reco, shr1_bkwrd_hl) ;
+            _gamma2_vtx_IP = _geoAlgo.SqDist(vertex_reco, shr2_bkwrd_hl) ;
+
+            //std::cout<<"DISTANCE: "<<dist_temp<<", "<<_gamma1_vtx_IP <<std::endl ;
 
             _pi0_mass      = sqrt(2 * shr1.Energy() * shr2.Energy() *(1.-cos(oangle))); 
             _pi0_mom       = tot_pi0_mom;
@@ -403,11 +445,16 @@ namespace larlite {
             _gamma_low_RL  = shr1.Energy() < shr2.Energy() ? radL_shr1 : radL_shr2 ;
             _gamma_high_RL = shr1.Energy() < shr2.Energy() ? radL_shr2 : radL_shr1 ;
             _gamma_IP = IP;
+            _gamma1_vtx_IP = sqrt( pow( v.X() - st1.X(),2) + pow( v.Y() - st1.Y(),2) + pow( v.Z() - st1.Z(),2)); 
+            _gamma2_vtx_IP = sqrt( pow( v.X() - st2.X(),2) + pow( v.Y() - st2.Y(),2) + pow( v.Z() - st2.Z(),2)); 
+
             _gamma_tree->Fill() ;
         }// shower ID 2 
+
+ 
       }// shower ID 1 
 
-      std::cout<<"JustifyPi0Cuts - Found a candidate! "<<std::endl ;
+      //std::cout<<"JustifyPi0Cuts - Found a candidate! "<<std::endl ;
       
     return true;
   }
@@ -417,6 +464,7 @@ namespace larlite {
     if(_fout) { 
       _fout->cd(); 
       _gamma_tree->Write(); 
+      _one_gamma_tree->Write(); 
       _tree->Write();
     }
 
