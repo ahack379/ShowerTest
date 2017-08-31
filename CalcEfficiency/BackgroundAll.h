@@ -52,6 +52,8 @@ namespace larlite {
 
     void GetPi0Info  ( bool getit=false ) { _get_pi0_info = getit; }
 
+    void GetSingleShowerInfo  ( bool getit=false ) { _get_single_shower_info = getit; }
+
     void clear() ;
 
   protected:
@@ -80,6 +82,9 @@ namespace larlite {
   float _pi0_low_radL;
   float _pi0_high_radL;
 
+  float _gamma_E;
+  float _gamma_RL ;
+
   float _mu_angle ;
   float _mu_len ;
   float _mu_startx ;
@@ -96,6 +101,7 @@ namespace larlite {
 
   bool _mc_sample ;
   bool _get_pi0_info ;
+  bool _get_single_shower_info ;
   
     
   };

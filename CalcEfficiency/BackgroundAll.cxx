@@ -52,6 +52,9 @@ namespace larlite {
       _tree->Branch("pi0_low_radL",&_pi0_low_radL,"pi0_low_radL/F");
       _tree->Branch("pi0_high_radL",&_pi0_high_radL,"pi0_high_radL/F");
 
+      _tree->Branch("gamma_E",&_gamma_E,"gamma_E/F");
+      _tree->Branch("gamma_RL",&_gamma_RL,"gamma_RL/F");
+
    }
 
     return true;
@@ -83,6 +86,9 @@ namespace larlite {
     _pi0_high_shrE = -999;
     _pi0_low_radL = -999;
     _pi0_high_radL = -999;
+
+    _gamma_E = -999;
+    _gamma_RL = -999;
 
   }
   
@@ -347,6 +353,15 @@ namespace larlite {
       _pi0_high_shrE = shr1.Energy() < shr2.Energy() ? shr2.Energy() : shr1.Energy() ;
       _pi0_low_radL  = shr1.Energy() < shr2.Energy() ? radL_shr1 : radL_shr2 ;
       _pi0_high_radL = shr1.Energy() < shr2.Energy() ? radL_shr2 : radL_shr1 ;
+
+    }
+ 
+    if ( _get_single_shower_info ){
+      auto ev_s = storage->get_data<event_shower>("pi0_1gamma_candidate_showers");
+      if ( !ev_s ) return false;
+
+      _gamma_E = ev_s->at(0).Energy(2); 
+      _gamma_RL = ev_s->at(0).Energy(2); 
 
     }
     
