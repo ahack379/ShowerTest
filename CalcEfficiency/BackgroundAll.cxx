@@ -360,8 +360,13 @@ namespace larlite {
       auto ev_s = storage->get_data<event_shower>("pi0_1gamma_candidate_showers");
       if ( !ev_s ) return false;
 
+      geoalgo::Point_t vertex(3);
+      vertex[0] = vtx.X();
+      vertex[1] = vtx.Y();
+      vertex[2] = vtx.Z();
+
       _gamma_E = ev_s->at(0).Energy(2); 
-      _gamma_RL = ev_s->at(0).Energy(2); 
+      _gamma_RL = vertex.Dist(ev_s->at(0).ShowerStart());
 
     }
     
