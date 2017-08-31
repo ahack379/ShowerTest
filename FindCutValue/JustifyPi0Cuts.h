@@ -18,6 +18,7 @@
 #include "Analysis/ana_base.h"
 #include "GeoAlgo/GeoAlgo.h"
 #include "LArUtil/GeometryHelper.h"
+#include "LArUtil/SpaceChargeMicroBooNE.h"
 
 
 namespace larlite {
@@ -122,6 +123,9 @@ namespace larlite {
 
 
     ::geoalgo::GeoAlgo _geoAlgo ;
+    double _time2cm;
+    larutil::SpaceChargeMicroBooNE *_SCE;
+
 
   };
 }

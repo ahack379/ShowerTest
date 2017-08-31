@@ -87,6 +87,9 @@ namespace larlite {
       _compare_tree->Branch("_mc_dirz",&_mc_dirz,"mc_dirz/F");
     }
 
+    _SCE = new larutil::SpaceChargeMicroBooNE();
+    _time2cm = larutil::GeometryHelper::GetME()->TimeToCm();
+
     _event = -1;
 
     return true;
@@ -234,6 +237,11 @@ namespace larlite {
       xyz[0] = traj.at(traj.size() - 1).X();
       xyz[1] = traj.at(traj.size() - 1).Y();
       xyz[2] = traj.at(traj.size() - 1).Z();
+
+      // Correct for space charge effect
+      auto tvtx = traj.at(traj.size() - 1).T(); // ns
+      auto vtxtick = (tvtx / 1000.) * 2.; // time in tick :
+      auto vtxtimecm = vtxtick * _time2cm; // time in cm :
 
       //Map of lengths -> track id
       std::multimap<float,int> trk_map ;
@@ -442,6 +450,15 @@ namespace larlite {
 
 	 auto mcs = ev_mcshr->at(mc_g1_id);
 
+         auto st_x = mcs.DetProfile().X();
+         auto st_y = mcs.DetProfile().Y();
+         auto st_z = mcs.DetProfile().Z();
+
+         auto sce_corr = _SCE->GetPosOffsets(st_x,st_y,st_z);
+         _mc_startx = st_x + vtxtimecm - sce_corr.at(0); 
+         _mc_starty = st_y + sce_corr.at(1); 
+         _mc_startz = st_z + sce_corr.at(2);
+
          _mc_E = mcs.DetProfile().E();  
          _mc_startx = mcs.Start().X();  
          _mc_starty = mcs.Start().Y();  
@@ -458,6 +475,15 @@ namespace larlite {
        else if ( s1 == reco_g2_id ){
 
 	 auto mcs = ev_mcshr->at(mc_g2_id);
+
+         auto st_x = mcs.DetProfile().X();
+         auto st_y = mcs.DetProfile().Y();
+         auto st_z = mcs.DetProfile().Z();
+
+         auto sce_corr = _SCE->GetPosOffsets(st_x,st_y,st_z);
+         _mc_startx = st_x + vtxtimecm - sce_corr.at(0); 
+         _mc_starty = st_y + sce_corr.at(1); 
+         _mc_startz = st_z + sce_corr.at(2);
 
          _mc_E = mcs.DetProfile().E();  
          _mc_startx = mcs.Start().X();  
