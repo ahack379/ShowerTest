@@ -50,7 +50,7 @@ namespace larlite {
 
     auto ev_s = storage->get_data<event_shower>("showerreco");
     auto ev_v = storage->get_data<event_vertex>("numuCC_vertex");
-    //auto ev_t = storage->get_data<event_track>("numuCC_track");
+    auto ev_t = storage->get_data<event_track>("numuCC_track");
 
     storage->set_id( ev_s->run(), ev_s->subrun(), ev_s->event_id() );
     auto new_shower_v = storage->get_data<larlite::event_shower>("pi0_1gamma_candidate_showers");
@@ -58,8 +58,8 @@ namespace larlite {
     if( !ev_s || !ev_s->size() ){
       std::cout<<"Not enough reco'd showers..." <<ev_s->size()<<std::endl; return false; }
 
-    //if( !ev_t || !ev_t->size() ){
-    //  std::cout<<"No tagged track; what??" <<std::endl; return false; }
+    if( !ev_t || !ev_t->size() ){
+      std::cout<<"No tagged track; what??" <<std::endl; return false; }
 
     std::cout<<"\nEvent : "<<_event <<std::endl ; 
 
@@ -95,27 +95,33 @@ namespace larlite {
            continue;
 	 }
 
-         //if( radL_shr1 > 60 || radL_shr1 < 2 ){
-         if( radL_shr1 > 80 || radL_shr1 < 6 ){
+         if( radL_shr1 > 62 ) { 
+         //if( radL_shr1 > 80 || radL_shr1 < 6 ){
 	   std::cout<<"Radiation length : "<<radL_shr1<<std::endl ;
            continue;
 	 }
 
-         if( _pi0_high_shrE < 40 ){
-	   std::cout<<"Energy: "<<_pi0_high_shrE<<std::endl ;
-           continue;
-	 }
+        // Slope cut option -- see google drive slides
+        //auto y = 4 - (4./62) * radL_shr1 ;
+	//if ( dist > y )
+	//  continue;
+
+
+         //if( _pi0_high_shrE < 40 ){
+	 //  std::cout<<"Energy: "<<_pi0_high_shrE<<std::endl ;
+         //  continue;
+	 //}
 
      	cand_map.emplace(dist,s1);
 
-        std::cout<<" Dist to vtx : "<<dist_to_vtx<<", IP: "<<dist <<", energy: "<<_pi0_high_shrE<<std::endl ;
+        //std::cout<<" Dist to vtx : "<<dist_to_vtx<<", IP: "<<dist <<", energy: "<<_pi0_high_shrE<<std::endl ;
 
       }// shower ID 1 
 
       if( cand_map.size() < 1 ) return false;
 
-      //auto tag_trk = ev_t->at(0) ;
-      //_mu_angle      = cos(tag_trk.Theta());
+      auto tag_trk = ev_t->at(0) ;
+      _mu_angle      = cos(tag_trk.Theta());
 
       // Store the new shower data product
       new_shower_v->emplace_back(ev_s->at(cand_map.begin()->second));
