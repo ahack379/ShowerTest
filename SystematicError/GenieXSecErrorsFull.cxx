@@ -27,7 +27,7 @@ namespace larlite {
     _tree = nullptr;
     _final_tree = nullptr;
 
-   _genie_label_v = {"FermiGasModelKf", "FermiGasModelSf", "IntraNukeNabs", "IntraNukeNcex", "IntraNukeNel", "IntraNukeNinel", "IntraNukeNmfp", "IntraNukeNpi", "IntraNukePIabs", "IntraNukePIcex", "IntraNukePIel", "IntraNukePIinel", "IntraNukePImfp", "IntraNukePIpi", "NC", "NonResRvbarp1pi", "NonResRvbarppi", "NonResRvp1pi", "NonResRvppi", "ResDecayEta", "ResDecayGamma", "ResDecayTheta", "ccresAxial", "ccresVector", "cohMA", "cohR0", "ncelAxial", "ncelEta", "ncresAxial", "ncresVector", "qema", "qevec"};
+   _genie_label_v = {"AGKYpT","AGKYxF","DISAth","DISBth","DISCv1u","DISCv2u","FermiGasModelKf", "FermiGasModelSf","FormZone", "IntraNukeNabs", "IntraNukeNcex", "IntraNukeNel", "IntraNukeNinel", "IntraNukeNmfp", "IntraNukeNpi", "IntraNukePIabs", "IntraNukePIcex", "IntraNukePIel", "IntraNukePIinel", "IntraNukePImfp", "IntraNukePIpi", "NC", "NonResRvbarp1pi", "NonResRvbarp2pi", "NonResRvp1pi", "NonResRvp2pi", "ResDecayEta", "ResDecayGamma", "ResDecayTheta", "ccresAxial", "ccresVector", "cohMA", "cohR0", "ncelAxial", "ncelEta", "ncresAxial", "ncresVector", "qema", "qevec"};
 
     fGeometry = nullptr;
 
@@ -67,23 +67,23 @@ namespace larlite {
  
   bool GenieXSecErrorsFull::analyze(storage_manager* storage) {
 
-     bool foundit = false;
-     auto it = _map.find(storage->subrun_id());
+     //bool foundit = false;
+     //auto it = _map.find(storage->subrun_id());
 
-     if( it != _map.end() ){
-       while ( it->first == storage->subrun_id() ){  
-         auto temp_event = it->second ; 
-         if( temp_event == storage->event_id() )
-           foundit = true;
+     //if( it != _map.end() ){
+     //  while ( it->first == storage->subrun_id() ){  
+     //    auto temp_event = it->second ; 
+     //    if( temp_event == storage->event_id() )
+     //      foundit = true;
 
-         it++; 
-         }   
-        if ( !foundit)
-         _map.emplace(storage->subrun_id(), storage->event_id() );
-        else return false;
-       }   
-      else 
-         _map.emplace(storage->subrun_id(), storage->event_id() );
+     //    it++; 
+     //    }   
+     //   if ( !foundit)
+     //    _map.emplace(storage->subrun_id(), storage->event_id() );
+     //   else return false;
+     //  }   
+     // else 
+     //    _map.emplace(storage->subrun_id(), storage->event_id() );
 
 
     auto ev_mctruth = storage->get_data<event_mctruth>("generator"); 
@@ -166,19 +166,22 @@ namespace larlite {
       //  xsec_theta_truth_m1[function] -> Fill(lep_dcosz_truth, (m.second.at(2*function)));
       //}
 
-        }
+     }
 
     return true;
   }
 
   bool GenieXSecErrorsFull::finalize() {
 
-   // std::cout<<"All events: "<<_all_evts_nominal<<std::endl ;
-   // for( int i = 0 ; i < _all_evts_m1.size(); i++) {
-   //   std::cout<<"\nFunction: "<<_genie_label_v[i]<<std::endl ;
-   //   std::cout<<"All events (-3sig): "<<_all_evts_m1.at(i)<<std::endl ;
-   //   std::cout<<"All events (+3sig): "<<_all_evts_p1.at(i)<<std::endl ;
-   // }
+    std::cout<<"All events: "<<_all_evts_nominal<<std::endl ;
+    for( int i = 0 ; i < _all_evts_m1.size(); i++) {
+      std::cout<<"\nFunction: "<<_genie_label_v[i]<<std::endl ;
+      std::cout<<"All events (-3sig): "<<_all_evts_m1.at(i)<<std::endl ;
+      std::cout<<"All events (+3sig): "<<_all_evts_p1.at(i)<<std::endl ;
+    }
+
+    //for( int i = 0 ; i < _genie_label_v.size(); i++) 
+    //  std::cout<<_genie_label_v[i]<<std::endl ;
 
     std::cout<<"All events: "<<_all_evts_nominal<<std::endl ;
 

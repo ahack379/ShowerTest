@@ -9,12 +9,13 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-#pragma link C++ class larlite::RepoSelectionII+;
 #pragma link C++ class larlite::GenieXSecErrorsFull+;
 #pragma link C++ class larlite::GenieXSecErrorsSelected+;
 #pragma link C++ class larlite::GetEventRunNumbers+;
 #pragma link C++ class larlite::DataGetEventRunNumbers+;
 #pragma link C++ class larlite::EvtWeightFilter+;
+#pragma link C++ class larlite::SaveWeights+;
+#pragma link C++ class larlite::WriteWeights+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
 
