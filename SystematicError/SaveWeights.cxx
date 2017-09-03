@@ -35,11 +35,13 @@ namespace larlite {
         double wgt ;
         while( in >> wgt ){
           wgt_v.emplace_back(wgt);
-           }
-        std::cout<<"LENGTH :"<<wgt_v.size()<<", "<<i<<std::endl ;
-	i++;
-       _wgtmap[evinfo] = wgt_v ;
+        }
+        //std::cout<<"LENGTH :"<<wgt_v.size()<<", "<<i<<std::endl ;
+	    i++;
+        _wgtmap[evinfo] = wgt_v ;
     }   
+
+    std::cout<<"Function size: " <<_func_v.size()<<std::endl;
 
     return true;
   }
@@ -51,7 +53,6 @@ namespace larlite {
     auto subrun = storage->subrun_id();
 
     auto ev_wgt = storage->get_data<event_mceventweight>("genieeventweight");
-    //auto ev_vtx = storage->get_data<event_vertex>("numuCC_vertex");
 
     storage->set_id(run, subrun, event);
 
@@ -64,25 +65,22 @@ namespace larlite {
 
 	if ( element.first != evinfo) continue;
 	
-	std::cout<<"Comparing subrun + event : "<<element.first.first <<", "<<element.first.second<<" with "<<evinfo.first<<", "<<evinfo.second<<std::endl;
+	//std::cout<<"Comparing subrun + event : "<<element.first.first <<", "<<element.first.second<<" with "<<evinfo.first<<", "<<evinfo.second<<std::endl;
 
 	auto const& wgt_v = element.second;
 	std::map<std::string,std::vector<double>> w_map; 
 
 	for( int i = 0; i < _func_v.size() ; i++ ){
-	  std::vector<double> temp_wgt_v = {wgt_v[i], wgt_v[i + 1] };
-	  std::cout<<"FUNCTION: "<<_func_v[i]<<", "<<temp_wgt_v[0]<<std::endl ;
+	  std::vector<double> temp_wgt_v = {wgt_v[2*i], wgt_v[2*i + 1] };
+	  std::cout<<"FUNCTION: "<<_func_v[i]<<", "<<temp_wgt_v[0]<<", "<<temp_wgt_v[1]<<std::endl ;
 
 	  w_map[_func_v[i]] = temp_wgt_v ; 
 	}
 
-    std::cout<<"OUTSIDE!"<<std::endl ;
-
      larlite::mceventweight thisweight(w_map);
-    std::cout<<"OUTSIDE!"<<std::endl ;
      ev_wgt->emplace_back( thisweight);
 
-     //if (ev_wgt->size() == 0 )
+     if (ev_wgt->size() == 0 )
        std::cout<<"WHAT IS HAPPENING\n\n\n\n\n\n\n\n "<<std::endl ;
 
 	return true;
