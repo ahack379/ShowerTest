@@ -20,12 +20,12 @@ for x in xrange(len(sys.argv)-1):
 my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
 
 # Specify output root file name
-my_proc.set_output_file("ana.root");
+my_proc.set_output_file("genie_unordered_events_reproc.root");
 
 my_proc.enable_filter(True)
 
 ana = fmwk.EvtWeightFilter()
-my_proc.add_process(ana)
+my_proc.add_process(ana,True)
 
 print
 print  "Finished configuring ana_processor. Start event loop!"

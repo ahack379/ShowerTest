@@ -95,21 +95,5 @@ namespace larlite {
     return true;
   }
 
-//  void SaveWeights::addWeight(const int& run, const int& subrun, const int& event, double *x ) { //std::vector<double> x ) {
-//
-//    std::pair<int,int> evinfo;
-//    evinfo = std::make_pair(subrun,event);
-//
-//    std::vector<double> wgt_v ;
-//
-//    for( int i = 0; i < 64; i ++)
-//        wgt_v.emplace_back(x[i]) ;
-//
-//    _wgtmap[evinfo] = wgt_v;
-//    
-//    return;
-//
-//  }
-
 }
 #endif

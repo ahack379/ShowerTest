@@ -181,7 +181,7 @@ namespace larlite {
       std::cout<<_sel_evts_m1[i]<<", " ;
 
     std::cout<<std::endl ;
-    for( int i = 0 ; i < _sel_evts_m1.size(); i++) 
+    for( int i = 0 ; i < _sel_evts_p1.size(); i++) 
       std::cout<<_sel_evts_p1[i]<<", " ;
 
     std::cout<<std::endl ;
@@ -191,7 +191,7 @@ namespace larlite {
       std::cout<<_bkgd_evts_m1[i]<<", " ;
 
     std::cout<<std::endl ;
-    for( int i = 0 ; i < _sel_evts_m1.size(); i++) 
+    for( int i = 0 ; i < _sel_evts_p1.size(); i++) 
       std::cout<<_bkgd_evts_p1[i]<<", " ;
 
     std::cout<<std::endl ;

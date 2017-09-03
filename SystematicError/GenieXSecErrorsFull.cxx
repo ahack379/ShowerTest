@@ -121,7 +121,7 @@ namespace larlite {
       // According to genie weight package, plus sig is stored first 
       for ( auto const & m : wgt ) { 
          auto w_v = m.second ;
-         std::cout<<"Parameter: "<<m.first<<", "<<m.second.at(0)<<", "<<m.second.at(1)<<std::endl;
+         //std::cout<<"Parameter: "<<m.first<<", "<<m.second.at(0)<<", "<<m.second.at(1)<<std::endl;
          _all_evts_p1[it] += (w_v.at(0)) ; 
          _all_evts_m1[it] += (w_v.at(1)) ;
          it++;
