@@ -29,6 +29,8 @@ namespace larlite {
 
    _genie_label_v = {"AGKYpT","AGKYxF","DISAth","DISBth","DISCv1u","DISCv2u","FermiGasModelKf", "FermiGasModelSf","FormZone", "IntraNukeNabs", "IntraNukeNcex", "IntraNukeNel", "IntraNukeNinel", "IntraNukeNmfp", "IntraNukeNpi", "IntraNukePIabs", "IntraNukePIcex", "IntraNukePIel", "IntraNukePIinel", "IntraNukePImfp", "IntraNukePIpi", "NC", "NonResRvbarp1pi", "NonResRvbarp2pi", "NonResRvp1pi", "NonResRvp2pi", "ResDecayEta", "ResDecayGamma", "ResDecayTheta", "ccresAxial", "ccresVector", "cohMA", "cohR0", "ncelAxial", "ncelEta", "ncresAxial", "ncresVector", "qema", "qevec"};
 
+
+     std::cout<<"GENIE LABLES: "<<_genie_label_v.size()<<std::endl ;
     
     fGeometry = nullptr;
 
@@ -39,15 +41,15 @@ namespace larlite {
 
     fGeometry = larutil::Geometry::GetME();
     _tot_pot = 0. ;
-    int funcs = 32; //64 total, +- for each func
+    int funcs = _genie_label_v.size() ; //78 total, +- for each func
 
     _sel_evts_nominal = 0;
-    _sel_evts_m1.resize(funcs,0) ; // 30 weights
-    _sel_evts_p1.resize(funcs,0) ; // 30 weights
+    _sel_evts_m1.resize(funcs,0) ; 
+    _sel_evts_p1.resize(funcs,0) ; 
 
     _bkgd_evts_nominal = 0;
-    _bkgd_evts_m1.resize(funcs,0) ; // 30 weights
-    _bkgd_evts_p1.resize(funcs,0) ; // 30 weights
+    _bkgd_evts_m1.resize(funcs,0) ; 
+    _bkgd_evts_p1.resize(funcs,0) ;
 
     if( !_tree){
        _tree = new TTree("tree","tree");
@@ -73,7 +75,6 @@ namespace larlite {
   bool GenieXSecErrorsSelected::analyze(storage_manager* storage) {
 
     auto ev_mctruth = storage->get_data<event_mctruth>("generator"); 
-    //auto ev_mcs = storage->get_data<event_mcshower>("mcreco");
     auto ev_wgt= storage->get_data<event_mceventweight>("genieeventweight"); 
 
     if(!ev_mctruth || !ev_mctruth->size() ){ 
@@ -88,12 +89,6 @@ namespace larlite {
 
     _events ++ ;
 
-
-    //if(!ev_mcs || !ev_mcs->size() ){
-    //  std::cout<<"No mcshower..." <<std::endl;
-    //  return false;
-    //  }
-  
     auto nu  = ev_mctruth->at(0).GetNeutrino();
     double xyz[3] = {0.};
     auto traj = nu.Nu().Trajectory();
@@ -137,54 +132,19 @@ namespace larlite {
     // We know in the fv at this point 
     if( n_mu == 1 && n_pi0 == 1 && nu_energy > 0.5 && infv){
 
-      //std::vector<int> shr_ids;
-      //for ( int si = 0; si < ev_mcs->size(); si++){ 
-
-      //  auto s = ev_mcs->at(si);
-      //  if( s.PdgCode() != 22 ) continue; 
-      //
-      //  auto st = s.Start();
-      //  auto dist = sqrt( pow(st.X() - start[0],2) + pow(st.Y() - start[1],2) + pow(st.Z() - start[2],2) );
-      //
-      //  if ( dist < 0.001 )
-      //    shr_ids.emplace_back(si) ;
-      //}
-      //
-      //if( shr_ids.size() == 2 ){
-
-      //  auto s1 = ev_mcs->at(shr_ids[0]).Start();
-      //  auto s2 = ev_mcs->at(shr_ids[1]).Start();
-      //  auto mag1 = sqrt( s1.Px()*s1.Px()+s1.Py()*s1.Py()+s1.Pz()*s1.Pz() );
-      //  auto mag2 = sqrt( s2.Px()*s2.Px()+s2.Py()*s2.Py()+s2.Pz()*s2.Pz() );
-      //  auto dot = s1.Px()*s2.Px() + s1.Py()*s2.Py() + s1.Pz()*s2.Pz() ;
-      //  lep_dcosz_truth = acos( dot / mag1 / mag2 );  
-      //}
-
       _xsec_mom_truth = lep_mom_truth; 
       _xsec_theta_truth = lep_dcosz_truth;
       _sel_evts_nominal ++ ;
 
-      //auto w_v = wgt.begin()->second; //
-      //std::cout<<"Number of weights : "<<w_v.size()<<std::endl ;
-
-      //for ( int function = 0; function < w_v.size()/2; function++ ){ 
-
-      //  _sel_evts_m1[function] += (w_v.at(2*function)) ; 
-      //  _sel_evts_p1[function] += (w_v.at(2*function+1)) ;
-      //  _weight_v.emplace_back(w_v.at(2*function));
-      //  _weight_v.emplace_back(w_v.at(2*function+1));
-      //  
-      // }
-
       int it = 0;
+
       for ( auto const & m : wgt ) { 
          auto w_v = m.second ;
-         std::cout<<"Parameter: "<<m.first<<", "<<m.second.size() <<std::endl;
-         //for ( auto const & w : m.second){
-           _sel_evts_m1[it] += (w_v.at(0)) ; 
-           _sel_evts_p1[it] += (w_v.at(1)) ;
+         //std::cout<<"Parameter: "<<m.first<<", "<<m.second.at(0)<<", "<<m.second.at(1)<<std::endl;  //m.second.size() <<std::endl;
+         _sel_evts_p1[it] += (w_v.at(0)) ; 
+         _sel_evts_m1[it] += (w_v.at(1)) ;
+
          it++;
-         // }   
        }
 
       _tree->Fill();
@@ -196,17 +156,11 @@ namespace larlite {
         int it = 0;
         for ( auto const & m : wgt ) { 
            auto w_v = m.second ;
-             _bkgd_evts_m1[it] += (w_v.at(0)) ; 
-             _bkgd_evts_p1[it] += (w_v.at(1)) ;
+             _bkgd_evts_p1[it] += (w_v.at(0)) ; 
+             _bkgd_evts_m1[it] += (w_v.at(1)) ;
            it++;
          }   
 
-        //auto w_v = wgt.begin()->second; //
-        //for ( int function = 0; function < w_v.size()/2; function++ ){ 
-        //  _bkgd_evts_m1[function] += (w_v.at(2*function)) ; 
-        //  _bkgd_evts_p1[function] += (w_v.at(2*function+1)) ;
-        //  
-        // }
       }
 
     return true;
@@ -227,7 +181,7 @@ namespace larlite {
       std::cout<<_sel_evts_m1[i]<<", " ;
 
     std::cout<<std::endl ;
-    for( int i = 0 ; i < _sel_evts_m1.size(); i++) 
+    for( int i = 0 ; i < _sel_evts_p1.size(); i++) 
       std::cout<<_sel_evts_p1[i]<<", " ;
 
     std::cout<<std::endl ;
@@ -237,17 +191,17 @@ namespace larlite {
       std::cout<<_bkgd_evts_m1[i]<<", " ;
 
     std::cout<<std::endl ;
-    for( int i = 0 ; i < _sel_evts_m1.size(); i++) 
+    for( int i = 0 ; i < _sel_evts_p1.size(); i++) 
       std::cout<<_bkgd_evts_p1[i]<<", " ;
 
     std::cout<<std::endl ;
 
-    _final_tree->Fill();
-    if(_fout){
-     _fout->cd();
-     _tree->Write();
-     _final_tree->Write();
-    }
+    //_final_tree->Fill();
+    //if(_fout){
+    // _fout->cd();
+    // _tree->Write();
+    // _final_tree->Write();
+    //}
      
     return true;
   }

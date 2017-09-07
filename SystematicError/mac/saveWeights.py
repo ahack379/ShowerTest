@@ -20,7 +20,7 @@ for x in xrange(len(sys.argv)-1):
 my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
 
 # Specify output root file name
-my_proc.set_output_file("pi0_ordered_w_weights.root");
+my_proc.set_output_file("pi0_w_weights.root");
 
 ana = fmwk.SaveWeights()
 my_proc.add_process(ana)

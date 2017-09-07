@@ -38,11 +38,11 @@ namespace larlite {
     fGeometry = larutil::Geometry::GetME();
     _tot_pot = 0. ;
 
-    int funcs = 32; 
+    int funcs = _genie_label_v.size() ; 
 
     _all_evts_nominal = 0;
-    _all_evts_m1.resize(funcs,0) ; // 30 weights
-    _all_evts_p1.resize(funcs,0) ; // 30 weights
+    _all_evts_m1.resize(funcs,0) ; 
+    _all_evts_p1.resize(funcs,0) ; 
 
     if( !_tree){
        _tree = new TTree("tree","tree");
@@ -66,25 +66,6 @@ namespace larlite {
 
  
   bool GenieXSecErrorsFull::analyze(storage_manager* storage) {
-
-     //bool foundit = false;
-     //auto it = _map.find(storage->subrun_id());
-
-     //if( it != _map.end() ){
-     //  while ( it->first == storage->subrun_id() ){  
-     //    auto temp_event = it->second ; 
-     //    if( temp_event == storage->event_id() )
-     //      foundit = true;
-
-     //    it++; 
-     //    }   
-     //   if ( !foundit)
-     //    _map.emplace(storage->subrun_id(), storage->event_id() );
-     //   else return false;
-     //  }   
-     // else 
-     //    _map.emplace(storage->subrun_id(), storage->event_id() );
-
 
     auto ev_mctruth = storage->get_data<event_mctruth>("generator"); 
     auto ev_wgt= storage->get_data<event_mceventweight>("genieeventweight"); 
@@ -135,36 +116,16 @@ namespace larlite {
 
       _all_evts_nominal ++ ;
 
-      //auto w_v = wgt.begin()->second; //
-      //std::cout<<"Number of weights : "<<w_v.size()<<std::endl ;
-      //for ( int function = 0; function < w_v.size()/2; function++ ){ 
-      //  _all_evts_m1[function] += (w_v.at(2*function)) ; 
-      //  _all_evts_p1[function] += (w_v.at(2*function+1)) ;
-      //  _weight_v.emplace_back(w_v.at(2*function));
-      //  _weight_v.emplace_back(w_v.at(2*function+1));
-      //  //xsec_theta_truth_m1[function] -> Fill(lep_dcosz_truth, (m.second.at(2*function)));
-      // }
-
       int it = 0;
 
+      // According to genie weight package, plus sig is stored first 
       for ( auto const & m : wgt ) { 
          auto w_v = m.second ;
-         //std::cout<<"Parameter: "<<m.first<<", "<<m.second.size() <<std::endl;
-         _all_evts_m1[it] += (w_v.at(0)) ; 
-         _all_evts_p1[it] += (w_v.at(1)) ;
+         //std::cout<<"Parameter: "<<m.first<<", "<<m.second.at(0)<<", "<<m.second.at(1)<<std::endl;
+         _all_evts_p1[it] += (w_v.at(0)) ; 
+         _all_evts_m1[it] += (w_v.at(1)) ;
          it++;
        }   
-
-      //_tree->Fill();
-      //xsec_mom_truth -> Fill(lep_mom_truth);
-      //xsec_theta_truth -> Fill(lep_dcosz_truth);
-      //all_evts_nominal++;
-      //for ( int function = 0; function < (m.second.size())/2; function++ ){ 
-      //  xsec_mom_truth_p1[function] -> Fill(lep_mom_truth, (m.second.at(2*function+1)));
-      //  xsec_mom_truth_m1[function] -> Fill(lep_mom_truth, (m.second.at(2*function))); 
-      //  xsec_theta_truth_p1[function] -> Fill(lep_dcosz_truth, (m.second.at(2*function+1)));
-      //  xsec_theta_truth_m1[function] -> Fill(lep_dcosz_truth, (m.second.at(2*function)));
-      //}
 
      }
 
@@ -180,9 +141,6 @@ namespace larlite {
       std::cout<<"All events (+3sig): "<<_all_evts_p1.at(i)<<std::endl ;
     }
 
-    //for( int i = 0 ; i < _genie_label_v.size(); i++) 
-    //  std::cout<<_genie_label_v[i]<<std::endl ;
-
     std::cout<<"All events: "<<_all_evts_nominal<<std::endl ;
 
     for( int i = 0 ; i < _all_evts_m1.size(); i++) 
@@ -194,12 +152,12 @@ namespace larlite {
 
     std::cout<<std::endl ;
 
-    _final_tree->Fill();
-    if(_fout){
-     _fout->cd();
-     //_tree->Write();
-     //_final_tree->Write();
-    }
+    //_final_tree->Fill();
+    //if(_fout){
+    // _fout->cd();
+    // //_tree->Write();
+    // //_final_tree->Write();
+    //}
      
     return true;
   }
