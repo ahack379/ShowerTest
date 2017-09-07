@@ -16,6 +16,7 @@
 #pragma link C++ class larlite::POTCalc+;
 #pragma link C++ class larlite::AcceptanceStudy+;
 #pragma link C++ class larlite::BackgroundAll+;
+#pragma link C++ class larlite::BackgroundObnoxious+;
 
 //ADD_NEW_CLASS ... do not change this line
 #endif

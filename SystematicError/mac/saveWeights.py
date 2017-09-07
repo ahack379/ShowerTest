@@ -17,10 +17,10 @@ for x in xrange(len(sys.argv)-1):
     my_proc.add_input_file(sys.argv[x+1])
 
 # Specify IO mode
-my_proc.set_io_mode(fmwk.storage_manager.kREAD)
+my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
 
 # Specify output root file name
-my_proc.set_ana_output_file("saveweights_reproc.root");
+my_proc.set_output_file("pi0_ordered_w_weights.root");
 
 ana = fmwk.SaveWeights()
 my_proc.add_process(ana)

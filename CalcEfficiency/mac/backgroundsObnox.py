@@ -19,11 +19,13 @@ for x in xrange(len(sys.argv)-1):
 # Specify IO mode
 my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 
-# Attach an analysis unit ... here we use a base class which does nothing.
-# Replace with your analysis unit if you wish.
-ana = fmwk.BackgroundCalc()
+my_proc.set_ana_output_file('mcc82_backgroundsCCNC.root')
 
-my_proc.set_ana_output_file('backgrounds_mcc82.root')
+ana = fmwk.BackgroundObnoxious()
+ana.UseMCSample(True)
+ana.GetPi0Info(True)
+ana.GetSingleShowerInfo(False)
+
 my_proc.add_process(ana)
 
 print

@@ -9,14 +9,14 @@
 #include "DataFormat/track.h"
 #include "DataFormat/vertex.h"
 
+#include "LArUtil/GeometryHelper.h"
+
 namespace larlite {
 
   bool BackgroundCalc::initialize() {    
 
     _event = -1; 
     //_event_list.clear();
-
-   // _pi0_list = {8,31,35,42,46,48,50,52,55,63,85,90,99,101,104,105,106,113,132,137,146,147,148,155,171,174,181,235,244,250,261,265,276,277,278,294,301,337,370,374,378,397,404,427,430,440,444,449,450,459,473,474,494,500,513,515,537,548,573,579,605,606,614,631,637,650,670,722,734,757,762,798,812,815,840,862,864,898,907,913,953,954,970,971,974,975,980,986,1040,1064,1066,1077,1086,1087,1101,1102,1103,1114,1122,1165,1181,1192,1195,1206,1207,1209,1214,1223,1228,1243,1265,1266,1271,1272,1296,1305,1311,1314,1320,1322,1330,1338,1373,1374,1402,1403,1411,1412,1441,1458,1474,1476,1489,1491,1492,1493,1500,1527,1541,1548,1576,1587,1597,1614,1621,1623,1631,1648,1665,1668,1672,1685,1707,1712,1720,1730,1735,1756,1773,1774,1775,1779,1808,1818,1819,1820,1831,1833,1849,1851,1852,1871,1885,1888,1894,1895,1917,1918,1932,1957,1969,1970,1974,1979,1980,1996,2015,2017,2037,2045,2058,2068,2078,2085,2103,2109,2114,2134,2140,2147,2150,2156,2157,2164,2165,2167,2173,2180,2195,2199,2200,2207,2208,2222,2225,2232,2233,2240,2242,2288,2293,2309,2325,2341,2343,2352,2391,2393,2427,2436,2451,2458,2481,2485,2488,2498,2514,2518,2520,2529,2545,2550,2558,2559,2573,2575,2582,2602,2608,2623,2628,2656,2674,2693,2696,2697,2702,2726,2737,2738,2788,2789,2799,2808,2821,2842,2847,2849,2871,2915,2918,2921,2939,2950,2952,2967,2985,3011,3023,3043,3057,3075,3083,3088,3090,3109,3115,3117,3118,3125,3177,3181,3186,3196,3197,3204,3207,3211,3215,3235,3236,3245,3271,3282,3283,3287,3293,3296,3300,3306,3312,3316,3323,3324,3326,3337,3364,3373,3378,3379,3397,3410,3426,3436,3439,3440,3445,3461,3465,3466,3482,3509,3523,3530,3538,3545,3552,3559,3560,3575,3608,3625,3633,3655,3668,3672,3687,3697,3700,3740,3762,3785,3805,3809,3816,3821,3840,3843,3865,3882,3899,3915,3922,3942,3943,3948,3964,3987,4007,4008,4017,4019,4037,4042,4062,4064,4069,4070,4073,4098,4116,4148,4149,4160,4173,4177,4178,4189,4190,4198,4200,4201,4216,4220,4236,4239,4242,4248,4261,4284,4291,4300,4310,4317,4339,4355,4364,4387,4388,4391,4393,4394,4396,4434,4436,4442,4443,4458,4460,4461,4466,4473,4504,4506,4507,4517,4520,4522,4533,4535,4567,4572,4578,4582,4584,4590,4612,4618,4632,4633,4640,4648,4663,4671,4693,4701,4703,4709,4715,4716,4761,4769,4785,4796,4805,4807,4816,4821,4832,4843,4853,4854,4871,4874,4891,4904,4905,4909,4915,4924,4926,4929,4930,4935,4936,4964,5010,5011,5024,5043,5068,5071,5090,5094,5107,5112,5130,5139,5179,5202,5213,5230,5251,5259,5265,5274,5275,5285,5287,5290,5296,5311,5331,5335,5347,5352,5360,5366,5372,5376,5383,5384,5388,5406,5408,5413,5450,5459,5463,5483,5486,5490,5512,5518,5522,5542,5545,5561,5633,5640,5651,5663,5665,5682,5688,5690,5712,5713,5717,5742,5764,5767,5768,5778,5785,5791,5797,5812,5816,5817,5827,5830,5852,5867,5868,5873,5875,5886,5900,5925,5942,5945,5951,5970,5982,5992,6000,6009,6015,6035,6042,6077,6080,6098,6127,6150,6153,6166,6202,6207,6211,6215,6250,6265,6274,6280,6283,6296,6302,6309,6315,6318,6323,6332,6342,6348,6353,6358,6372,6390,6398,6406,6417,6418,6436,6444,6445,6455,6459,6465,6469,6474,6476,6484,6505,6507,6511,6515,6533,6541,6547,6557,6569,6571,6586,6594,6602,6605,6609,6621,6634,6647,6648,6652,6674,6681,6693,6696,6762,6768,6775,6776,6780,6809,6818,6829,6830,6833,6836,6843,6848,6852,6883,6897,6899,6926,6927,6953,6954,6955,6957,6964,6967,6973,6974,6983,6993,7004,7035,7037,7047,7058,7060,7062,7074,7107,7111,7132,7148,7162,7177,7184,7187,7195,7209,7214,7215,7233,7239,7248,7258,7262,7286,7293,7308,7309,7311,7323,7332,7361,7363,7391,7395,7402,7407,7408,7411,7412,7424,7431,7441,7447,7452,7460,7463,7473,7479,7481,7512,7517,7521,7527,7535,7536,7546,7555,7564,7583,7603,7609,7619,7641,7645,7669,7680,7683,7693,7715,7725,7731,7732,7739,7751,7755,7756,7764,7772,7775,7792,7794,7810,7812,7826,7828,7829,7833,7836,7837,7843,7867,7874,7883,7894,7906,7917,7924,7936,7942,7978,8001,8006,8024,8025,8066,8072,8079,8080,8091,8102};
 
     _n_noise = 0;     // 1
     _n_cosmic = 0;    // 2
@@ -57,11 +57,10 @@ namespace larlite {
   
   bool BackgroundCalc::analyze(storage_manager* storage) {
 
+    auto geomH = ::larutil::GeometryHelper::GetME(); 
+
     _bkgd_id = -1 ;
     _event++ ;
-    //if ( std::find(_pi0_list.begin(),_pi0_list.end(),_event) == _pi0_list.end() )
-    //  return false;
-
     //std::cout<<"\nEvent is : "<<_event <<", "<<storage->event_id()<<", "<<storage->subrun_id()<<std::endl ;
 
     auto ev_mctruth= storage->get_data<event_mctruth>("generator"); 
@@ -174,59 +173,15 @@ namespace larlite {
     //Map of lengths -> track id
     std::multimap<float,int> trk_map ;
 
-    //float min_dist = 10000;
-
-    // Find closest + longest pandoraNu track to vertex
-    //for ( size_t ti = 0; ti < ev_trk->size(); ti++ ) { 
-
-    //  auto t_vtx = ev_trk->at(ti).Vertex() ;
-    //  auto t_end = ev_trk->at(ti).End() ;
-    //
-    //  float dist_st = sqrt( pow(t_vtx.X() - vtxXYZ[0],2) + 
-    //                        pow(t_vtx.Y() - vtxXYZ[1],2) + 
-    //                        pow(t_vtx.Z() - vtxXYZ[2],2) );  
-
-    //  float dist_end = sqrt( pow(t_end.X() - vtxXYZ[0],2) + 
-    //                         pow(t_end.Y() - vtxXYZ[1],2) + 
-    //                         pow(t_end.Z() - vtxXYZ[2],2) );  
-
-    //   if ( dist_st < 3 || dist_end < 3 ){
-
-    //      float len = ev_trk->at(ti).Length();
-    //      trk_map.emplace(1./len,ti);
-    //      min_dist = dist_st < dist_end ? dist_st : dist_end ; 
-    //    }   
-    // }   
-
-    //int max_it = -1;
-    //float max_dot = -1.;
-
-    //if( trk_map.size() ) { 
-
-    //auto m_st = ev_tagged_trk->at(0).VertexDirection();     
-    //auto m_norm = sqrt( pow(m_st.Px(),2) + pow(m_st.Py(),2) + pow(m_st.Pz(),2)); 
-
-    //  for( auto & ti : trk_map ){
-    //        
-    //    auto t = ev_trk->at(ti.second);
-    //    auto t_st = t.VertexDirection();
-    //    
-    //    auto dot = (m_st.Px() * t_st.Px() + m_st.Py() * t_st.Py() + m_st.Pz() * t_st.Pz())/m_norm ;
-
-    //    if ( fabs(dot) > max_dot ){
-    //         max_dot = dot;
-    //         max_it = ti.second ;
-    //      }
-    //    }
-    //  }   
-    //else return false ;
-
-    // Annnnnnd same thing for MC, to grab the origin of the track and assess backgrounds properly
+    // Grab the origin of the track and assess backgrounds properly
     std::multimap<float,int> mctrk_map ;
     auto tag_trk = ev_tagged_trk->at(0);
     auto tag_st = tag_trk.Vertex() ;
     auto tag_end = tag_trk.End() ;
     float mc_min_dist = 1e9;
+
+    auto reco2d = geomH->Point_3Dto2D(tag_st,2);
+    auto reco2d_end = geomH->Point_3Dto2D(tag_end,2);
 
     for ( size_t ti = 0; ti < ev_mctrk->size(); ti++ ) { 
 
@@ -241,13 +196,35 @@ namespace larlite {
                              pow(mc_vtx.Y() - tag_end.Y(),2) + 
                              pow(mc_vtx.Z() - tag_end.Z(),2) );  
 
-       //if ( dist_st > 80 || dist_end > 80) 
-       //  std::cout<<"dist_st end: "<<dist_st<<", "<<dist_end<<", "<<tag_end.X()<<", "<<tag_st.X()<<std::endl ;
+       
+       //std::vector<double> xyz = { mc_vtx.X(), mc_vtx.Y(), mc_vtx.Z() } ;
+       //std::vector<double> xyzend = { mc_end.X(), mc_end.Y(), mc_end.Z() } ;
+
+       //if ( _event != 87 ) return false;
+
+       //auto mc2d = geomH->Point_3Dto2D(xyz,2);
+       //auto mc2d_end = geomH->Point_3Dto2D(xyzend,2);
+
+       ////if ( dist_st < 150 || dist_end < 150){ 
+       //if ( ev_mctrk->at(ti).Origin() == 1 ){
+       //  std::cout<<"\ndist_st end: "<<dist_st<<", "<<dist_end<<std::endl; 
+       //  std::cout<<"X: "<<tag_end.X()<<", "<<mc_end.X()<<", "<<tag_st.X()<<", "<<mc_vtx.X()<<std::endl ;
+       //  std::cout<<"Y: "<<tag_end.Y()<<", "<<mc_end.Y()<<", "<<tag_st.Y()<<", "<<mc_vtx.Y()<<std::endl ;
+       //  std::cout<<"Z: "<<tag_end.Z()<<", "<<mc_end.Z()<<", "<<tag_st.Z()<<", "<<mc_vtx.Z()<<std::endl ;
+
+       // std::cout<<"wire compare: "<<mc2d.w/geomH->WireToCm() <<", "<<reco2d.w/geomH->WireToCm()<<", "<<reco2d_end.w/geomH->WireToCm()<<std::endl ;
+       // std::cout<<"time compare: "<<mc2d.t/geomH->TimeToCm()+800 <<", "<<reco2d.t/geomH->TimeToCm() + 800<<", "<<reco2d_end.t/geomH->TimeToCm() + 800<<std::endl ;
+
+       // std::cout<<"wire compare: "<<mc2d_end.w/geomH->WireToCm() <<", "<<reco2d.w/geomH->WireToCm()<<", "<<reco2d_end.w/geomH->WireToCm()<<std::endl ;
+       // std::cout<<"time compare: "<<mc2d_end.t/geomH->TimeToCm()+800 <<", "<<reco2d.t/geomH->TimeToCm() + 800<<", "<<reco2d_end.t/geomH->TimeToCm() + 800<<std::endl ;
+       //}
+
 
        if ( dist_st < 25 || dist_end < 25){
           float length = sqrt( pow(mc_end.X() - mc_vtx.X(),2) + 
                            pow(mc_end.Y() - mc_vtx.Y(),2) + 
                            pow(mc_end.Z() - mc_vtx.Z(),2) );  
+
           mctrk_map.emplace(1./length,ti);
 	  mc_min_dist = dist_st < dist_end ? dist_st : dist_end ; 
        }   
@@ -279,7 +256,7 @@ namespace larlite {
     }   
     // If no true tracks aligned with reco track, mark it as noise
     else {
-       std::cout<<"\nEvent is : "<<_event <<", mult: "<<trk_map.size()<<std::endl ; //storage->event_id()<<", "<<storage->subrun_id()<<std::endl ;
+       std::cout<<"\nEvent is : "<<_event <<", mult: "<<trk_map.size()<<", "<<storage->event_id()<<", "<<storage->subrun_id()<<std::endl ;
        //std::cout<<"Vertex difference: "<<vtx_diff<<std::endl ;
        //std::cout<<"MC length : "<<1./temp <<", and ntracks: "<<ev_mctrk->size()<<std::endl ;
 
@@ -290,17 +267,6 @@ namespace larlite {
 
        //   auto it1 = it1_0->second ;
        //   
-       //   auto t0 = ev_trk->at(it0);
-       //   auto t1 = ev_trk->at(it1);
-
-       //   auto d0 = t0.VertexDirection();
-       //   auto d1 = t1.VertexDirection();
-
-       //   auto dot = d0.Px() * d1.Px() + d0.Py() * d1.Py() + d0.Pz() * d1.Pz() ;
-       //   std::cout<<"DOT: "<<dot <<", "<<t0.Vertex().X()<<", "<<t0.Vertex().Y()<<", "<<t0.Vertex().Z()<<", "
-       //            <<t0.End().X()<<", "<<t0.End().Y()<<", "<<t0.End().Z()<<std::endl ; 
-       //   std::cout<<"LENGTH: "<<t0.Length()<<", "<<t1.Length()<<std::endl ; 
-       //}
 
       //_n_noise++;
       _n_cosmic++;

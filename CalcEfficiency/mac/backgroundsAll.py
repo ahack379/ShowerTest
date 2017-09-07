@@ -22,8 +22,8 @@ my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 my_proc.set_ana_output_file('mcc82_backgroundsCCNC.root')
 
 ana = fmwk.BackgroundAll()
-ana.UseMCSample(False)
-ana.GetPi0Info(False)
+ana.UseMCSample(True)
+ana.GetPi0Info(True)
 
 my_proc.add_process(ana)
 

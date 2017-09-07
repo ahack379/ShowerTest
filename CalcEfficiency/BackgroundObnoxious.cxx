@@ -1,27 +1,40 @@
-#ifndef LARLITE_BACKGROUNDALL_CXX
-#define LARLITE_BACKGROUNDALL_CXX
+#ifndef LARLITE_BACKGROUNDOBNOXIOUS_CXX
+#define LARLITE_BACKGROUNDOBNOXIOUS_CXX
 
-#include "BackgroundAll.h"
+#include "BackgroundObnoxious.h"
 #include "DataFormat/mctruth.h"
 #include "DataFormat/mctrack.h"
 #include "DataFormat/track.h"
 #include "DataFormat/shower.h"
+#include "DataFormat/mcshower.h"
 #include "DataFormat/vertex.h"
 
 #include "LArUtil/GeometryHelper.h"
 
 namespace larlite {
 
-  bool BackgroundAll::initialize() {    
+  bool BackgroundObnoxious::initialize() {    
 
     _event = -1; 
 
-    _n_other = 0;    // 0 
-    _n_cosmic = 0;   // 1
-    _n_cc1pi0 = 0;   // 2 
-    _n_cc0pi0 = 0;   // 3
-    _n_nc1pi0 = 0;   // 4 
-    _n_nc0pi0 = 0;   // 5
+    _n_other = 0;    // 0
+    _n_cosmic = 0;   // 1         
+    _n_cc1pi0 = 0;   // 2
+    _n_nc1pi0 = 0;   // 3
+    _n_cc1pi0_outFV = 0;  // 4
+    _n_multpi0 = 0;  // 5
+    _n_nue = 0;      // 6 
+    _n_antimu  = 0;   // 7
+    _n_cccex = 0;    // 8
+    _n_nccex = 0;    // 9
+    _n_ccother = 0;  // 12
+    _n_ncother = 0;  // 13
+
+    // After thoughts 
+    _n_gamma = 0 ; // 10
+    _n_kaondecay = 0 ; // 11
+
+    _bkgd_v = { "Other","Cosmic","CC1pi0","NC1pi0","CC1pi0_outFV","Multpi0", "nue","antinumu","cccex","nccex","ccgamma","kaondecay","ccother","ncother" };
 
     if ( !_tree ){
       _tree = new TTree("tree","");
@@ -60,7 +73,7 @@ namespace larlite {
     return true;
   }
 
-  void BackgroundAll::clear(){
+  void BackgroundObnoxious::clear(){
 
     _bkgd_id = -1 ;
     _mult    = 0;
@@ -92,7 +105,7 @@ namespace larlite {
 
   }
   
-  bool BackgroundAll::analyze(storage_manager* storage) {
+  bool BackgroundObnoxious::analyze(storage_manager* storage) {
 
     _event++ ;
     clear();
@@ -116,7 +129,7 @@ namespace larlite {
     // Fill track information
     _mu_phi = trk.Phi();
     _mu_angle = cos(trk.Theta());
-    _mu_len =   trk.Length(0); // Allulates the length from point 0 to end
+    _mu_len =   trk.Length(0); // Calculates the length from point 0 to end
     _mu_startx = trk.Vertex().X(); 
     _mu_starty = trk.Vertex().Y(); 
     _mu_startz = trk.Vertex().Z(); 
@@ -156,13 +169,6 @@ namespace larlite {
           _mult ++ ;
    }
 
-   if ( _mult == 0 ){ 
-     std::cout<<"Weird...Origin? "<<_event<<", "<<storage->run_id()<<", "<<storage->subrun_id()<<", "<<storage->event_id()<<std::endl ;
-
-     std::cout<<"Track size: " <<ev_trk->size() <<std::endl;
-
-   }
-
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Want to be able to access the origin of the tagged muon. Thus, need to find it, and 
     // Ask for its origin.  Need to match to MCtrack to do this
@@ -177,6 +183,9 @@ namespace larlite {
       auto ev_mctrk = storage->get_data<event_mctrack>("mcreco");
       if ( !ev_mctrk || !ev_mctrk->size() ) {std::cout<<"No MCTrack!" <<std::endl ; return false; }
 
+      auto ev_mcs = storage->get_data<event_mcshower>("mcreco") ;
+      if ( !ev_mcs || !ev_mcs->size() ) {std::cout<<"No MCShower!" <<std::endl ; return false; }
+
       auto & truth = ev_mctruth->at(0);
       auto & nu  = truth.GetNeutrino();
 
@@ -189,6 +198,7 @@ namespace larlite {
       std::vector<double> vtxXYZ = { vtx.X(), vtx.Y(), vtx.Z() };
 
       auto vtx_diff = sqrt(pow(xyz[0] - _vtx_x,2) + pow(xyz[1] - _vtx_y,2) + pow(xyz[2] - _vtx_z,2));
+
 
       //Map of lengths -> track id
       std::multimap<float,int> trk_map ;
@@ -238,25 +248,79 @@ namespace larlite {
         auto tag_norm = sqrt( pow(tag_st.Px(),2) + pow(tag_st.Py(),2) + pow(tag_st.Pz(),2)); 
 
         for( auto & ti : mctrk_map ){
-              
+
           auto mc = ev_mctrk->at(ti.second);
           auto mc_st = mc.Start();
           auto mc_norm = sqrt( pow(mc_st.Px(),2) + pow(mc_st.Py(),2) + pow(mc_st.Pz(),2) );
           
           auto dot = (tag_st.Px() * mc_st.Px() + tag_st.Py() * mc_st.Py() + tag_st.Pz() * mc_st.Pz())/tag_norm / mc_norm ;
 
+	  //std::cout<<"Origin: "<<mc.Origin()<<", length: "<<1./ti.first<<", "<<fabs(dot)<<std::endl ;
+
           if ( fabs(dot) > mc_max_dot ){
-               mc_max_dot = dot;
+               mc_max_dot = fabs(dot);
                mc_max_it = ti.second ;
           }
         }
       }   
       // If no true tracks aligned with reco track, mark it as cosmic 
       else {
-         //std::cout<<"\nEvent is : "<<_event <<", mult: "<<trk_map.size()<<", "<<storage->event_id()<<", "<<storage->subrun_id()<<std::endl ;
-        _n_other++;
-        _bkgd_id = 6 ;
+        //for ( size_t si = 0; si < ev_mcs->size(); si++ ) { 
 
+        //  auto mc_vtx = ev_mcs->at(si).Start() ;
+        //
+        //  float dist_st = sqrt(  pow(mc_vtx.X() - tag_st.X(),2) + 
+        //                         pow(mc_vtx.Y() - tag_st.Y(),2) + 
+        //                         pow(mc_vtx.Z() - tag_st.Z(),2) );  
+
+        //  float dist_end = sqrt( pow(mc_vtx.X() - tag_end.X(),2) + 
+        //                         pow(mc_vtx.Y() - tag_end.Y(),2) + 
+        //                         pow(mc_vtx.Z() - tag_end.Z(),2) );  
+
+        //   
+        //   if ( dist_st < 25 || dist_end < 25){
+        //      mc_min_dist = dist_st < dist_end ? dist_st : dist_end ; 
+        //      mctrk_map.emplace(dist_st,si);
+        //   }   
+        // }   
+
+	// int mcs_max_dot = -1;
+	// int mcs_max_it = -1;
+
+        // if( mctrk_map.size() ) {
+
+        //   auto tag_st = tag_trk.VertexDirection();     
+        //   auto tag_norm = sqrt( pow(tag_st.Px(),2) + pow(tag_st.Py(),2) + pow(tag_st.Pz(),2)); 
+
+        //   for( auto & si : mctrk_map ){
+        //         
+        //     auto mc = ev_mcs->at(si.second);
+        //     auto mc_st = mc.Start();
+        //     auto mc_norm = sqrt( pow(mc_st.Px(),2) + pow(mc_st.Py(),2) + pow(mc_st.Pz(),2) );
+        //     
+        //     auto dot = (tag_st.Px() * mc_st.Px() + tag_st.Py() * mc_st.Py() + tag_st.Pz() * mc_st.Pz())/tag_norm / mc_norm ;
+
+        //     if ( fabs(dot) > mcs_max_dot ){
+        //       mcs_max_dot = dot;
+        //       mcs_max_it = si.second ;
+        //     }
+        //   }
+	//   if ( ev_mcs->at(mcs_max_it).Origin() == 2 ){
+	//     _n_cosmic++;
+	//     _bkgd_id = 1;
+	//   }
+	//   else {
+	//     _n_other++;
+	//     _bkgd_id = 0 ;
+	//   }
+        // }   
+	// else{
+           _n_other++;
+           _bkgd_id = 0 ;
+	   _event_list.emplace_back(_event) ;
+	   _vtx_list.emplace_back(vtx_diff);
+            //std::cout<<"\nEvent is : "<<_event <<", mult: "<<trk_map.size()<<", "<<storage->event_id()<<", "<<storage->subrun_id()<<std::endl ;
+	  //}
       }
 
       ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -270,37 +334,98 @@ namespace larlite {
 
         auto parts = ev_mctruth->at(0).GetParticles();
         int n_pi0 = 0;
+        int n_gamma = 0;
 
         for ( auto const & p : parts ){
           if( p.StatusCode() == 1 && p.PdgCode() == 111 )
-            n_pi0 ++;
-        }   
+            n_pi0++;
 
+          if( p.StatusCode() == 1 && p.PdgCode() == 22 )
+            n_gamma++;
+        }   
         if( ev_mctrk->at(mc_max_it).Origin() == 2 ){
           _n_cosmic++;
           _bkgd_id = 1; 
         }
-        else if( nu.Nu().PdgCode() == 14 && nu.CCNC() == 0 && n_pi0 == 1 && infv ) {
-          _bkgd_id = 2;
-          _n_cc1pi0 ++; 
-          _event_list.emplace_back(_event);
+        else if( abs(nu.Nu().PdgCode()) == 12 ){
+          _n_nue ++ ; 
+          _bkgd_id = 6 ;
         }
-        else if( nu.CCNC() == 0 && n_pi0 == 0 ) {
-          _bkgd_id = 3;
-          _n_cc0pi0++;
+        else if( nu.Nu().PdgCode() == -14 ){
+          _n_antimu ++ ; 
+          _bkgd_id = 7 ;
+        }
+        // frmo here we can assume we have a muon neutrino
+        else if( nu.CCNC() == 0 && n_pi0 == 1 && infv ) {
+          _bkgd_id = 2;
+          _n_cc1pi0++; 
+          //_event_list.emplace_back(_event);
         }
         else if( nu.CCNC() == 1 && n_pi0 > 0 ) {
-          _bkgd_id = 4;
+          _bkgd_id = 3;
           _n_nc1pi0 ++; 
         }
-        else if( nu.CCNC() == 1 && n_pi0 == 0 ) {
-          _bkgd_id = 5;
-          _n_nc0pi0++;
+        else if ( nu.CCNC() == 0 & n_pi0 == 1 && !infv ){
+          _bkgd_id = 4 ;
+          _n_cc1pi0_outFV ++; 
         }
-        else {
-          _bkgd_id = 6;
-          _n_other ++;   
+        else if( nu.CCNC() == 0 && n_pi0 > 1 ) {
+          _bkgd_id = 5;
+          _n_multpi0 ++; 
+        }
+	else if( n_pi0 == 0 && n_gamma > 0 ){
+	  _bkgd_id = 10 ;
+	  _n_gamma++;
+	}
+        else{
+          
+          bool charge_ex = false; 
+          bool kaon_decay = false; 
+          for ( auto const & s : *ev_mcs ){
+            if ( s.MotherPdgCode() == 111 && abs(s.AncestorPdgCode()) == 211 ){
+              charge_ex = true; 
+              break;
+            }
 
+            if ( s.MotherPdgCode() == 111 && abs(s.AncestorPdgCode()) == 321 ){
+              kaon_decay = true; 
+	      break;
+	    }
+
+            //if ( s.MotherPdgCode() == 111 )
+	    //  std::cout<<"THERES A PI) IN HERE SOMEWHERE "<<s.AncestorPdgCode()<<", "<<s.MotherProcess()<<std::endl;
+          }
+
+          if( charge_ex && nu.CCNC() == 0 ){
+            _bkgd_id = 8;
+            _n_cccex++;
+          }
+          else if( charge_ex && nu.CCNC() == 1 ) {
+            _bkgd_id = 9;
+            _n_nccex++;
+          }
+          else if( kaon_decay ){
+            _bkgd_id = 11;
+            _n_kaondecay++;
+          }
+          else if( !charge_ex && nu.CCNC() == 0 ){
+            _bkgd_id = 12;
+            _n_ccother++; 
+
+            //for ( auto const & p : parts ){
+            //  if( p.StatusCode() == 1 && p.PdgCode() < 700 )
+	    //    std::cout<<"CCOTHER PDG: "<<p.PdgCode()<<std::endl ;
+	    //}
+          }
+          else if( !charge_ex && nu.CCNC() == 1 ){
+            _bkgd_id = 13;
+            _n_ncother++; 
+          }
+          else {
+	    std::cout<<"We come in here..."<<std::endl ;
+            _bkgd_id = 0;
+            _n_other ++;   
+          }
         }
       }
     }
@@ -368,27 +493,41 @@ namespace larlite {
       _gamma_RL = vertex.Dist(ev_s->at(0).ShowerStart());
 
     }
+
+    //std::cout<<"Event and ID: "<<_event<<", "<<_bkgd_v[_bkgd_id]<<"\n\n";
     
     _tree->Fill();    
 
     return true;
   }
 
-  bool BackgroundAll::finalize() {
+  bool BackgroundObnoxious::finalize() {
 
     std::cout<<"Signals: "<<std::endl ;
     std::cout<<"Total CCpi0 : "<<_n_cc1pi0<<std::endl; 
 
     // Note that cc other includes secondary pi0s.
     std::cout<<"\nBackgrounds: "<<std::endl;
+    std::cout<<"0) Other: "<<_n_other<< std::endl;
     std::cout<<"1) Cosmic : "<<_n_cosmic<< std::endl;
     std::cout<<"2) CC 1pi0 : "<<_n_cc1pi0<<std::endl;
-    std::cout<<"3) CC 0pi0 : "<<_n_cc0pi0<<std::endl;
-    std::cout<<"4) NC 1pi0 : "<<_n_nc1pi0<<std::endl;
-    std::cout<<"5) NC 0pi0 : "<<_n_nc0pi0<<std::endl;
-    std::cout<<"6) Other   : "<<_n_other<<std::endl; 
+    std::cout<<"3) NC 1pi0 : "<<_n_nc1pi0<<std::endl;
+    std::cout<<"4) CC 1pi0 out FV: "<<_n_cc1pi0_outFV<<std::endl;
+    std::cout<<"5) CC mult pi0: "<<_n_multpi0<<std::endl;
+    std::cout<<"6) Nue: "<<_n_nue<<std::endl;
+    std::cout<<"7) Antinumu: "<<_n_antimu<<std::endl;
+    std::cout<<"8) CC Cex: "<<_n_cccex<<std::endl;
+    std::cout<<"9) NC Cex: "<<_n_nccex<<std::endl;
+    std::cout<<"10) CC Gamma : "<<_n_gamma<<std::endl;
+    std::cout<<"11) Kaon Decay: "<<_n_kaondecay<<std::endl;
+    std::cout<<"12) CC Other : "<<_n_ccother<<std::endl;
+    std::cout<<"13) NC Other : "<<_n_ncother<<std::endl;
 
-    std::cout<<"Total accounted backgrounds: "<< _n_other + _n_cosmic + _n_nc1pi0 + _n_nc0pi0 + _n_cc0pi0 <<std::endl ;
+    //std::cout<<"Total accounted backgrounds: "<< _n_other + _n_cosmic + _n_nc1pi0 + _n_nc0pi0 + _n_cc0pi0 <<std::endl ;
+
+    for (int i = 0; i < _event_list.size(); i++){
+      std::cout<<_event_list[i]<<", "<<_vtx_list[i]<<std::endl;
+      }
 
     if ( _fout ){
       _fout->cd();

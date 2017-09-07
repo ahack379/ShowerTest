@@ -394,7 +394,7 @@ namespace larlite {
 
     int reco_g1_id = -1, reco_g2_id = -1;
     int mc_g1_id = -1, mc_g2_id = -1;
-    int dot_g1 = -10, dot_g2 = -10;
+    float dot_g1 = -10, dot_g2 = -10;
 
     for ( auto const & m : mc_reco_map ){
 
@@ -461,7 +461,7 @@ namespace larlite {
          _mc_dirz = mcs.DetProfile().Pz();  
 
 	 _reco_dot = dot_g1 ;
-	 _reco_start3D = sqrt( pow(_mc_startx - _reco_startx,2) + pow(_mc_starty - _reco_starty,2) + pow(_mc_startz - _reco_startx,2)); 
+	 _reco_start3D = sqrt( pow(_mc_startx - _reco_startx,2) + pow(_mc_starty - _reco_starty,2) + pow(_mc_startz - _reco_startz,2)); 
 
          _compare_tree->Fill();
        }

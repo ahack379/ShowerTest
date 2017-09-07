@@ -23,7 +23,7 @@ OSNAMEMODE      = $(OSNAME)
 
 LDFLAGS += $(shell basictool-config --libs)
 LDFLAGS += $(shell larlite-config --libs)
-LDFLAGS += -L$(OPENCV_LIBDIR) -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc
+#LDFLAGS += -L$(OPENCV_LIBDIR) -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc
 
 
 # call kernel specific compiler setup
