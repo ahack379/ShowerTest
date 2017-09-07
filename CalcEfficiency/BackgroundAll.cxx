@@ -246,7 +246,7 @@ namespace larlite {
           auto dot = (tag_st.Px() * mc_st.Px() + tag_st.Py() * mc_st.Py() + tag_st.Pz() * mc_st.Pz())/tag_norm / mc_norm ;
 
           if ( fabs(dot) > mc_max_dot ){
-               mc_max_dot = dot;
+               mc_max_dot = fabs(dot);
                mc_max_it = ti.second ;
           }
         }
@@ -254,8 +254,8 @@ namespace larlite {
       // If no true tracks aligned with reco track, mark it as cosmic 
       else {
          //std::cout<<"\nEvent is : "<<_event <<", mult: "<<trk_map.size()<<", "<<storage->event_id()<<", "<<storage->subrun_id()<<std::endl ;
-        _n_other++;
-        _bkgd_id = 6 ;
+        _n_cosmic++;
+        _bkgd_id = 1 ;
 
       }
 

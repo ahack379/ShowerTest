@@ -343,6 +343,7 @@ namespace larlite {
           if( p.StatusCode() == 1 && p.PdgCode() == 22 )
             n_gamma++;
         }   
+
         if( ev_mctrk->at(mc_max_it).Origin() == 2 ){
           _n_cosmic++;
           _bkgd_id = 1; 
@@ -411,18 +412,12 @@ namespace larlite {
           else if( !charge_ex && nu.CCNC() == 0 ){
             _bkgd_id = 12;
             _n_ccother++; 
-
-            //for ( auto const & p : parts ){
-            //  if( p.StatusCode() == 1 && p.PdgCode() < 700 )
-	    //    std::cout<<"CCOTHER PDG: "<<p.PdgCode()<<std::endl ;
-	    //}
           }
           else if( !charge_ex && nu.CCNC() == 1 ){
             _bkgd_id = 13;
             _n_ncother++; 
           }
           else {
-	    std::cout<<"We come in here..."<<std::endl ;
             _bkgd_id = 0;
             _n_other ++;   
           }
