@@ -19,6 +19,13 @@ namespace larlite {
     _signal = 0;
     _event_list.clear();
 
+    _n_other = 0;    // 0 
+    _n_cosmic = 0;   // 1
+    _n_cc1pi0 = 0;   // 2 
+    _n_cc0pi0 = 0;   // 3
+    _n_nc1pi0 = 0;   // 4 
+    _n_nc0pi0 = 0;   // 5
+
     return true;
   }
   
@@ -64,8 +71,10 @@ namespace larlite {
     xyz[2] = traj.at(traj.size() - 1).Z();
     auto e = traj.at(traj.size() - 1).E();
 
+    bool infv = true;
+
     if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1] > 96.5 || xyz[1] < -96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
-        return false;
+        infv = false;
 
     auto parts = ev_mctruth->at(0).GetParticles();
     int n_pi0 = 0;
@@ -79,18 +88,46 @@ namespace larlite {
           n_mu ++;
      }
 
-    if ( n_pi0 == 1 && n_mu == 1 && e > 0.5) 
-      _event_list.emplace_back(_event-1);
+     if( n_pi0 == 1 && n_mu == 1 && e > 0.5 && infv){ 
+       _event_list.emplace_back(_event-1);
+       _n_cc1pi0 ++; 
+     }
+     else if( nu.CCNC() == 0 && n_pi0 == 0 ) 
+       _n_cc0pi0++;
+      else if( nu.CCNC() == 1 && n_pi0 > 0 ) 
+        _n_nc1pi0 ++; 
+      else if( nu.CCNC() == 1 && n_pi0 == 0 ) 
+        _n_nc0pi0++;
+      else 
+        _n_other ++;   
+    
+
 
     return true;
   }
 
   bool CCpi0Eff::finalize() {
 
-    std::cout<<"CCpi0 are "<<float(_event_list.size())/(_event)*100<<"\% of BNB ("<<_event_list.size()<<"/"<<_event<<")"<<std::endl ;
+   // std::cout<<"CCpi0 are "<<float(_event_list.size())/(_event)*100<<"\% of BNB ("<<_event_list.size()<<"/"<<_event<<")"<<std::endl ;
 
-    std::cout<<"\n\n"<<_event_list.size()<<" in Event list :" <<std::endl ;
-    for( auto const & e : _event_list) std::cout<<e<<", ";
+   // std::cout<<"\n\n"<<_event_list.size()<<" in Event list :" <<std::endl ;
+   // for( auto const & e : _event_list) std::cout<<e<<", ";
+
+    std::cout<<"Signals: "<<std::endl ;
+    std::cout<<"Total CCpi0 : "<<_n_cc1pi0<<std::endl; 
+
+    // Note that cc other includes secondary pi0s.
+    std::cout<<"\nBackgrounds: "<<std::endl;
+    std::cout<<"1) Cosmic : "<<_n_cosmic<< std::endl;
+    std::cout<<"2) CC 1pi0 : "<<_n_cc1pi0<<std::endl;
+    std::cout<<"3) CC 0pi0 : "<<_n_cc0pi0<<std::endl;
+    std::cout<<"4) NC 1pi0 : "<<_n_nc1pi0<<std::endl;
+    std::cout<<"5) NC 0pi0 : "<<_n_nc0pi0<<std::endl;
+    std::cout<<"6) Other   : "<<_n_other<<std::endl; 
+
+    std::cout<<"Total accounted backgrounds: "<< _n_other + _n_cosmic + _n_nc1pi0 + _n_nc0pi0 + _n_cc0pi0 <<std::endl ;
+
+
 
     return true;
   }

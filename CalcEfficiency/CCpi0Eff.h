@@ -52,6 +52,13 @@ namespace larlite {
   int _event ;
   int _signal ;
 
+  int _n_other ;
+  int _n_cosmic ;
+  int _n_cc1pi0 ; // This is the signal
+  int _n_cc0pi0 ;
+  int _n_nc1pi0 ; 
+  int _n_nc0pi0 ;
+
   std::vector<int> _event_list ;
   std::multimap<float,float> _map;
 
