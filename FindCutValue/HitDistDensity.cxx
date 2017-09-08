@@ -66,8 +66,23 @@ namespace larlite {
     if(!ev_mctruth || !ev_mctruth->size() ) return false;
 
     auto & truth = ev_mctruth->at(0);
-    auto parts = ev_mctruth->at(0).GetParticles();
+    auto & nu  = truth.GetNeutrino();
+
+    // Check FV
+    double xyz[3] = {0.};
+    auto traj = nu.Nu().Trajectory();
+    xyz[0] = traj.at(traj.size() - 1).X();
+    xyz[1] = traj.at(traj.size() - 1).Y();
+    xyz[2] = traj.at(traj.size() - 1).Z();
+    auto e = traj.at(traj.size() - 1).E();
+
+    bool infv = true; 
+
+    if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1] > 96.5 || xyz[1] < -96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
+        infv = false ;
  
+    // Check that there is only 1 muon and only 1 pi0 originating from vertex
+    auto parts = ev_mctruth->at(0).GetParticles();
     int n_pi0 = 0; 
     int n_mu = 0;
 
@@ -80,10 +95,10 @@ namespace larlite {
           n_mu++ ;
     }
 
-    if((n_mu != 1 || n_pi0 != 1) && _get_pi0s )
+    if((n_mu != 1 || n_pi0 != 1 || !infv ) && _get_pi0s )
        return false;
     
-    if((n_mu == 1 && n_pi0 == 1) && !_get_pi0s)
+    if((n_mu == 1 && n_pi0 == 1 && infv) && !_get_pi0s)
        return false;
 
     for( auto const & h : *ev_hit_g ){
