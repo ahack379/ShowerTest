@@ -273,7 +273,7 @@ namespace larlite {
         //    n_mu++;
         //}
 
-        //if( n_mu == 1 && n_pi0 == 1 && infv && e > 0.3 ) 
+        //if( n_mu == 1 && n_pi0 == 1 && infv && e > 0.275 ) 
 	std::cout<<"\nEvent : "<<_event<<", "<<e<<std::endl ;
         std::cout<<nu.Nu().PdgCode()<<", "<< nu.CCNC() <<std::endl; 
         for ( auto const & p : parts ){
@@ -304,7 +304,7 @@ namespace larlite {
           _n_cosmic++;
           _bkgd_id = 1; 
         }
-        else if( nu.Nu().PdgCode() == 14 && nu.CCNC() == 0 && n_pi0 == 1 && infv && e > 0.3 ) {
+        else if( nu.Nu().PdgCode() == 14 && nu.CCNC() == 0 && n_pi0 == 1 && infv && e > 0.275 ) {
           _bkgd_id = 2;
           _n_cc1pi0 ++; 
           _event_list.emplace_back(_event);
