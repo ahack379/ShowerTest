@@ -242,6 +242,29 @@ namespace larlite {
       else {
         _n_cosmic++;
         _bkgd_id = 1 ;
+
+        //bool infv = true;
+        //if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1] > 96.5 || xyz[1] < -96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
+        //  infv = false;
+
+        auto parts = ev_mctruth->at(0).GetParticles();
+        //int n_pi0 = 0;
+	//int n_mu = 0 ;
+
+        //for ( auto const & p : parts ){
+        //  if( p.StatusCode() == 1 && p.PdgCode() == 111 )
+        //    n_pi0 ++;
+        //  if( p.StatusCode() == 1 && p.PdgCode() == 13 )
+        //    n_mu++;
+        //}
+
+        //if( n_mu == 1 && n_pi0 == 1 && infv && e > 0.275 ) 
+	std::cout<<"\nEvent : "<<_event<<", "<<e<<std::endl ;
+        std::cout<<nu.Nu().PdgCode()<<", "<< nu.CCNC() <<std::endl; 
+        for ( auto const & p : parts ){
+	  if ( p.PdgCode() < 3000 ) std::cout<<p.PdgCode()<<std::endl ;
+	}
+
       }
 
       ///////////////////////////////////////////////////////////////////////////////////////////////
