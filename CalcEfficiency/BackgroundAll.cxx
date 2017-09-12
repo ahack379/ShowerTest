@@ -27,6 +27,7 @@ namespace larlite {
       _tree = new TTree("tree","");
       _tree->Branch("event",&_event,"event/I");
       _tree->Branch("bkgd_id",&_bkgd_id,"bkgd_id/I");
+      _tree->Branch("nshrs",&_nshrs,"nshrs/I");
 
       _tree->Branch("vtx_x",&_vtx_x,"vtx_x/F");
       _tree->Branch("vtx_y",&_vtx_y,"vtx_y/F");
@@ -63,6 +64,7 @@ namespace larlite {
   void BackgroundAll::clear(){
 
     _bkgd_id = -1 ;
+    _nshrs  = -1 ;
     _mult    = 0;
     _vtx_x   = -999;
     _vtx_y   = -999;
@@ -114,15 +116,15 @@ namespace larlite {
     auto trk = ev_tagged_trk->at(0) ;
 
     // Fill track information
-    _mu_phi = trk.Phi();
-    _mu_angle = cos(trk.Theta());
-    _mu_len =   trk.Length(0); // Allulates the length from point 0 to end
     _mu_startx = trk.Vertex().X(); 
     _mu_starty = trk.Vertex().Y(); 
     _mu_startz = trk.Vertex().Z(); 
     _mu_endx = trk.End().X(); 
     _mu_endy = trk.End().Y(); 
     _mu_endz = trk.End().Z(); 
+    _mu_len =   trk.Length(0); // Allulates the length from point 0 to end
+    _mu_angle = cos(trk.Theta());
+    _mu_phi = trk.Phi();
 
     _mu_mom  = trk.VertexMomentum() ;
 
@@ -156,13 +158,7 @@ namespace larlite {
           _mult ++ ;
    }
 
-   if ( _mult == 0 ){ 
-     std::cout<<"Weird...Origin? "<<_event<<", "<<storage->run_id()<<", "<<storage->subrun_id()<<", "<<storage->event_id()<<std::endl ;
-
-     std::cout<<"Track size: " <<ev_trk->size() <<std::endl;
-
-   }
-
+ 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Want to be able to access the origin of the tagged muon. Thus, need to find it, and 
     // Ask for its origin.  Need to match to MCtrack to do this
@@ -191,20 +187,11 @@ namespace larlite {
 
       auto vtx_diff = sqrt(pow(xyz[0] - _vtx_x,2) + pow(xyz[1] - _vtx_y,2) + pow(xyz[2] - _vtx_z,2));
 
-      //Map of lengths -> track id
-      std::multimap<float,int> trk_map ;
-
       // Grab the origin of the track and assess backgrounds properly
       std::multimap<float,int> mctrk_map ;
       auto tag_trk = ev_tagged_trk->at(0);
       auto tag_st = tag_trk.Vertex() ;
       auto tag_end = tag_trk.End() ;
-      float mc_min_dist = 1e9;
-
-      auto geomH = ::larutil::GeometryHelper::GetME(); 
-
-      auto reco2d = geomH->Point_3Dto2D(tag_st,2);
-      auto reco2d_end = geomH->Point_3Dto2D(tag_end,2);
 
       for ( size_t ti = 0; ti < ev_mctrk->size(); ti++ ) { 
 
@@ -226,7 +213,6 @@ namespace larlite {
                              pow(mc_end.Z() - mc_vtx.Z(),2) );  
 
             mctrk_map.emplace(1./length,ti);
-            mc_min_dist = dist_st < dist_end ? dist_st : dist_end ; 
          }   
        }   
        
@@ -254,33 +240,8 @@ namespace larlite {
       }   
       // If no true tracks aligned with reco track, mark it as cosmic 
       else {
-         //std::cout<<"\nEvent is : "<<_event <<", mult: "<<trk_map.size()<<", "<<storage->event_id()<<", "<<storage->subrun_id()<<std::endl ;
         _n_cosmic++;
         _bkgd_id = 1 ;
-
-        //bool infv = true;
-        //if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1] > 96.5 || xyz[1] < -96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
-        //  infv = false;
-
-        auto parts = ev_mctruth->at(0).GetParticles();
-        //int n_pi0 = 0;
-	//int n_mu = 0 ;
-
-        //for ( auto const & p : parts ){
-        //  if( p.StatusCode() == 1 && p.PdgCode() == 111 )
-        //    n_pi0 ++;
-        //  if( p.StatusCode() == 1 && p.PdgCode() == 13 )
-        //    n_mu++;
-        //}
-
-        //if( n_mu == 1 && n_pi0 == 1 && infv && e > 0.3 ) 
-	std::cout<<"\nEvent : "<<_event<<", "<<e<<std::endl ;
-        std::cout<<nu.Nu().PdgCode()<<", "<< nu.CCNC() <<std::endl; 
-        for ( auto const & p : parts ){
-	  if ( p.PdgCode() < 3000 ) std::cout<<p.PdgCode()<<std::endl ;
-	}
-
-
       }
 
       ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -304,7 +265,7 @@ namespace larlite {
           _n_cosmic++;
           _bkgd_id = 1; 
         }
-        else if( nu.Nu().PdgCode() == 14 && nu.CCNC() == 0 && n_pi0 == 1 && infv && e > 0.3 ) {
+        else if( nu.Nu().PdgCode() == 14 && nu.CCNC() == 0 && n_pi0 == 1 && infv && e > 0.275 ) {
           _bkgd_id = 2;
           _n_cc1pi0 ++; 
           _event_list.emplace_back(_event);
@@ -328,6 +289,9 @@ namespace larlite {
         }
       }
     }
+
+    auto ev_s = storage->get_data<event_shower>("showerreco");
+    if ( ev_s ) _nshrs = ev_s->size(); 
 
     if ( _get_pi0_info ){
 
