@@ -88,7 +88,7 @@ namespace larlite {
           n_mu ++;
      }
 
-     if( n_pi0 == 1 && n_mu == 1 && e > 0.5 && infv){ 
+     if( n_pi0 == 1 && n_mu == 1 && e > 0.3 && infv){ 
        _event_list.emplace_back(_event-1);
        _n_cc1pi0 ++; 
      }
