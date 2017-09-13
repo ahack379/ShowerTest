@@ -70,6 +70,7 @@ namespace larlite {
   TTree * _tree ;
   int _event ;
   int _bkgd_id ;
+  int _nu_mode;
   int _nshrs ;
   float _vtx_x ;
   float _vtx_y ;

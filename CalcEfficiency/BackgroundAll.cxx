@@ -27,6 +27,7 @@ namespace larlite {
       _tree = new TTree("tree","");
       _tree->Branch("event",&_event,"event/I");
       _tree->Branch("bkgd_id",&_bkgd_id,"bkgd_id/I");
+      _tree->Branch("nu_mode",&_nu_mode,"nu_mode/I");
       _tree->Branch("nshrs",&_nshrs,"nshrs/I");
 
       _tree->Branch("vtx_x",&_vtx_x,"vtx_x/F");
@@ -64,6 +65,7 @@ namespace larlite {
   void BackgroundAll::clear(){
 
     _bkgd_id = -1 ;
+    _nu_mode = -1 ;
     _nshrs  = -1 ;
     _mult    = 0;
     _vtx_x   = -999;
@@ -157,7 +159,6 @@ namespace larlite {
         if (dist_st < 3 || dist_end < 3)
           _mult ++ ;
    }
-
  
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Want to be able to access the origin of the tagged muon. Thus, need to find it, and 
@@ -175,6 +176,7 @@ namespace larlite {
 
       auto & truth = ev_mctruth->at(0);
       auto & nu  = truth.GetNeutrino();
+      _nu_mode = nu.Mode();
 
       double xyz[3] = {0.};
       auto traj = nu.Nu().Trajectory();
