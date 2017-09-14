@@ -20,10 +20,10 @@ def getShowerRecoAlgModular():
     angle3D = showerreco.Angle3DFromVtxQweighted()
     
     energy = showerreco.LinearEnergy()
-    energy.SetElectronLifetime(1e20) #1e6) #8000.) # in us MCC7 value
-    energy.SetRecombFactor(0.577) #62)
-    energy.SetElecGain(198) # e- / ADC DATA value, MCC8
-    #energy.SetElecGain(189) # MCC7 value
+    energy.SetElectronLifetime(1e20) 
+    energy.SetRecombFactor(0.577) 
+    #energy.SetElecGain(243) # e- / ADC DATA value, MCC8 Data
+    energy.SetElecGain(198) # MCC8 MC value
     energy.setVerbosity(False)
     energy.SetFillTree(True)
 

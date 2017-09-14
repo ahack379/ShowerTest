@@ -1,0 +1,96 @@
+[?1034h/pnfs/uboone/persistent/users/oscillations_group/GoldenPi0/MC/sel2_MCC8_BNB_COSMIC_FULL_LARLITE/larlite_reco2d_0000.root
+[95m    [NORMAL]  [0m[95m<LoadData> [0mLoading data for Geometry...
+     file=/uboone/app/users/ahack/LARLITE_HR/core/LArUtil/dat/larutil_microboone.root 
+[95m    [NORMAL]  [0m[95m<LoadData> [0mLoading data for DetectorProperties...
+     file=/uboone/app/users/ahack/LARLITE_HR/core/LArUtil/dat/larutil_microboone.root 
+[95m    [NORMAL]  [0m[95m<LoadData> [0mLoading data for LArProperties...
+     file=/uboone/app/users/ahack/LARLITE_HR/core/LArUtil/dat/larutil_microboone.root 
+Print the list of modules to run in Shower Reco Alg Modular:
+	0) StartPoint3DModule
+	1) Angle3DFromVtxQweighted
+	2) LinearEnergy
+	3) GeoModule
+
+Finished configuring ana_processor. Start event loop!
+
+[95m    [NORMAL]  [0m[95m<open> [0mOpening a file in READ mode: /pnfs/uboone/persistent/users/oscillations_group/GoldenPi0/MC/sel2_MCC8_BNB_COSMIC_FULL_LARLITE/larlite_reco2d_0000.root
+[95m    [NORMAL]  [0m[95m<open> [0mOpening a file in kWRITE mode: /pnfs/uboone/persistent/users/oscillations_group/GoldenPi0/MC/sel2_MCC8_BNB_COSMIC_FULL_LARLITE/larlite_pandora_0000.root_output.root
+********************************
+Wire -> cm conversion : 0.3
+Time -> cm conversion : 0.0557179
+********************************
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData pc ID = 0
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData fcp1 ID = 1
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData sc ID = 2
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData fr ID = 3
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData brd ID = 4
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData brs ID = 5
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData roip ID = 6
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData vih ID = 7
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData fm ID = 8
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData fcp2 ID = 9
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData sc2 ID = 10
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData vih2 ID = 11
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData sep ID = 12
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData ca ID = 13
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData cwires ID = 14
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData cwo ID = 15
+	>> Configuring DeadWireCombine with fcl: dead_wires.fcl <<
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData iouo ID = 16
+Electron lifetime : 1e+20 [ms]
+Recomb factor     : 0.577
+ADC -> fC         : 1.08834e-315
+fC  -> e-         : 6250
+e-  -> eV         : 23.6
+eV  -> MeV        : 1e-06
+ADC -> MeV        : 1.08851e-315
+[95m    [NORMAL]  [0m[95m<run> [0mProcessing 39 events from entry 0...
+[93m   [WARNING]  [0m[95m<get_data> [0mRequested ass tree by NuMuCCSelectionII which does not exists yet. Created a new one.
+[?1034h/pnfs/uboone/persistent/users/oscillations_group/GoldenPi0/MC/sel2_MCC8_BNB_COSMIC_FULL_LARLITE/larlite_reco2d_0000.root
+[95m    [NORMAL]  [0m[95m<LoadData> [0mLoading data for Geometry...
+     file=/uboone/app/users/ahack/LARLITE_HR/core/LArUtil/dat/larutil_microboone.root 
+[95m    [NORMAL]  [0m[95m<LoadData> [0mLoading data for DetectorProperties...
+     file=/uboone/app/users/ahack/LARLITE_HR/core/LArUtil/dat/larutil_microboone.root 
+[95m    [NORMAL]  [0m[95m<LoadData> [0mLoading data for LArProperties...
+     file=/uboone/app/users/ahack/LARLITE_HR/core/LArUtil/dat/larutil_microboone.root 
+Print the list of modules to run in Shower Reco Alg Modular:
+	0) StartPoint3DModule
+	1) Angle3DFromVtxQweighted
+	2) LinearEnergy
+	3) GeoModule
+
+Finished configuring ana_processor. Start event loop!
+
+[95m    [NORMAL]  [0m[95m<open> [0mOpening a file in READ mode: /pnfs/uboone/persistent/users/oscillations_group/GoldenPi0/MC/sel2_MCC8_BNB_COSMIC_FULL_LARLITE/larlite_reco2d_0000.root
+[95m    [NORMAL]  [0m[95m<open> [0mOpening a file in kWRITE mode: /pnfs/uboone/persistent/users/oscillations_group/GoldenPi0/MC/sel2_MCC8_BNB_COSMIC_FULL_LARLITE/larlite_pandora_0000.root_output.root
+********************************
+Wire -> cm conversion : 0.3
+Time -> cm conversion : 0.0557179
+********************************
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData pc ID = 0
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData fcp1 ID = 1
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData sc ID = 2
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData fr ID = 3
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData brd ID = 4
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData brs ID = 5
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData roip ID = 6
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData vih ID = 7
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData fm ID = 8
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData fcp2 ID = 9
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData sc2 ID = 10
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData vih2 ID = 11
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData sep ID = 12
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData ca ID = 13
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData cwires ID = 14
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData cwo ID = 15
+	>> Configuring DeadWireCombine with fcl: dead_wires.fcl <<
+    [95m[NORMAL][00m [0m [94m<laropencv_base::Register>[00m Registering AlgoData iouo ID = 16
+Electron lifetime : 1e+20 [ms]
+Recomb factor     : 0.577
+ADC -> fC         : 1.03617e-315
+fC  -> e-         : 6250
+e-  -> eV         : 23.6
+eV  -> MeV        : 1e-06
+ADC -> MeV        : 1.03617e-315
+[95m    [NORMAL]  [0m[95m<run> [0mProcessing 39 events from entry 0...
+[93m   [WARNING]  [0m[95m<get_data> [0mRequested ass tree by NuMuCCSelectionII which does not exists yet. Created a new one.

@@ -1,5 +1,6 @@
 from algoconfig import loadAlgo
 from algoconfig_nu import loadAlgo as loadAlgo_nu
+from showerconfig import getShowerRecoAlgModular 
 
 import sys
 
@@ -11,25 +12,41 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 from larlite import larlite as fmwk
+from ROOT import protoshower
+
+def DefaultShowerReco3D():
+
+    ana_unit = fmwk.ShowerReco3D()
+    ana_unit.SetRequirePDG11(False)
+    sralg = getShowerRecoAlgModular()
+    ana_unit.AddShowerAlgo(sralg)
+
+    return ana_unit
 
 my_proc = fmwk.ana_processor()
 
 for x in xrange(len(sys.argv)-1): 
     my_proc.add_input_file(sys.argv[x+1])
 
+cfg  = 'MCBNB_cosmics_BBox.fcl'
+
 # Specify IO mode
 my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
 
-#my_proc.enable_filter(True)
+my_proc.enable_filter(True)
 
 # Specify data output root file name
-my_proc.set_output_file("hitremoval_out.root"); 
+my_proc.set_output_file("full_output.root"); 
 
-my_proc.set_ana_output_file("") #hitremoval.root");
+my_proc.set_ana_output_file("analysis.root");
 
-search = fmwk.SaveSel2VtxTrkMCC82()
-search.SetVerbose(False)
-my_proc.add_process(search)
+#my_proc.enable_event_alignment(False)
+
+# Extract numuCC_vertex product from selectionII output
+# Only uncomment if vertex needs to be extracted
+ana = fmwk.SaveSel2VtxTrkMCC82()
+ana.SetVerbose(False)
+my_proc.add_process(ana)
 
 # prepare the various hit removal stages
 my_proc.add_process( loadAlgo("ROIRemoval") )
@@ -45,6 +62,27 @@ my_proc.add_process(loadAlgo_nu("VertexTrackRemoval") )
 my_proc.add_process(loadAlgo_nu("LinearRemoval") )
 my_proc.add_process(loadAlgo_nu("RemoveHitsNearVtx") )
 
+ratio = fmwk.DistanceCut()
+ratio.SetRatioCut(0.19) 
+ratio.SetRadius(50)
+ratio.SetVtxProducer("numuCC_vertex")
+ratio.UseChainedModules(True)
+my_proc.add_process(ratio,True)
+
+myunit = fmwk.LArImageHit()
+myunit.set_config(cfg)
+my_proc.add_process(myunit,True)
+
+protoshoweralg = protoshower.ProtoShowerAlgOpenCV()
+shr_unit = DefaultShowerReco3D()
+shr_unit.GetProtoShowerHelper().setProtoShowerAlg( protoshoweralg )
+shr_unit.SetInputProducer("ImageClusterHit")
+shr_unit.SetOutputProducer("showerreco")
+my_proc.add_process(shr_unit)
+
+pi0 = fmwk.Pi0Cuts()
+pi0.UseChainedModules(True)
+my_proc.add_process(pi0,True)
 
 # Output we save
 # HitRemoval Stuff
@@ -53,6 +91,19 @@ my_proc.set_data_to_write(fmwk.data.kCluster,     "pandoraCosmic"  )
 my_proc.set_data_to_write(fmwk.data.kAssociation, "pandoraCosmic" )
 #my_proc.set_data_to_write(fmwk.data.kCluster,     "sc"            )   
 #my_proc.set_data_to_write(fmwk.data.kAssociation, "sc"            )   
+
+# OpenCV Stuff
+my_proc.set_data_to_write(fmwk.data.kCluster,     "ImageClusterHit"  )
+my_proc.set_data_to_write(fmwk.data.kAssociation, "ImageClusterHit"  )
+my_proc.set_data_to_write(fmwk.data.kPFParticle,  "ImageClusterHit"  )
+
+# Showerreco Stuff
+my_proc.set_data_to_write(fmwk.data.kShower,      "showerreco")
+my_proc.set_data_to_write(fmwk.data.kAssociation, "showerreco")
+
+# Pi0Reco Stuff
+my_proc.set_data_to_write(fmwk.data.kShower,      "pi0_candidate_showers")
+my_proc.set_data_to_write(fmwk.data.kAssociation, "pi0_candidate_showers")
 
 # Other Things 
 my_proc.set_data_to_write(fmwk.data.kVertex,  "numuCC_vertex"  )
@@ -63,9 +114,7 @@ my_proc.set_data_to_write(fmwk.data.kTrack,   "pandoraNu"  )
 my_proc.set_data_to_write(fmwk.data.kMCShower,    "mcreco"         )
 my_proc.set_data_to_write(fmwk.data.kMCTrack,     "mcreco"         )
 my_proc.set_data_to_write(fmwk.data.kMCTruth,     "generator"      )
-#my_proc.set_data_to_write(fmwk.data.kCluster,  "mccluster"  )
-#my_proc.set_data_to_write(fmwk.data.kAssociation,  "mccluster"  )
-#my_proc.set_data_to_write(fmwk.data.kVertex,      "mcvertex"       )
+my_proc.set_data_to_write(fmwk.data.kVertex,      "mcvertex"       )
 
 print
 print  "Finished configuring ana_processor. Start event loop!"
