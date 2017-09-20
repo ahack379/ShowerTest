@@ -80,7 +80,6 @@ namespace larlite {
     storage->set_id( ev_s->run(), ev_s->subrun(), ev_s->event_id() );
     auto new_shower_v = storage->get_data<larlite::event_shower>("pi0_candidate_showers");
 
-
     std::cout<<"\nEvent : "<<_event <<std::endl;
 
     clear();
@@ -190,61 +189,61 @@ namespace larlite {
 
       std::cout<<"Pi0Cuts - Found a candidate! "<<std::endl ;
 
-      auto ev_v = storage->get_data<event_vertex>("numuCC_vertex");
-      auto ev_t = storage->get_data<event_track>("numuCC_track");
+      //auto ev_v = storage->get_data<event_vertex>("numuCC_vertex");
+      //auto ev_t = storage->get_data<event_track>("numuCC_track");
 
-      if( !ev_t || !ev_t->size() ){
-        std::cout<<"No tagged track; what??" <<std::endl;
-        return false;
-      }
+      //if( !ev_t || !ev_t->size() ){
+      //  std::cout<<"No tagged track; what??" <<std::endl;
+      //  return false;
+      //}
 
-      if( !ev_v || !ev_v->size() ){
-        std::cout<<"No tagged vertex; what??" <<std::endl;
-        return false;
-      }
+      //if( !ev_v || !ev_v->size() ){
+      //  std::cout<<"No tagged vertex; what??" <<std::endl;
+      //  return false;
+      //}
 
-      auto t = ev_t->at(0) ;
-      auto v = ev_v->at(0) ;
+      //auto t = ev_t->at(0) ;
+      //auto v = ev_v->at(0) ;
 
-      _mu_startx = t.Vertex().X() ;
-      _mu_starty = t.Vertex().Y() ;
-      _mu_startz = t.Vertex().Z() ;
-      _mu_endx = t.End().X() ;
-      _mu_endy = t.End().Y() ;
-      _mu_endz = t.End().Z() ;
-      _mu_mom  = t.VertexMomentum() ;
-      _mu_len  = t.Length(0); // Calculates the length from point 0 to end
-      _mu_angle = cos(t.Theta()) ;
-      _mu_phi = t.Phi() ; 
+      //_mu_startx = t.Vertex().X() ;
+      //_mu_starty = t.Vertex().Y() ;
+      //_mu_startz = t.Vertex().Z() ;
+      //_mu_endx = t.End().X() ;
+      //_mu_endy = t.End().Y() ;
+      //_mu_endz = t.End().Z() ;
+      //_mu_mom  = t.VertexMomentum() ;
+      //_mu_len  = t.Length(0); // Calculates the length from point 0 to end
+      //_mu_angle = cos(t.Theta()) ;
+      //_mu_phi = t.Phi() ; 
 
-      std::vector<double> dir = { (_mu_endx - _mu_startx) / _mu_len,
-                                  (_mu_endy - _mu_starty) / _mu_len,
-                                  (_mu_endz - _mu_startz) / _mu_len };
+      //std::vector<double> dir = { (_mu_endx - _mu_startx) / _mu_len,
+      //                            (_mu_endy - _mu_starty) / _mu_len,
+      //                            (_mu_endz - _mu_startz) / _mu_len };
 
-      auto dir_start = t.VertexDirection();
-      std::vector<double> other_dir = { dir_start.X(), dir_start.Y(), dir_start.Z() };  
+      //auto dir_start = t.VertexDirection();
+      //std::vector<double> other_dir = { dir_start.X(), dir_start.Y(), dir_start.Z() };  
 
-      float dotProd = dir.at(0) * other_dir.at(0) + dir.at(1) * other_dir.at(1) +  dir.at(2) * other_dir.at(2) ;
+      //float dotProd = dir.at(0) * other_dir.at(0) + dir.at(1) * other_dir.at(1) +  dir.at(2) * other_dir.at(2) ;
 
-      if( dotProd < 0 ) { 
-         TVector3 new_dir(-dir_start.X(),-dir_start.Y(),-dir_start.Z());
-         _mu_angle = cos(new_dir.Theta());
-         _mu_phi = new_dir.Phi();
-      }   
-      
+      //if( dotProd < 0 ) { 
+      //   TVector3 new_dir(-dir_start.X(),-dir_start.Y(),-dir_start.Z());
+      //   _mu_angle = cos(new_dir.Theta());
+      //   _mu_phi = new_dir.Phi();
+      //}   
+      //
 
-      auto ev_trk = storage->get_data<event_track>("pandoraNu");
+      //auto ev_trk = storage->get_data<event_track>("pandoraNu");
 
-      for ( auto const & t : *ev_trk ){
-        auto st = t.Vertex() ;
-        auto end = t.Vertex() ;
+      //for ( auto const & t : *ev_trk ){
+      //  auto st = t.Vertex() ;
+      //  auto end = t.Vertex() ;
 
-        auto dist_st = sqrt( pow(st.X() - v.X(),2) + pow(st.Y() - v.Y(),2) + pow(st.Z() - v.Z(),2) );
-        auto dist_end = sqrt( pow(end.X() - v.X(),2) + pow(end.Y() - v.Y(),2) + pow(end.Z() - v.Z(),2) );
+      //  auto dist_st = sqrt( pow(st.X() - v.X(),2) + pow(st.Y() - v.Y(),2) + pow(st.Z() - v.Z(),2) );
+      //  auto dist_end = sqrt( pow(end.X() - v.X(),2) + pow(end.Y() - v.Y(),2) + pow(end.Z() - v.Z(),2) );
 
-        if (dist_st < 3 || dist_end < 3)
-          _mult ++ ;
-      }
+      //  if (dist_st < 3 || dist_end < 3)
+      //    _mult ++ ;
+      //}
       
       // Store the new shower data product
       new_shower_v->emplace_back(ev_s->at(cand_ids[0]));
