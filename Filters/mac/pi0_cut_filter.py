@@ -27,6 +27,7 @@ my_proc.set_output_file("mcc8_post_pi0cut.root") #/Volumes/UBooNEData/mcc8/intim
 # Replace with your analysis unit if you wish.
 pi0 = fmwk.Pi0Cuts()
 pi0.UseChainedModules(False)
+pi0.SetVtxProducer('numuCC_vertex')
 my_proc.add_process(pi0)
 
 my_proc.enable_filter(True)

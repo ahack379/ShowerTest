@@ -65,7 +65,7 @@ namespace larlite {
       if( _chain_modules ){
         auto ev_c = storage->get_data<event_cluster>("ImageClusterHit");
         auto ev_p = storage->get_data<event_pfpart>("ImageClusterHit");
-        auto ev_v = storage->get_data<event_vertex>("numuCC_vertex");
+        auto ev_v = storage->get_data<event_vertex>(_vtx_producer);
         auto ev_t = storage->get_data<event_track>("numuCC_track");
         ev_c->clear();
         ev_p->clear();

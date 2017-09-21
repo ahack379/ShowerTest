@@ -54,6 +54,8 @@ namespace larlite {
 
     void UseChainedModules(bool doityouwont){ _chain_modules = doityouwont; } 
 
+    void SetVtxProducer(std::string vtx_producer="numuCC_vertex" ){ _vtx_producer = vtx_producer; } 
+
   protected:
 
     bool _chain_modules ;
@@ -83,6 +85,8 @@ namespace larlite {
     ::geoalgo::GeoAlgo _geoAlgo ;
     std::vector<int> _event_list ;    
     std::vector<int> _one_shower_list ;
+
+    std::string _vtx_producer ;
 
   };
 }
