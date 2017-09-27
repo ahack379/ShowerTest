@@ -56,8 +56,27 @@ namespace larlite {
 
       _tree->Branch("gamma_E",&_gamma_E,"gamma_E/F");
       _tree->Branch("gamma_RL",&_gamma_RL,"gamma_RL/F");
-
    }
+
+    if(!_shower_tree){
+      _shower_tree = new TTree("shower_tree","");
+      _shower_tree->Branch("event",&_event,"event/I");
+      _shower_tree->Branch("bkgd_id",&_bkgd_id,"bkgd_id/I");
+      _shower_tree->Branch("shr_startx",&_shr_startx,"shr_startx/F");
+      _shower_tree->Branch("shr_starty",&_shr_starty,"shr_starty/F");
+      _shower_tree->Branch("shr_startz",&_shr_startz,"shr_startz/F");
+      _shower_tree->Branch("shr_startw",&_shr_startw,"shr_startw/F");
+      _shower_tree->Branch("shr_startt",&_shr_startt,"shr_startt/F");
+      _shower_tree->Branch("shr_dirx",&_shr_dirx,"shr_dirx/F");
+      _shower_tree->Branch("shr_diry",&_shr_diry,"shr_diry/F");
+      _shower_tree->Branch("shr_dirz",&_shr_dirz,"shr_dirz/F");
+      _shower_tree->Branch("shr_energy",&_shr_energy,"shr_energy/F");
+      _shower_tree->Branch("shr_oangle",&_shr_oangle,"shr_oangle/F");
+      _shower_tree->Branch("shr_dedx",&_shr_dedx,"shr_dedx/F");
+      _shower_tree->Branch("shr_vtx_dist",&_shr_vtx_dist,"shr_vtx_dist/F");
+      _shower_tree->Branch("shr_trk_delta_theta",&_shr_trk_delta_theta,"shr_trk_delta_theta/F");
+      _shower_tree->Branch("shr_trk_delta_phi",&_shr_trk_delta_phi,"shr_trk_delta_phi/F");
+    }
 
     return true;
   }
@@ -93,6 +112,21 @@ namespace larlite {
 
     _gamma_E = -999;
     _gamma_RL = -999;
+
+    _shr_startx = -999;
+    _shr_starty = -999;
+    _shr_startz = -999;
+    _shr_startw = -999;
+    _shr_startt = -999;
+    _shr_dirx = -999;
+    _shr_diry = -999;
+    _shr_dirz = -999;
+    _shr_energy = -999;
+    _shr_oangle = -999;
+    _shr_dedx = -999;
+    _shr_vtx_dist = -999;
+    _shr_trk_delta_theta = -999;
+    _shr_trk_delta_phi = -999;
 
   }
   
@@ -315,7 +349,10 @@ namespace larlite {
       }
     }
 
+    auto geomH = ::larutil::GeometryHelper::GetME();
+
     auto ev_s = storage->get_data<event_shower>("showerreco");
+
     if ( ev_s ) _nshrs = ev_s->size(); 
 
     if ( _get_pi0_info ){
@@ -381,8 +418,42 @@ namespace larlite {
       _gamma_RL = vertex.Dist(ev_s->at(0).ShowerStart());
 
     }
-    
+
     _tree->Fill();    
+
+    if ( !ev_s || ev_s->size() == 0) return false ;
+
+    if ( ev_s->size() != 0 ){
+
+      for( auto const & s : *ev_s ){
+        _shr_startx = s.ShowerStart().X();
+        _shr_starty = s.ShowerStart().Y();
+        _shr_startz = s.ShowerStart().Z();
+
+        std::vector<float> shr_to_proj = { _shr_startx, _shr_starty, _shr_startz } ;
+        auto shr2d = geomH->Point_3Dto2D(shr_to_proj,2) ;
+        _shr_startw = shr2d.w ;
+        _shr_startt = shr2d.t ;
+
+        _shr_dirx = s.Direction().X();
+        _shr_diry = s.Direction().Y();
+        _shr_dirz = s.Direction().Z();
+
+        _shr_energy = s.Energy(2);
+        _shr_oangle = s.OpeningAngle();
+        _shr_dedx = s.dEdx(2);
+
+        _shr_vtx_dist = sqrt( pow(_vtx_x - _shr_startx,2) +
+                              pow(_vtx_y - _shr_starty,2) +
+                              pow(_vtx_z - _shr_startz,2) );
+
+        _shr_trk_delta_theta = s.Direction().Theta() - _mu_angle;
+        _shr_trk_delta_phi = s.Direction().Phi() - _mu_phi ;
+
+        _shower_tree->Fill() ;
+      }
+    }
+
 
     return true;
   }
@@ -406,6 +477,7 @@ namespace larlite {
     if ( _fout ){
       _fout->cd();
       _tree->Write();
+      _shower_tree->Write();
     }
   
     return true;

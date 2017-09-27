@@ -28,7 +28,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    BackgroundAll(){ _name="BackgroundAll"; _fout=0; _tree=0; }
+    BackgroundAll(){ _name="BackgroundAll"; _fout=0; _tree=0; _shower_tree = 0; }
 
     /// Default destructor
     virtual ~BackgroundAll(){}
@@ -98,6 +98,24 @@ namespace larlite {
   float _mu_phi ;
   float _mu_mom;
   float _mult;
+
+  // One entry per shower
+  TTree * _shower_tree ;
+  float _shr_startx;
+  float _shr_starty;
+  float _shr_startz;
+  float _shr_startw;
+  float _shr_startt;
+  float _shr_dirx;
+  float _shr_diry;
+  float _shr_dirz;
+  float _shr_energy;
+  float _shr_oangle;
+  float _shr_dedx;
+  float _shr_vtx_dist;
+  float _shr_trk_delta_theta ;
+  float _shr_trk_delta_phi ;
+
 
   ::geoalgo::GeoAlgo _geoAlgo ;
 
