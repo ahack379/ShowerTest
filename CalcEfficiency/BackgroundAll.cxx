@@ -261,11 +261,11 @@ namespace larlite {
         //}
 
         //if( n_mu == 1 && n_pi0 == 1 && infv && e > 0.275 ) 
-	std::cout<<"\nEvent : "<<_event<<", "<<e<<std::endl ;
-        std::cout<<nu.Nu().PdgCode()<<", "<< nu.CCNC() <<std::endl; 
-        for ( auto const & p : parts ){
-	  if ( p.PdgCode() < 3000 ) std::cout<<p.PdgCode()<<std::endl ;
-	}
+	//std::cout<<"\nEvent : "<<_event<<", "<<e<<std::endl ;
+        //std::cout<<nu.Nu().PdgCode()<<", "<< nu.CCNC() <<std::endl; 
+        //for ( auto const & p : parts ){
+	//  if ( p.PdgCode() < 3000 ) std::cout<<p.PdgCode()<<std::endl ;
+	//}
 
       }
 

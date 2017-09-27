@@ -19,7 +19,9 @@
 #pragma link C++ class larlite::Pi0Cuts+;
 #pragma link C++ class larlite::SingleShowerPi0Cuts+;
 #pragma link C++ class larlite::DistanceCut+;
+#pragma link C++ class larlite::dQdxFilter+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
+
 
 

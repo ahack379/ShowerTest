@@ -29,3 +29,11 @@ Plots/*.png
 *.C
 DataMCCompare/*
 *.pyc
+*/*.ipynb
+*/*/*.ipynb
+*/*/*/*.ipynb
+*/*/*/*/*.ipynb
+*.pdf
+AnsQuestions/
+SystematicError/arxiv/
+MCC82_FinalPlots/GoldenPi0Plots/

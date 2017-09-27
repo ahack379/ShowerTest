@@ -241,7 +241,8 @@ namespace larlite {
       _vtx_trk_dist = st_dist < end_dist ? st_dist : end_dist ;
       _vtx_mc_reco_dist = sqrt( pow(_mc_vtxx - _vtxx,2) + pow(_mc_vtxy - _vtxy,2) + pow(_mc_vtxz - _vtxz,2) );
 
-      if ( ev_shr ) _nshrs = ev_shr->size() ;
+      _nshrs = ev_shr->size() ;
+      //if ( ev_shr ) _nshrs = ev_shr->size() ;
 
       auto ev_trk = storage->get_data<event_track>("pandoraNu");
 

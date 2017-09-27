@@ -62,12 +62,12 @@ my_proc.add_process(loadAlgo_nu("VertexTrackRemoval") )
 my_proc.add_process(loadAlgo_nu("LinearRemoval") )
 my_proc.add_process(loadAlgo_nu("RemoveHitsNearVtx") )
 
-ratio = fmwk.DistanceCut()
-ratio.SetRatioCut(0.19) 
-ratio.SetRadius(50)
-ratio.SetVtxProducer("numuCC_vertex")
-ratio.UseChainedModules(True)
-my_proc.add_process(ratio,True)
+#ratio = fmwk.DistanceCut()
+#ratio.SetRatioCut(0.19) 
+#ratio.SetRadius(50)
+#ratio.SetVtxProducer("numuCC_vertex")
+#ratio.UseChainedModules(True)
+#my_proc.add_process(ratio,True)
 
 myunit = fmwk.LArImageHit()
 myunit.set_config(cfg)
@@ -109,12 +109,6 @@ my_proc.set_data_to_write(fmwk.data.kAssociation, "pi0_candidate_showers")
 my_proc.set_data_to_write(fmwk.data.kVertex,  "numuCC_vertex"  )
 my_proc.set_data_to_write(fmwk.data.kTrack,   "numuCC_track"  )
 my_proc.set_data_to_write(fmwk.data.kTrack,   "pandoraNu"  )
-
-# MC Stuff 
-#my_proc.set_data_to_write(fmwk.data.kMCShower,    "mcreco"         )
-#my_proc.set_data_to_write(fmwk.data.kMCTrack,     "mcreco"         )
-#my_proc.set_data_to_write(fmwk.data.kMCTruth,     "generator"      )
-#my_proc.set_data_to_write(fmwk.data.kVertex,      "mcvertex"       )
 
 print
 print  "Finished configuring ana_processor. Start event loop!"

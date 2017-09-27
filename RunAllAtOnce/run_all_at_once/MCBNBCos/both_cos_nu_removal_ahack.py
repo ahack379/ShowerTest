@@ -42,11 +42,16 @@ my_proc.set_ana_output_file("analysis.root");
 
 #my_proc.enable_event_alignment(False)
 
-# Extract numuCC_vertex product from selectionII output
-# Only uncomment if vertex needs to be extracted
+# Extract reco numuCC_vertex product from selectionII output
 ana = fmwk.SaveSel2VtxTrkMCC82()
 ana.SetVerbose(False)
 my_proc.add_process(ana)
+
+# Creates MC vertex
+#mcvtx = fmwk.MakeMCVertex()
+#mcvtx.SetXOffset(0.7)
+#mcvtx.FilterEvents(False)
+#my_proc.add_process(mcvtx)
 
 # prepare the various hit removal stages
 my_proc.add_process( loadAlgo("ROIRemoval") )
@@ -62,12 +67,12 @@ my_proc.add_process(loadAlgo_nu("VertexTrackRemoval") )
 my_proc.add_process(loadAlgo_nu("LinearRemoval") )
 my_proc.add_process(loadAlgo_nu("RemoveHitsNearVtx") )
 
-ratio = fmwk.DistanceCut()
-ratio.SetRatioCut(0.19) 
-ratio.SetRadius(50)
-ratio.SetVtxProducer("numuCC_vertex")
-ratio.UseChainedModules(True)
-my_proc.add_process(ratio,True)
+#ratio = fmwk.DistanceCut()
+#ratio.SetRatioCut(0.19) 
+#ratio.SetRadius(50)
+#ratio.SetVtxProducer("numuCC_vertex")
+#ratio.UseChainedModules(True)
+#my_proc.add_process(ratio,True)
 
 myunit = fmwk.LArImageHit()
 myunit.set_config(cfg)
@@ -82,6 +87,7 @@ my_proc.add_process(shr_unit)
 
 pi0 = fmwk.Pi0Cuts()
 pi0.UseChainedModules(True)
+pi0.SetVtxProducer("numuCC_vertex")
 my_proc.add_process(pi0,True)
 
 # Output we save
