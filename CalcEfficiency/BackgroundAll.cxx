@@ -211,6 +211,7 @@ namespace larlite {
       auto & truth = ev_mctruth->at(0);
       auto & nu  = truth.GetNeutrino();
       _nu_mode = nu.Mode();
+      if (_nu_mode == 10) _nu_mode = 4;
 
       double xyz[3] = {0.};
       auto traj = nu.Nu().Trajectory();

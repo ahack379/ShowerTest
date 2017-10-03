@@ -383,12 +383,12 @@ namespace larlite {
           bool charge_ex = false; 
           bool kaon_decay = false; 
           for ( auto const & s : *ev_mcs ){
-            if ( s.MotherPdgCode() == 111 && abs(s.AncestorPdgCode()) == 211 ){
+            if ( s.MotherPdgCode() == 111 && s.Origin() == 1 && abs(s.AncestorPdgCode()) == 211 ){
               charge_ex = true; 
               break;
             }
 
-            if ( s.MotherPdgCode() == 111 && abs(s.AncestorPdgCode()) == 321 ){
+            if ( s.MotherPdgCode() == 111 && s.Origin() == 1 && abs(s.AncestorPdgCode()) == 321 ){
               kaon_decay = true; 
 	      break;
 	    }
