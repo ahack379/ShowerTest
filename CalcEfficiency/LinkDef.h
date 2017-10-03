@@ -18,6 +18,7 @@
 #pragma link C++ class larlite::BackgroundAll+;
 #pragma link C++ class larlite::BackgroundObnoxious+;
 #pragma link C++ class larlite::CCEff+;
+#pragma link C++ class larlite::NuMode+;
 
 //ADD_NEW_CLASS ... do not change this line
 #endif
