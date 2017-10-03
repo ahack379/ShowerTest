@@ -105,12 +105,9 @@ namespace larlite {
     std::cout<<"5) NC 0pi0 : "<<_n_nc0pi0<<std::endl;
     std::cout<<"6) Other   : "<<_n_other<<std::endl; 
 
-    std::cout<<"Total accounted backgrounds: "<< _n_other + _n_cosmic + _n_nc1pi0 + _n_nc0pi0 + _n_cc0pi0 <<std::endl ;
-
     if ( _fout ){
       _fout->cd();
       _tree->Write();
-      _shower_tree->Write();
     }
   
     return true;
