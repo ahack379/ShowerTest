@@ -97,7 +97,7 @@ namespace larlite {
            continue;
 	}
 
-         if( radL_shr1 > 62 ) { 
+        if( radL_shr1 > 62 ) { 
          //if( radL_shr1 > 80 || radL_shr1 < 6 ){
 	   std::cout<<"Radiation length : "<<radL_shr1<<std::endl ;
            continue;
@@ -114,7 +114,7 @@ namespace larlite {
          //  continue;
 	 //}
 
-     	cand_map.emplace(dist,s1);
+     	cand_map.emplace(1./shr1.Energy(),s1);
 
         //std::cout<<" Dist to vtx : "<<dist_to_vtx<<", IP: "<<dist <<", energy: "<<_pi0_high_shrE<<std::endl ;
 

@@ -146,10 +146,10 @@ namespace larlite {
                continue;
               }
 
-            if( radL_shr1 > 62 || radL_shr2 > 62 ){
-               //std::cout<<"Rad Length : "<<radL_shr1<<", "<<radL_shr2<<std::endl ;
-               continue;
-                }
+           // if( radL_shr1 > 62 || radL_shr2 > 62 ){
+           //    //std::cout<<"Rad Length : "<<radL_shr1<<", "<<radL_shr2<<std::endl ;
+           //    continue;
+           //     }
 
             // Bunch of cuts
             if( IP < min_IP ){
