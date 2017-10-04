@@ -36,6 +36,7 @@ namespace larlite {
       _gamma_tree->Branch("_gamma2_vtx_IP",&_gamma2_vtx_IP,"gamma2_vtx_IP/F");
       _gamma_tree->Branch("_pi0_mass",&_pi0_mass,"pi0_mass/F");
       _gamma_tree->Branch("_pi0_mom",&_pi0_mom,"pi0_mom/F");
+      _gamma_tree->Branch("_event_type",&_event_type,"event_type/F");
     }
 
     if( !_one_gamma_tree ){
@@ -114,6 +115,8 @@ namespace larlite {
     _gamma_RL = -10;
     _gamma_vtx_IP = -10;
     _gamma_matched =false;
+
+    _event_type = -1;
 
     _mu_startx     = -1000;
     _mu_starty     = -1000;
@@ -358,16 +361,37 @@ namespace larlite {
     // Now deal with shower comparisons
     std::vector<int> shr_ids;
 
+    bool found_pi0 = false;
+
     for ( int si = 0; si < ev_mcshr->size(); si++){
 
       auto s = ev_mcshr->at(si);
       auto st = s.Start();
       auto dist = sqrt( pow(st.X() - xyz[0],2) + pow(st.Y() - xyz[1],2) + pow(st.Z() - xyz[2],2) );
 
-      if ( dist < 0.0001 && s.DetProfile().E() > 0 && s.MotherPdgCode() == 111 )
+      if ( s.DetProfile().E() > 0 && s.MotherPdgCode() == 111 && s.Origin() == 1 ) found_pi0 = true;
+
+      if ( dist < 0.0001 && found_pi0 && nu.Nu().PdgCode() == 14 && nu.CCNC() == 0 ){
         shr_ids.emplace_back(si) ;
-      
+        _event_type = 0;
+      }
     }
+
+    if ( found_pi0 && !shr_ids.size() ){
+      for ( int si = 0; si < ev_mcshr->size(); si++){
+
+        auto s = ev_mcshr->at(si);
+        auto st = s.Start();
+        auto dist = sqrt( pow(st.X() - xyz[0],2) + pow(st.Y() - xyz[1],2) + pow(st.Z() - xyz[2],2) );
+
+        if ( s.DetProfile().E() > 0 && s.MotherPdgCode() == 111 ){
+          shr_ids.emplace_back(si) ;
+	  _event_type = 1;
+	  }
+	}
+    }
+      
+    if ( _event_type == -1 ) _event_type = 2;
 
     std::multimap<float,std::pair<int,int>> mc_reco_map ;    
 

@@ -59,6 +59,7 @@ namespace larlite {
 
     TTree * _gamma_tree ;
     int _event;
+    int _event_type; // signal 0, bkgd with pi0 1, bkgd with no pi0 2
     float _pi0_mass;
     float _pi0_mom;
     float _gamma_oangle;
