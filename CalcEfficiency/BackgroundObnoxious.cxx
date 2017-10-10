@@ -434,13 +434,14 @@ namespace larlite {
       }
     }
 
-    auto ev_s = storage->get_data<event_shower>("pi0_candidate_showers");
+    auto ev_shr = storage->get_data<event_shower>("showerreco");
 
-    if ( ev_s ) _nshrs = ev_s->size(); 
+    if ( ev_shr ) _nshrs = ev_shr->size(); 
 
     if ( _get_pi0_info ){
 
 
+      auto ev_s = storage->get_data<event_shower>("pi0_candidate_showers");
       if( !ev_s || !ev_s->size() || ev_s->size() < 2 ){
         std::cout<<"Not enough reco'd showers..." <<std::endl;
         return false;
