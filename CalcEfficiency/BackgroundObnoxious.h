@@ -82,6 +82,8 @@ namespace larlite {
   TTree * _tree ;
   int _event ;
   int _bkgd_id ;
+  int _nu_mode ;
+  int _nshrs;
   float _vtx_x ;
   float _vtx_y ;
   float _vtx_z ;
@@ -89,6 +91,7 @@ namespace larlite {
   float _pi0_mass ;
   float _pi0_mom ;
   float _pi0_oangle ;
+  float _pi0_IP;
   float _pi0_low_shrE;
   float _pi0_high_shrE;
   float _pi0_low_radL;

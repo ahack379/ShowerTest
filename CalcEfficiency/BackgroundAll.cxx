@@ -48,6 +48,7 @@ namespace larlite {
 
       _tree->Branch("pi0_mass",&_pi0_mass,"pi0_mass/F");
       _tree->Branch("pi0_oangle",&_pi0_oangle,"pi0_oangle/F");
+      _tree->Branch("pi0_IP",&_pi0_IP,"pi0_IP/F");
       _tree->Branch("pi0_mom",&_pi0_mom,"pi0_mom/F");
       _tree->Branch("pi0_low_shrE",&_pi0_low_shrE,"pi0_low_shrE/F");
       _tree->Branch("pi0_high_shrE",&_pi0_high_shrE,"pi0_high_shrE/F");
@@ -104,6 +105,7 @@ namespace larlite {
 
     _pi0_mass = -999;
     _pi0_oangle = -999;
+    _pi0_IP = -999;
     _pi0_mom = -999;
     _pi0_low_shrE = -999;
     _pi0_high_shrE = -999;
@@ -371,6 +373,12 @@ namespace larlite {
       geoalgo::Vector_t rev_shr1(-1.*shr1.Direction()) ;
       geoalgo::Vector_t rev_shr2(-1.*shr2.Direction()) ;
 
+      // Make the backwards projection for the showers
+      auto shr1_bkwrd_hl = ::geoalgo::HalfLine_t(shr1.ShowerStart(),rev_shr1);
+      auto shr2_bkwrd_hl = ::geoalgo::HalfLine_t(shr2.ShowerStart(),rev_shr2);
+
+      auto IP = pow(_geoAlgo.SqDist(shr1_bkwrd_hl,shr2_bkwrd_hl),0.5);
+
       // CCNC the Opening angle of the showers
       double oangle = acos( shr1.Direction().Dot(shr2.Direction())) ;
 
@@ -386,6 +394,7 @@ namespace larlite {
 
       _geoAlgo.commonOrigin(shr1_hl, shr2_hl, vertex, true);
 
+
       // CCNC Diretion of two correlated shower
       geoalgo::Vector_t momentum(3);// need to fill out
       geoalgo::Vector_t mom_vect(shr2.Direction()*shr1.Energy(2) +shr1.Direction()*shr2.Energy(2)) ;
@@ -399,6 +408,7 @@ namespace larlite {
       _pi0_mass      = sqrt(2 * shr1.Energy() * shr2.Energy() *(1.-cos(oangle)));
       _pi0_mom       = tot_pi0_mom;
       _pi0_oangle    = oangle;
+      _pi0_IP        = IP ;
       _pi0_low_shrE  = shr1.Energy() < shr2.Energy() ? shr1.Energy() : shr2.Energy() ;
       _pi0_high_shrE = shr1.Energy() < shr2.Energy() ? shr2.Energy() : shr1.Energy() ;
       _pi0_low_radL  = shr1.Energy() < shr2.Energy() ? radL_shr1 : radL_shr2 ;

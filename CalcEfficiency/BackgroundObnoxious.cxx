@@ -40,6 +40,8 @@ namespace larlite {
       _tree = new TTree("tree","");
       _tree->Branch("event",&_event,"event/I");
       _tree->Branch("bkgd_id",&_bkgd_id,"bkgd_id/I");
+      _tree->Branch("nu_mode",&_nu_mode,"nu_mode/I");
+      _tree->Branch("nshrs",&_nshrs,"nshrs/I");
 
       _tree->Branch("vtx_x",&_vtx_x,"vtx_x/F");
       _tree->Branch("vtx_y",&_vtx_y,"vtx_y/F");
@@ -59,6 +61,7 @@ namespace larlite {
 
       _tree->Branch("pi0_mass",&_pi0_mass,"pi0_mass/F");
       _tree->Branch("pi0_oangle",&_pi0_oangle,"pi0_oangle/F");
+      _tree->Branch("pi0_IP",&_pi0_IP,"pi0_IP/F");
       _tree->Branch("pi0_mom",&_pi0_mom,"pi0_mom/F");
       _tree->Branch("pi0_low_shrE",&_pi0_low_shrE,"pi0_low_shrE/F");
       _tree->Branch("pi0_high_shrE",&_pi0_high_shrE,"pi0_high_shrE/F");
@@ -76,6 +79,8 @@ namespace larlite {
   void BackgroundObnoxious::clear(){
 
     _bkgd_id = -1 ;
+    _nu_mode = -1 ;
+    _nshrs = -1 ;
     _mult    = 0;
     _vtx_x   = -999;
     _vtx_y   = -999;
@@ -94,6 +99,7 @@ namespace larlite {
 
     _pi0_mass = -999;
     _pi0_oangle = -999;
+    _pi0_IP = -999;
     _pi0_mom = -999;
     _pi0_low_shrE = -999;
     _pi0_high_shrE = -999;
@@ -188,6 +194,9 @@ namespace larlite {
 
       auto & truth = ev_mctruth->at(0);
       auto & nu  = truth.GetNeutrino();
+
+      _nu_mode = nu.Mode();
+      if (_nu_mode == 10) _nu_mode = 4;
 
       double xyz[3] = {0.};
       auto traj = nu.Nu().Trajectory();
@@ -425,9 +434,12 @@ namespace larlite {
       }
     }
 
+    auto ev_s = storage->get_data<event_shower>("pi0_candidate_showers");
+
+    if ( ev_s ) _nshrs = ev_s->size(); 
+
     if ( _get_pi0_info ){
 
-      auto ev_s = storage->get_data<event_shower>("pi0_candidate_showers");
 
       if( !ev_s || !ev_s->size() || ev_s->size() < 2 ){
         std::cout<<"Not enough reco'd showers..." <<std::endl;
@@ -439,6 +451,12 @@ namespace larlite {
 
       geoalgo::Vector_t rev_shr1(-1.*shr1.Direction()) ;
       geoalgo::Vector_t rev_shr2(-1.*shr2.Direction()) ;
+
+      // Make the backwards projection for the showers
+      auto shr1_bkwrd_hl = ::geoalgo::HalfLine_t(shr1.ShowerStart(),rev_shr1);
+      auto shr2_bkwrd_hl = ::geoalgo::HalfLine_t(shr2.ShowerStart(),rev_shr2);
+
+      auto IP = pow(_geoAlgo.SqDist(shr1_bkwrd_hl,shr2_bkwrd_hl),0.5);
 
       // CCNC the Opening angle of the showers
       double oangle = acos( shr1.Direction().Dot(shr2.Direction())) ;
@@ -468,6 +486,7 @@ namespace larlite {
       _pi0_mass      = sqrt(2 * shr1.Energy() * shr2.Energy() *(1.-cos(oangle)));
       _pi0_mom       = tot_pi0_mom;
       _pi0_oangle    = oangle;
+      _pi0_IP        = IP ;
       _pi0_low_shrE  = shr1.Energy() < shr2.Energy() ? shr1.Energy() : shr2.Energy() ;
       _pi0_high_shrE = shr1.Energy() < shr2.Energy() ? shr2.Energy() : shr1.Energy() ;
       _pi0_low_radL  = shr1.Energy() < shr2.Energy() ? radL_shr1 : radL_shr2 ;
