@@ -274,62 +274,10 @@ namespace larlite {
       }   
       // If no true tracks aligned with reco track, mark it as cosmic 
       else {
-        //for ( size_t si = 0; si < ev_mcs->size(); si++ ) { 
-
-        //  auto mc_vtx = ev_mcs->at(si).Start() ;
-        //
-        //  float dist_st = sqrt(  pow(mc_vtx.X() - tag_st.X(),2) + 
-        //                         pow(mc_vtx.Y() - tag_st.Y(),2) + 
-        //                         pow(mc_vtx.Z() - tag_st.Z(),2) );  
-
-        //  float dist_end = sqrt( pow(mc_vtx.X() - tag_end.X(),2) + 
-        //                         pow(mc_vtx.Y() - tag_end.Y(),2) + 
-        //                         pow(mc_vtx.Z() - tag_end.Z(),2) );  
-
-        //   
-        //   if ( dist_st < 25 || dist_end < 25){
-        //      mc_min_dist = dist_st < dist_end ? dist_st : dist_end ; 
-        //      mctrk_map.emplace(dist_st,si);
-        //   }   
-        // }   
-
-	// int mcs_max_dot = -1;
-	// int mcs_max_it = -1;
-
-        // if( mctrk_map.size() ) {
-
-        //   auto tag_st = tag_trk.VertexDirection();     
-        //   auto tag_norm = sqrt( pow(tag_st.Px(),2) + pow(tag_st.Py(),2) + pow(tag_st.Pz(),2)); 
-
-        //   for( auto & si : mctrk_map ){
-        //         
-        //     auto mc = ev_mcs->at(si.second);
-        //     auto mc_st = mc.Start();
-        //     auto mc_norm = sqrt( pow(mc_st.Px(),2) + pow(mc_st.Py(),2) + pow(mc_st.Pz(),2) );
-        //     
-        //     auto dot = (tag_st.Px() * mc_st.Px() + tag_st.Py() * mc_st.Py() + tag_st.Pz() * mc_st.Pz())/tag_norm / mc_norm ;
-
-        //     if ( fabs(dot) > mcs_max_dot ){
-        //       mcs_max_dot = dot;
-        //       mcs_max_it = si.second ;
-        //     }
-        //   }
-	//   if ( ev_mcs->at(mcs_max_it).Origin() == 2 ){
-	//     _n_cosmic++;
-	//     _bkgd_id = 1;
-	//   }
-	//   else {
-	//     _n_other++;
-	//     _bkgd_id = 0 ;
-	//   }
-        // }   
-	// else{
            _n_other++;
            _bkgd_id = 0 ;
 	   _event_list.emplace_back(_event) ;
 	   _vtx_list.emplace_back(vtx_diff);
-            //std::cout<<"\nEvent is : "<<_event <<", mult: "<<trk_map.size()<<", "<<storage->event_id()<<", "<<storage->subrun_id()<<std::endl ;
-	  //}
       }
 
       ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -421,6 +369,27 @@ namespace larlite {
           else if( !charge_ex && nu.CCNC() == 0 ){
             _bkgd_id = 12;
             _n_ccother++; 
+
+           std::cout<<"\nCC OTHER!!! "<<_event<<", "<<nu.Mode()<<std::endl;
+
+            bool nu_shower = false;
+            for ( auto const & s : *ev_mcs ){
+              if ( (abs(s.PdgCode()) == 11 || s.PdgCode() == 22 ) && s.Origin() == 1 ){
+                nu_shower = true; 
+                std::cout<<" shower process: "<<s.Process()<<", Mother and Daughter: "<<s.MotherPdgCode()<<", "<<s.PdgCode()<<std::endl ;
+              }
+            }
+
+            int i = 0;
+            for ( auto const & p : parts ){
+              if(  p.StatusCode() == 1 && p.PdgCode() < 3000 ){
+                 //if ( i == 0 ){ std::cout<<"Process: "<<p.Process()<<std::endl; i++; }
+                 std::cout<<"  Particle: "<<p.PdgCode() <<std::endl ;
+              }
+                  
+            }
+
+
           }
           else if( !charge_ex && nu.CCNC() == 1 ){
             _bkgd_id = 13;
@@ -492,6 +461,18 @@ namespace larlite {
       _pi0_high_shrE = shr1.Energy() < shr2.Energy() ? shr2.Energy() : shr1.Energy() ;
       _pi0_low_radL  = shr1.Energy() < shr2.Energy() ? radL_shr1 : radL_shr2 ;
       _pi0_high_radL = shr1.Energy() < shr2.Energy() ? radL_shr2 : radL_shr1 ;
+
+      if ( _bkgd_id == 12 || _bkgd_id == 2 ){
+        std::cout<<"Pi0 Info: "<<_bkgd_v[_bkgd_id] <<std::endl;
+        std::cout<<"\tMass : "<<_pi0_mass<<std::endl;
+        std::cout<<"\tAngle: "<<_pi0_oangle<<std::endl;
+        std::cout<<"\tIP: "<<_pi0_IP<<std::endl;
+        std::cout<<"\tLow E RL: "<<_pi0_low_radL<<std::endl;
+        std::cout<<"\tHigh E RL: "<<_pi0_high_radL<<std::endl;
+        std::cout<<"\tLow E: "<<_pi0_low_shrE<<std::endl;
+        std::cout<<"\tHigh E: "<<_pi0_high_shrE<<std::endl;
+        std::cout<<"\tTotal E: "<<_pi0_high_shrE+_pi0_low_shrE<<std::endl;
+      }
 
     }
  
