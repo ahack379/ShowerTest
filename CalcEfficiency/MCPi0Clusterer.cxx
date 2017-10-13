@@ -82,6 +82,8 @@ namespace larlite {
     std::vector<std::vector<unsigned int> > g4_trackid_v;
     std::vector<unsigned int> mc_index_v;
     std::vector<bool> pi0_index_v;
+    std::vector<float> track_shower_index_v;
+
     // keep track of all the shower and track trackIDs
     g4_trackid_v.reserve(ev_mcs->size()+ev_mct->size());
 
@@ -120,11 +122,10 @@ namespace larlite {
         g4_trackid_v.push_back(id_v);
         mc_index_v.push_back(mc_index);
 	pi0_index_v.push_back(found_pi0);
+	track_shower_index_v.push_back(1); // 1 indicates shower
       }// if this shower has enough energy
     }
 
-
-    found_pi0 = false;
     // for each mctrack, add it's track id info to the list of IDs to look at
     for (size_t mc_index = 0; mc_index < ev_mct->size(); ++mc_index) {
       auto const& mct = (*ev_mct)[mc_index];
@@ -143,8 +144,9 @@ namespace larlite {
         //	  << " w/ PDG code : " << mct.PdgCode()
         //	  << " w/ energy : "   << energy << std::endl;
         g4_trackid_v.push_back(id_v);
-        mc_index_v.push_back(mc_index+ev_mcs->size());
-	pi0_index_v.push_back(mc_index + ev_mcs->size());
+        mc_index_v.push_back(mc_index + ev_mcs->size());
+	pi0_index_v.push_back(false);
+	track_shower_index_v.push_back(0); // 1 indicates shower
       }
     }
 
@@ -161,6 +163,7 @@ namespace larlite {
     // vector to save the plane information for each cluster
     std::vector<larlite::geo::View_t> cluster_plane_v(cluster_hit_v.size(), larlite::geo::View_t::kUnknown);
     std::vector<bool> cluster_pi0_v(cluster_hit_v.size(), false);
+    std::vector<float> cluster_ts_v(cluster_hit_v.size(), 0);
 
     // loop through hits, use the back-tracker to find which MCX object
     // it should belong to, and add that hit to the cluster that is
@@ -217,6 +220,7 @@ namespace larlite {
 	cluster_hit_v[ pl * mc_index_v.size() + idx ].push_back( hit_idx );
 	cluster_plane_v[ pl * mc_index_v.size() + idx ] = pl;
 	cluster_pi0_v[ pl * mc_index_v.size() + idx ] = pi0_index_v.at(idx) ;
+	cluster_ts_v[ pl * mc_index_v.size() + idx ] = track_shower_index_v.at(idx) ;
     }// for all hits 
 
     // now create the clusters and save them as data-products
@@ -238,7 +242,8 @@ namespace larlite {
       cluster clus;
       clus.set_n_hits(cluster_hit_v[idx].size());
       clus.set_view(cluster_plane_v[idx]);
-      clus.set_id(cluster_pi0_v[idx]);
+      clus.set_is_merged(cluster_pi0_v[idx]); // Is there pi0 here?
+      clus.set_start_opening(cluster_ts_v[idx]); // Is this a track or shower?
       ev_mccluster->push_back(clus);
       cluster_hit_ass_v.push_back(cluster_hit_v[idx]);
 
