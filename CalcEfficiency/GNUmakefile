@@ -14,6 +14,7 @@ OBJECTS = $(SOURCES:.cxx=.o)
 INCFLAGS  = -I.                       #Include itself
 INCFLAGS += $(shell larlite-config --includes)
 INCFLAGS += $(shell basictool-config --includes)
+INCFLAGS += $(shell recotool-config --includes)
 INCFLAGS += -I$(OPENCV_INCDIR)
 
 # platform-specific options
@@ -23,6 +24,7 @@ OSNAMEMODE      = $(OSNAME)
 
 LDFLAGS += -L$(OPENCV_LIBDIR) -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc
 LDFLAGS += $(shell basictool-config --libs)
+LDFLAGS += $(shell recotool-config --libs) -lRecoTool_MCComp
 LDFLAGS += $(shell larlite-config --libs)
 
 
