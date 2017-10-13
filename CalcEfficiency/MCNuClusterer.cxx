@@ -76,17 +76,6 @@ namespace larlite {
     // reload the event information
     storage->set_id(ev_hit->run(),ev_hit->subrun(),ev_hit->event_id()); 
     
-    // used track id vector
-    std::vector<unsigned int> used_trk_id;
-
-    // Create G4 track ID vector for MCShowers & MCTracks in the event
-    std::vector<std::vector<unsigned int> > g4_trackid_v;
-    std::vector<unsigned int> mc_index_v;
-    std::vector<bool> pi0_index_v;
-    std::vector<float> track_shower_index_v;
-
-    // keep track of all the shower and track trackIDs
-    g4_trackid_v.reserve(ev_mcs->size()+ev_mct->size());
 
     auto & truth = ev_mctruth->at(0);
     auto & nu  = truth.GetNeutrino();
@@ -113,6 +102,20 @@ namespace larlite {
     vertex new_vtx(xyz) ;
     ev_vtx->push_back(new_vtx);
 
+    // used track id vector
+    std::vector<unsigned int> used_trk_id;
+
+    // Create G4 track ID vector for MCShowers & MCTracks in the event
+    std::vector<std::vector<unsigned int> > g4_trackid_v;
+    std::vector<unsigned int> mc_index_v;
+    std::vector<bool> pi0_index_v;
+    std::vector<float> track_shower_index_v;
+    std::vector<float> cosmic_neutrino_v;
+
+
+    // keep track of all the shower and track trackIDs
+    g4_trackid_v.reserve(ev_mcs->size()+ev_mct->size());
+
     bool found_pi0 = false;
 
     // for each mcshower, find the geant trackIDs associated with that shower
@@ -124,12 +127,12 @@ namespace larlite {
       double energy = mcs.DetProfile().E();
 
       auto st = mcs.Start();
-      auto dist = sqrt( pow(st.X() - xvtx,2) + pow(st.Y() - yvtx,2) + pow(st.Z() - zvtx,2) );
+      //auto dist = sqrt( pow(st.X() - xvtx,2) + pow(st.Y() - yvtx,2) + pow(st.Z() - zvtx,2) );
 
       std::vector<unsigned int> id_v;
       id_v.reserve(mcs.DaughterTrackID().size());
 
-      if ( energy > _mc_energy_min && mcs.Origin() == 1 ) {
+      if ( energy > _mc_energy_min && (mcs.Origin() == 1 || mcs.Origin() == 2)) {
         if ( mcs.MotherPdgCode() == 111 )
           found_pi0  = true ;
         for (auto const& id : mcs.DaughterTrackID()) {
@@ -143,8 +146,9 @@ namespace larlite {
         used_trk_id.push_back(mcs.TrackID());
         g4_trackid_v.push_back(id_v);
         mc_index_v.push_back(mc_index);
-	    pi0_index_v.push_back(found_pi0);
-	    track_shower_index_v.push_back(1); // 1 indicates shower
+	pi0_index_v.push_back(found_pi0);
+	track_shower_index_v.push_back(1); // 1 indicates shower
+	cosmic_neutrino_v.push_back(mcs.Origin()); // 1 indicate neutrino
         //std::cout<<" Nu : "<<found_pi0<<std::endl ;
       }// if this shower has enough energy
     }
@@ -156,7 +160,8 @@ namespace larlite {
       // if this track id has been used -> ignore
       if (std::find(used_trk_id.begin(),used_trk_id.end(),mct_id) != used_trk_id.end())
         continue;
-      if (mct.size() < 2 or mct.Origin() != 1 ) continue;
+      //if (mct.size() < 2 or mct.Origin() != 1 ) continue;
+      if (mct.size() < 2 or (mct.Origin() != 1 and mct.Origin() != 2) ) continue;
       
       auto energy = mct[0].E() - mct[mct.size()-1].E();
       // the list of track IDs for an MCTrack consists only of
@@ -170,6 +175,7 @@ namespace larlite {
         mc_index_v.push_back(mc_index + ev_mcs->size());
 	pi0_index_v.push_back(false);
 	track_shower_index_v.push_back(0); // 1 indicates shower
+	cosmic_neutrino_v.push_back(mct.Origin()); // 1 indicates shower
       }
     }
 
@@ -187,6 +193,7 @@ namespace larlite {
     std::vector<larlite::geo::View_t> cluster_plane_v(cluster_hit_v.size(), larlite::geo::View_t::kUnknown);
     std::vector<bool> cluster_pi0_v(cluster_hit_v.size(), false);
     std::vector<float> cluster_ts_v(cluster_hit_v.size(), 0);
+    std::vector<float> cluster_cos_nu_v(cluster_hit_v.size(), -1);
 
     // loop through hits, use the back-tracker to find which MCX object
     // it should belong to, and add that hit to the cluster that is
@@ -244,6 +251,7 @@ namespace larlite {
 	cluster_plane_v[ pl * mc_index_v.size() + idx ] = pl;
 	cluster_pi0_v[ pl * mc_index_v.size() + idx ] = pi0_index_v.at(idx) ;
 	cluster_ts_v[ pl * mc_index_v.size() + idx ] = track_shower_index_v.at(idx) ;
+	cluster_cos_nu_v[ pl * mc_index_v.size() + idx ] = cosmic_neutrino_v.at(idx) ;
     }// for all hits 
 
     // now create the clusters and save them as data-products
@@ -267,6 +275,7 @@ namespace larlite {
       clus.set_view(cluster_plane_v[idx]);
       clus.set_is_merged(cluster_pi0_v[idx]); // Is there pi0 here?
       clus.set_start_opening(cluster_ts_v[idx]); // Is this a track or shower?
+      clus.set_width(cluster_cos_nu_v[idx]); // Is this a neutrino or a cosmic?
       ev_mccluster->push_back(clus);
       cluster_hit_ass_v.push_back(cluster_hit_v[idx]);
 
