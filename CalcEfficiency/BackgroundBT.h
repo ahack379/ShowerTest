@@ -59,9 +59,9 @@ namespace larlite {
   protected:
 
   std::vector<int> _event_list ;
-  std::vector<int> _vtx_list ;
 
-  int _n_other ;
+  int _n_noise;
+
   int _n_cosmic ;
   int _n_cc1pi0 ; // This is the signal
   int _n_nc1pi0 ; 
@@ -77,7 +77,7 @@ namespace larlite {
 
   int _n_gamma ;
   int _n_kaondecay;
-
+  int _n_other ;
 
   TTree * _tree ;
   int _event ;
@@ -102,8 +102,22 @@ namespace larlite {
   float _pi0_low_radL;
   float _pi0_high_radL;
 
+  float _pi0_low_purity;
+  float _pi0_high_purity;
+  float _pi0_low_complete;
+  float _pi0_high_complete;
+  float _pi0_low_cw_purity;
+  float _pi0_high_cw_purity;
+  float _pi0_low_cw_complete;
+  float _pi0_high_cw_complete;
+
+  //////////////////////////////////////
   float _gamma_E;
   float _gamma_RL ;
+  float _gamma_purity; 
+  float _gamma_complete; 
+  float _gamma_cw_purity; 
+  float _gamma_cw_complete; 
 
   float _mu_angle ;
   float _mu_len ;
@@ -116,6 +130,10 @@ namespace larlite {
   float _mu_phi ;
   float _mu_mom;
   float _mult;
+  float _mu_purity ;
+  float _mu_complete ;
+  float _mu_cw_purity ;
+  float _mu_cw_complete ;
 
   ::geoalgo::GeoAlgo _geoAlgo ;
 
@@ -124,7 +142,6 @@ namespace larlite {
   bool _get_single_shower_info ;
 
   std::vector<std::string> _bkgd_v ;
-  
     
   };
 }

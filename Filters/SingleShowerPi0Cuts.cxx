@@ -129,31 +129,30 @@ namespace larlite {
       new_shower_v->emplace_back(ev_s->at(cand_map.begin()->second));
 
       // Now also store the associations
-      //event_cluster *ev_cluster = nullptr;
-      //auto ass_cluster_v = storage->find_one_ass(ev_s->id(), ev_cluster, ev_s->name());
+      event_cluster *ev_cluster = nullptr;
+      auto ass_cluster_v = storage->find_one_ass(ev_s->id(), ev_cluster, ev_s->name());
 
-      //std::vector<std::vector<unsigned int> > shower_cluster_v ; 
-      //shower_cluster_v.reserve(2) ;
+      std::vector<std::vector<unsigned int> > shower_cluster_v ; 
+      shower_cluster_v.reserve(2) ;
 
-      //for( int i = 0; i < ass_cluster_v.size(); i ++ ){
-      //   if ( i == cand_map.begin()->second )
-      //      shower_cluster_v.emplace_back(ass_cluster_v[i] ) ;
-      //      
-      // } 
+      for( int i = 0; i < ass_cluster_v.size(); i ++ ){
+         if ( i == cand_map.begin()->second )
+            shower_cluster_v.emplace_back(ass_cluster_v[i] ) ;
+      } 
 
-      //::larlite::event_ass * shower_cluster_ass_v = 0;
+      ::larlite::event_ass * shower_cluster_ass_v = 0;
 
-      //// if associated clusters not found -> quit and exit
-      //if ( !ev_cluster or (ev_cluster->size() == 0) ) 
-      //  print(msg::kERROR, __FUNCTION__, Form("No clusters found associated to shower" ));
-      //else 
-      //  shower_cluster_ass_v = storage->get_data<event_ass>(new_shower_v->name());
+      // if associated clusters not found -> quit and exit
+      if ( !ev_cluster or (ev_cluster->size() == 0) ) 
+        print(msg::kERROR, __FUNCTION__, Form("No clusters found associated to shower" ));
+      else 
+        shower_cluster_ass_v = storage->get_data<event_ass>(new_shower_v->name());
 
-      //if ( shower_cluster_ass_v ) {
-      //  shower_cluster_ass_v->set_association(new_shower_v->id(),
-      //                                        product_id(data::kCluster, ev_cluster->name()),
-      //                                        shower_cluster_v);
-      //}
+      if ( shower_cluster_ass_v ) {
+        shower_cluster_ass_v->set_association(new_shower_v->id(),
+                                              product_id(data::kCluster, ev_cluster->name()),
+                                              shower_cluster_v);
+      }
       
       _pi0_selection->Fill();
       _event_list.emplace_back(_event); 

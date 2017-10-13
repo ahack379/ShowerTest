@@ -3,12 +3,13 @@
 
 #include "BackgroundBT.h"
 #include "DataFormat/mctruth.h"
+#include "DataFormat/mcshower.h"
 #include "DataFormat/mctrack.h"
 #include "DataFormat/track.h"
-#include "DataFormat/hit.h"
 #include "DataFormat/shower.h"
-#include "DataFormat/mcshower.h"
 #include "DataFormat/vertex.h"
+#include "DataFormat/cluster.h"
+#include "DataFormat/hit.h"
 
 #include "LArUtil/GeometryHelper.h"
 
@@ -18,7 +19,7 @@ namespace larlite {
 
     _event = -1; 
 
-    _n_other = 0;    // 0
+    _n_noise = 0;    // 0
     _n_cosmic = 0;   // 1         
     _n_cc1pi0 = 0;   // 2
     _n_nc1pi0 = 0;   // 3
@@ -30,6 +31,7 @@ namespace larlite {
     _n_nccex = 0;    // 9
     _n_ccother = 0;  // 12
     _n_ncother = 0;  // 13
+    _n_other = 0;    // 14 
 
     // After thoughts 
     _n_gamma = 0 ; // 10
@@ -62,6 +64,10 @@ namespace larlite {
       _tree->Branch("mu_phi",&_mu_phi,"mu_phi/F");
       _tree->Branch("mu_mom",&_mu_mom,"mu_mom/F");
       _tree->Branch("mult",&_mult,"mult/F");
+      _tree->Branch("mu_purity",&_mu_purity,"mu_purity/F");
+      _tree->Branch("mu_complete",&_mu_complete,"mu_complete/F");
+      _tree->Branch("mu_cw_purity",&_mu_cw_purity,"mu_cw_purity/F");
+      _tree->Branch("mu_cw_complete",&_mu_cw_complete,"mu_cw_complete/F");
 
       _tree->Branch("pi0_mass",&_pi0_mass,"pi0_mass/F");
       _tree->Branch("pi0_oangle",&_pi0_oangle,"pi0_oangle/F");
@@ -72,9 +78,23 @@ namespace larlite {
       _tree->Branch("pi0_low_radL",&_pi0_low_radL,"pi0_low_radL/F");
       _tree->Branch("pi0_high_radL",&_pi0_high_radL,"pi0_high_radL/F");
 
+      _tree->Branch("pi0_low_purity",&_pi0_low_purity,"pi0_low_purity/F");
+      _tree->Branch("pi0_high_purity",&_pi0_high_purity,"pi0_high_purity/F");
+      _tree->Branch("pi0_low_complete",&_pi0_low_complete,"pi0_low_complete/F");
+      _tree->Branch("pi0_high_complete",&_pi0_high_complete,"pi0_high_complete/F");
+
+      _tree->Branch("pi0_low_cw_purity",&_pi0_low_cw_purity,"pi0_low_cw_purity/F");
+      _tree->Branch("pi0_high_cw_purity",&_pi0_high_cw_purity,"pi0_high_cw_purity/F");
+      _tree->Branch("pi0_low_cw_complete",&_pi0_low_cw_complete,"pi0_low_cw_complete/F");
+      _tree->Branch("pi0_high_cw_complete",&_pi0_high_cw_complete,"pi0_high_cw_complete/F");
+
+
       _tree->Branch("gamma_E",&_gamma_E,"gamma_E/F");
       _tree->Branch("gamma_RL",&_gamma_RL,"gamma_RL/F");
-
+      _tree->Branch("gamma_purity",&_gamma_purity,"gamma_purity/F");
+      _tree->Branch("gamma_complete",&_gamma_complete,"gamma_complete/F");
+      _tree->Branch("gamma_cw_purity",&_gamma_cw_purity,"gamma_cw_purity/F");
+      _tree->Branch("gamma_cw_complete",&_gamma_cw_complete,"gamma_cw_complete/F");
    }
 
     return true;
@@ -103,6 +123,10 @@ namespace larlite {
     _mu_endz = -999;
     _mu_phi  = -999;
     _mu_mom  = -999;
+    _mu_complete  = 0.;
+    _mu_purity  = 0.;
+    _mu_cw_complete  = 0.;
+    _mu_cw_purity  = 0.;
 
     _pi0_mass = -999;
     _pi0_oangle = -999;
@@ -113,8 +137,22 @@ namespace larlite {
     _pi0_low_radL = -999;
     _pi0_high_radL = -999;
 
+    _pi0_high_purity = 0.;
+    _pi0_high_complete = 0.;
+    _pi0_low_purity = 0.;
+    _pi0_low_complete = 0.;
+
+    _pi0_high_cw_purity = 0.;
+    _pi0_high_cw_complete = 0.;
+    _pi0_low_cw_purity = 0.;
+    _pi0_low_cw_complete = 0.;
+
     _gamma_E = -999;
     _gamma_RL = -999;
+    _gamma_purity = 0.;
+    _gamma_complete = 0.;
+    _gamma_cw_purity = 0.;
+    _gamma_cw_complete = 0.;
 
   }
   
@@ -194,6 +232,16 @@ namespace larlite {
 
     }
 
+    auto ev_hit = storage->get_data<larlite::event_hit>("gaushit");
+
+    if (!ev_hit || ev_hit->size() == 0){
+      std::cout << "No hits! exit" << std::endl;
+      return false;
+    }   
+
+    std::vector<int> pur_ctr_v ;
+    std::vector<float> cw_pur_ctr_v ;
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Want to be able to access the origin of the tagged muon. Thus, need to find it, and 
     // Ask for its origin.  Need to match to MCtrack to do this
@@ -242,12 +290,6 @@ namespace larlite {
         return false;
       }   
 
-      auto ev_hit = storage->get_data<larlite::event_hit>("gaushit");
-
-      if (!ev_hit || ev_hit->size() == 0){
-        std::cout << "No hits! exit" << std::endl;
-        return false;
-      }   
 
       // Keep track of the charge-weighted hit count
       std::map<int,float> tot_mc_cw_hits_v ; 
@@ -296,8 +338,6 @@ namespace larlite {
       }
 
       // for each reco cluster, find the origin of all hits and calc purity/completeness 
-      std::vector<int> pur_ctr_v ;
-      std::vector<float> cw_pur_ctr_v ;
       pur_ctr_v.resize(ass_mcclus_v.size(),0) ;
       cw_pur_ctr_v.resize(ass_mcclus_v.size(),0) ;
 
@@ -309,6 +349,8 @@ namespace larlite {
       for(int i = 0; i < ass_hit_v.at(min_trk_dist_it).size(); i++){
          auto hid = ass_hit_v.at(min_trk_dist_it).at(i) ;
          auto h = ev_hit->at(hid);
+         if ( h.WireID().Plane != 2 ) continue;
+
          tot_reco_cw_hits += h.Integral() ;
          
          if ( _mc_hit_map.find(hid) != _mc_hit_map.end() ){
@@ -318,7 +360,7 @@ namespace larlite {
            pur_ctr_v[mcclus_id]++ ; 
            cw_pur_ctr_v[mcclus_id] += h.Integral() ; 
 
-           if( pur_ctr_v[ mcclus_id] > max_hits ){
+           if( pur_ctr_v[mcclus_id] > max_hits ){
             
              max_hits = pur_ctr_v[mcclus_id];
              max_cid = mcclus_id ; 
@@ -327,168 +369,297 @@ namespace larlite {
          }
        }
 
-       float purity = 0. ;
-       float complete = 0. ;
-
-       float cw_purity = 0. ;
-       float cw_complete = 0.;
-
        if ( max_cid != -1 ){
 
          auto tot_mc_hits =  ass_mcclus_v[max_cid].size(); 
          auto tot_reco_hits = ass_hit_v.at(min_trk_dist_it).size();         
-         purity   = float(max_hits) / tot_reco_hits ;
-         complete = float(max_hits) / tot_mc_hits ;
+         _mu_purity   = float(max_hits) / tot_reco_hits ;
+         _mu_complete = float(max_hits) / tot_mc_hits ;
 
-         cw_purity   = float(max_cw_hits) / tot_reco_cw_hits ;
-         cw_complete = float(max_cw_hits) / tot_mc_cw_hits_v[max_cid]; 
-
+         _mu_cw_purity   = float(max_cw_hits) / tot_reco_cw_hits ;
+         _mu_cw_complete = float(max_cw_hits) / tot_mc_cw_hits_v[max_cid]; 
        }
-          
-       //_purity_v[plane].emplace_back(purity) ;
-       //_complete_v[plane].emplace_back(complete) ;
-
-       //_cw_purity_v[plane].emplace_back(cw_purity) ;
-       //_cw_complete_v[plane].emplace_back(cw_complete) ;
-
-       // if( plane == 0 )
-       //   _p0++ ;
-       // else if ( plane == 1) 
-       //   _p1++ ;
-       // else if ( plane == 2)
-       //   _p2++ ;
-
-      //else {
-      //     _n_other++;
-      //     _bkgd_id = 0 ;
-      //     _event_list.emplace_back(_event) ;
-      //     _vtx_list.emplace_back(vtx_diff);
-      //}
+      else {
+         // Noise category
+         _n_noise++;
+         _bkgd_id = 0 ;
+         _event_list.emplace_back(_event) ;
+      }
 
       ///////////////////////////////////////////////////////////////////////////////////////////////
       /// Now count the number of backgrounds and signals
       ///////////////////////////////////////////////////////////////////////////////////////////////
-      //if( _bkgd_id == -1 ){
+      if( _bkgd_id == -1 ){
 
-      auto ev_mcs = storage->get_data<event_mcshower>("mcreco") ;
-      if ( !ev_mcs || !ev_mcs->size() ) {std::cout<<"No MCShower!" <<std::endl ; return false; }
+        auto ev_mcs = storage->get_data<event_mcshower>("mcreco") ;
+        if ( !ev_mcs || !ev_mcs->size() ) {std::cout<<"No MCShower!" <<std::endl ; return false; }
 
+        bool infv = true;
+        if( _mc_vtx_x < 20 || _mc_vtx_x > 236.35 || _mc_vtx_y > 96.5 || _mc_vtx_y < -96.5 || _mc_vtx_z < 10 || _mc_vtx_z > 1026.8 )
+          infv = false;
 
-      bool infv = true;
-      if( _mc_vtx_x < 20 || _mc_vtx_x > 236.35 || _mc_vtx_y > 96.5 || _mc_vtx_y < -96.5 || _mc_vtx_z < 10 || _mc_vtx_z > 1026.8 )
-        infv = false;
+        auto parts = ev_mctruth->at(0).GetParticles();
+        int n_pi0 = 0;
+        int n_gamma = 0;
 
-      auto parts = ev_mctruth->at(0).GetParticles();
-      int n_pi0 = 0;
-      int n_gamma = 0;
+        for ( auto const & p : parts ){
+          if( p.StatusCode() == 1 && p.PdgCode() == 111 )
+            n_pi0++;
 
-      for ( auto const & p : parts ){
-        if( p.StatusCode() == 1 && p.PdgCode() == 111 )
-          n_pi0++;
+          if( p.StatusCode() == 1 && p.PdgCode() == 22 )
+            n_gamma++;
+        }   
 
-        if( p.StatusCode() == 1 && p.PdgCode() == 22 )
-          n_gamma++;
-      }   
+       auto ev_mcc = storage->get_data<event_cluster>("mccluster");
+       auto mcclus = ev_mcc->at(max_cid) ;
+       // Remember that I've repurposed the cluster width variable to store info 
+       // about whether this mccluster (which we've identified as the match to 
+       // our reco particle at this stage) is neutrino or cosmic in origin 
 
-      //if( ev_mctrk->at(mc_max_it).Origin() == 2 ){
-      if( purity < 0.5 ){
-        _n_cosmic++;
-        _bkgd_id = 1; 
+        if( mcclus.Width() == 2){
+          _n_cosmic++;
+          _bkgd_id = 1; 
+        }
+        else if( abs(nu.Nu().PdgCode()) == 12 ){
+          _n_nue ++ ; 
+          _bkgd_id = 6 ;
+        }
+        else if( nu.Nu().PdgCode() == -14 ){
+          _n_antimu ++ ; 
+          _bkgd_id = 7 ;
+        }
+        // frmo here we can assume we have a muon neutrino
+        else if( nu.CCNC() == 0 && n_pi0 == 1 && infv ) {
+          _bkgd_id = 2;
+          _n_cc1pi0++; 
+        }
+        else if( nu.CCNC() == 1 && n_pi0 > 0 ) {
+          _bkgd_id = 3;
+          _n_nc1pi0 ++; 
+        }
+        else if ( nu.CCNC() == 0 & n_pi0 == 1 && !infv ){
+          _bkgd_id = 4 ;
+          _n_cc1pi0_outFV ++; 
+        }
+        else if( nu.CCNC() == 0 && n_pi0 > 1 ) {
+          _bkgd_id = 5;
+          _n_multpi0 ++; 
+        }
+        else if( n_pi0 == 0 && n_gamma > 0 ){
+          _bkgd_id = 10 ;
+          _n_gamma++;
+        }
+        else{
+          
+          bool charge_ex = false; 
+          bool kaon_decay = false; 
+          for ( auto const & s : *ev_mcs ){
+            if ( s.MotherPdgCode() == 111 && s.Origin() == 1 && abs(s.AncestorPdgCode()) == 211 ){
+              charge_ex = true; 
+              break;
+            }
+
+            if ( s.MotherPdgCode() == 111 && s.Origin() == 1 && abs(s.AncestorPdgCode()) == 321 ){
+              kaon_decay = true; 
+              break;
+            }
+
+          }
+
+          if( charge_ex && nu.CCNC() == 0 ){
+            _bkgd_id = 8;
+            _n_cccex++;
+          }
+          else if( charge_ex && nu.CCNC() == 1 ) {
+            _bkgd_id = 9;
+            _n_nccex++;
+          }
+          else if( kaon_decay ){
+            _bkgd_id = 11;
+            _n_kaondecay++;
+          }
+          else if( !charge_ex && nu.CCNC() == 0 ){
+            _bkgd_id = 12;
+            _n_ccother++; 
+
+          }
+          else if( !charge_ex && nu.CCNC() == 1 ){
+            _bkgd_id = 13;
+            _n_ncother++; 
+          }
+          else {
+            _bkgd_id = 14;
+            _n_other ++;   
+          }
+        }
       }
-      else if( abs(nu.Nu().PdgCode()) == 12 ){
-        _n_nue ++ ; 
-        _bkgd_id = 6 ;
-      }
-      else if( nu.Nu().PdgCode() == -14 ){
-        _n_antimu ++ ; 
-        _bkgd_id = 7 ;
-      }
-      // frmo here we can assume we have a muon neutrino
-      else if( nu.CCNC() == 0 && n_pi0 == 1 && infv ) {
-        _bkgd_id = 2;
-        _n_cc1pi0++; 
-        //_event_list.emplace_back(_event);
-      }
-      else if( nu.CCNC() == 1 && n_pi0 > 0 ) {
-        _bkgd_id = 3;
-        _n_nc1pi0 ++; 
-      }
-      else if ( nu.CCNC() == 0 & n_pi0 == 1 && !infv ){
-        _bkgd_id = 4 ;
-        _n_cc1pi0_outFV ++; 
-      }
-      else if( nu.CCNC() == 0 && n_pi0 > 1 ) {
-        _bkgd_id = 5;
-        _n_multpi0 ++; 
-      }
-      else if( n_pi0 == 0 && n_gamma > 0 ){
-        _bkgd_id = 10 ;
-        _n_gamma++;
-      }
-      else{
+
+      // Get the association from cluster -> hit
+      auto const & ev_clus = storage->get_data<event_cluster>("ImageClusterHit");
+      auto const & ev_ass_c = storage->get_data<larlite::event_ass>("ImageClusterHit");
+      auto const & ass_imageclus_v = ev_ass_c->association(ev_clus->id(), ev_hit->id());
+
+      if ( _get_pi0_info ){
+
+        auto ev_s = storage->get_data<event_shower>("pi0_candidate_showers");
+        if( !ev_s || !ev_s->size() ){ 
+          std::cout<<"Not enough reco'd showers..." <<std::endl;
+          return false;
+         }   
+
+        auto const& shr1 = ev_s->at(0) ;
+        auto const& shr2 = ev_s->at(1);
+        bool lowE_is_shr1 = shr1.Energy() < shr2.Energy() ? 1 : 0 ;
+
+        // Get the association from shower -> cluster
+        auto ev_ass_s = storage->get_data<larlite::event_ass>("pi0_candidate_showers");
+        auto const& ass_showerreco_v = ev_ass_s->association(ev_s->id(), ev_clus->id());
         
-        bool charge_ex = false; 
-        bool kaon_decay = false; 
-        for ( auto const & s : *ev_mcs ){
-          if ( s.MotherPdgCode() == 111 && s.Origin() == 1 && abs(s.AncestorPdgCode()) == 211 ){
-            charge_ex = true; 
-            break;
+        // Loop over showers
+        for (size_t i = 0; i < ass_showerreco_v.size(); i++ ){
+
+          float purity = 0., complete = 0., cw_purity = 0., cw_complete = 0.;
+
+          // Loop over clusters associated to this shower
+          for (size_t j = 0; j < ass_showerreco_v.at(i).size(); j++ ){
+
+              auto clus_id = ass_showerreco_v.at(i).at(j); 
+              auto iclus = ev_clus->at(clus_id);
+          
+              int plane = iclus.Plane().Plane ;
+              if ( plane != 2 ) continue;
+
+              pur_ctr_v.clear();
+              cw_pur_ctr_v.clear();
+              pur_ctr_v.resize(ass_mcclus_v.size(),0) ;
+              cw_pur_ctr_v.resize(ass_mcclus_v.size(),0) ;
+
+              max_hits = -1;
+              max_cw_hits = -1;
+              max_cid = -1 ;
+              tot_reco_cw_hits = 0;
+              
+              // Loop through all hits associared to the cluster 
+              for ( int k = 0; k < ass_imageclus_v.at(clus_id).size(); k++ ){
+
+                auto hid = ass_imageclus_v.at(clus_id).at(k) ; 
+                auto h = ev_hit->at(hid);
+                tot_reco_cw_hits += h.Integral() ;
+                
+                if ( _mc_hit_map.find(hid) != _mc_hit_map.end() ){
+
+                  auto mcclus_id = _mc_hit_map[hid] ;
+
+                  pur_ctr_v[mcclus_id]++ ; 
+                  cw_pur_ctr_v[mcclus_id] += h.Integral() ; 
+
+                  if( pur_ctr_v[ mcclus_id] > max_hits ){
+                    max_hits = pur_ctr_v[mcclus_id];
+                    max_cid = mcclus_id ; 
+                    max_cw_hits = cw_pur_ctr_v[mcclus_id] ;
+                  }
+                }
+              }
+
+              if ( max_cid != -1 ){
+
+                auto tot_mc_hits =  ass_mcclus_v[max_cid].size(); 
+                auto tot_reco_hits = ass_imageclus_v[clus_id].size();
+                
+                purity   = float(max_hits) / tot_reco_hits ;
+                complete = float(max_hits) / tot_mc_hits ;
+
+                cw_purity   = float(max_cw_hits) / tot_reco_cw_hits ;
+                cw_complete = float(max_cw_hits) / tot_mc_cw_hits_v[max_cid]; 
+             }
+           }
+           if ( i == 0 ){
+             if ( lowE_is_shr1 ){ 
+               _pi0_low_purity = purity ;
+               _pi0_low_complete = complete;
+             }
+             else{
+               _pi0_high_purity = purity;
+               _pi0_high_complete = purity;
+             }
+           }
+           else if ( i == 1) {
+
+             if ( lowE_is_shr1 ){ 
+               _pi0_low_purity = purity ;
+               _pi0_low_complete = complete;
+             }
+             else{
+               _pi0_high_purity = purity;
+               _pi0_high_complete = complete;
+             }
+           }
+        }
+      }
+
+    if ( _get_single_shower_info ){
+      auto ev_s = storage->get_data<event_shower>("pi0_1gamma_candidate_showers");
+      if ( !ev_s ) return false;
+
+      // Get the association from shower -> cluster
+      auto ev_ass_s = storage->get_data<larlite::event_ass>("pi0_1gamma_candidate_showers");
+      auto const& ass_showerreco_v = ev_ass_s->association(ev_s->id(), ev_clus->id());
+      
+      // Loop over clusters associated to this shower
+      for (size_t j = 0; j < ass_showerreco_v.at(0).size(); j++ ){
+
+        auto clus_id = ass_showerreco_v.at(0).at(j); 
+        auto iclus = ev_clus->at(clus_id);
+        
+        int plane = iclus.Plane().Plane ;
+        if ( plane != 2 ) continue;
+
+        pur_ctr_v.clear();
+        cw_pur_ctr_v.clear();
+        pur_ctr_v.resize(ass_mcclus_v.size(),0) ;
+        cw_pur_ctr_v.resize(ass_mcclus_v.size(),0) ;
+
+        max_hits = -1;
+        max_cw_hits = -1;
+        max_cid = -1 ;
+        tot_reco_cw_hits = 0;
+        
+        // Loop through all hits associared to the cluster 
+        for ( int k = 0; k < ass_imageclus_v.at(clus_id).size(); k++ ){
+
+          auto hid = ass_imageclus_v.at(clus_id).at(k) ; 
+          auto h = ev_hit->at(hid);
+          tot_reco_cw_hits += h.Integral() ;
+          
+          if ( _mc_hit_map.find(hid) != _mc_hit_map.end() ){
+
+            auto mcclus_id = _mc_hit_map[hid] ;
+
+            pur_ctr_v[mcclus_id]++ ; 
+            cw_pur_ctr_v[mcclus_id] += h.Integral() ; 
+
+            if( pur_ctr_v[ mcclus_id] > max_hits ){
+              max_hits = pur_ctr_v[mcclus_id];
+              max_cid = mcclus_id ; 
+              max_cw_hits = cw_pur_ctr_v[mcclus_id] ;
+            }
           }
-
-          if ( s.MotherPdgCode() == 111 && s.Origin() == 1 && abs(s.AncestorPdgCode()) == 321 ){
-            kaon_decay = true; 
-            break;
-          }
-
         }
 
-        if( charge_ex && nu.CCNC() == 0 ){
-          _bkgd_id = 8;
-          _n_cccex++;
-        }
-        else if( charge_ex && nu.CCNC() == 1 ) {
-          _bkgd_id = 9;
-          _n_nccex++;
-        }
-        else if( kaon_decay ){
-          _bkgd_id = 11;
-          _n_kaondecay++;
-        }
-        else if( !charge_ex && nu.CCNC() == 0 ){
-          _bkgd_id = 12;
-          _n_ccother++; 
+        if ( max_cid != -1 ){
 
-         //std::cout<<"\nCC OTHER!!! "<<_event<<", "<<nu.Mode()<<std::endl;
+          auto tot_mc_hits =  ass_mcclus_v[max_cid].size(); 
+          auto tot_reco_hits = ass_imageclus_v[clus_id].size();
+          
+          _gamma_purity   = float(max_hits) / tot_reco_hits ;
+          _gamma_complete = float(max_hits) / tot_mc_hits ;
 
-         // bool nu_shower = false;
-         // for ( auto const & s : *ev_mcs ){
-         //   if ( (abs(s.PdgCode()) == 11 || s.PdgCode() == 22 ) && s.Origin() == 1 ){
-         //     nu_shower = true; 
-         //     std::cout<<" shower process: "<<s.Process()<<", Mother and Daughter: "<<s.MotherPdgCode()<<", "<<s.PdgCode()<<std::endl ;
-         //   }
-         // }
-
-         // int i = 0;
-         // for ( auto const & p : parts ){
-         //   if(  p.StatusCode() == 1 && p.PdgCode() < 3000 ){
-         //      //if ( i == 0 ){ std::cout<<"Process: "<<p.Process()<<std::endl; i++; }
-         //      std::cout<<"  Particle: "<<p.PdgCode() <<std::endl ;
-         //   }
-         //       
-         // }
-
-
-        }
-        else if( !charge_ex && nu.CCNC() == 1 ){
-          _bkgd_id = 13;
-          _n_ncother++; 
-        }
-        else {
-          _bkgd_id = 0;
-          _n_other ++;   
+          _gamma_cw_purity   = float(max_cw_hits) / tot_reco_cw_hits ;
+          _gamma_cw_complete = float(max_cw_hits) / tot_mc_cw_hits_v[max_cid]; 
         }
       }
     }
+  }
 
     auto ev_shr = storage->get_data<event_shower>("showerreco");
 
@@ -497,7 +668,7 @@ namespace larlite {
     if ( _get_pi0_info ){
 
       auto ev_s = storage->get_data<event_shower>("pi0_candidate_showers");
-      if( !ev_s || !ev_s->size() || ev_s->size() < 2 ){
+      if( !ev_s || !ev_s->size() ){ //|| ev_s->size() < 2 ){
         std::cout<<"Not enough reco'd showers..." <<std::endl;
         return false;
        }   
@@ -548,18 +719,6 @@ namespace larlite {
       _pi0_low_radL  = shr1.Energy() < shr2.Energy() ? radL_shr1 : radL_shr2 ;
       _pi0_high_radL = shr1.Energy() < shr2.Energy() ? radL_shr2 : radL_shr1 ;
 
-      //if ( _bkgd_id == 12 || _bkgd_id == 2 ){
-      //  std::cout<<"Pi0 Info: "<<_bkgd_v[_bkgd_id] <<std::endl;
-      //  std::cout<<"\tMass : "<<_pi0_mass<<std::endl;
-      //  std::cout<<"\tAngle: "<<_pi0_oangle<<std::endl;
-      //  std::cout<<"\tIP: "<<_pi0_IP<<std::endl;
-      //  std::cout<<"\tLow E RL: "<<_pi0_low_radL<<std::endl;
-      //  std::cout<<"\tHigh E RL: "<<_pi0_high_radL<<std::endl;
-      //  std::cout<<"\tLow E: "<<_pi0_low_shrE<<std::endl;
-      //  std::cout<<"\tHigh E: "<<_pi0_high_shrE<<std::endl;
-      //  std::cout<<"\tTotal E: "<<_pi0_high_shrE+_pi0_low_shrE<<std::endl;
-      //}
-
     }
  
     if ( _get_single_shower_info ){
@@ -590,7 +749,7 @@ namespace larlite {
 
     // Note that cc other includes secondary pi0s.
     std::cout<<"\nBackgrounds: "<<std::endl;
-    std::cout<<"0) Other: "<<_n_other<< std::endl;
+    std::cout<<"0) Noise : "<<_n_noise<< std::endl;
     std::cout<<"1) Cosmic : "<<_n_cosmic<< std::endl;
     std::cout<<"2) CC 1pi0 : "<<_n_cc1pi0<<std::endl;
     std::cout<<"3) NC 1pi0 : "<<_n_nc1pi0<<std::endl;
@@ -604,11 +763,12 @@ namespace larlite {
     std::cout<<"11) Kaon Decay: "<<_n_kaondecay<<std::endl;
     std::cout<<"12) CC Other : "<<_n_ccother<<std::endl;
     std::cout<<"13) NC Other : "<<_n_ncother<<std::endl;
+    std::cout<<"14) Other: "<<_n_other<< std::endl;
 
     //std::cout<<"Total accounted backgrounds: "<< _n_other + _n_cosmic + _n_nc1pi0 + _n_nc0pi0 + _n_cc0pi0 <<std::endl ;
 
     for (int i = 0; i < _event_list.size(); i++){
-      std::cout<<_event_list[i]<<", "<<_vtx_list[i]<<std::endl;
+      std::cout<<_event_list[i]<<std::endl;
       }
 
     if ( _fout ){
