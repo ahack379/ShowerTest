@@ -1,19 +1,20 @@
-#ifndef LARLITE_MCPI0CLUSTERER_CXX
-#define LARLITE_MCPI0CLUSTERER_CXX
+#ifndef LARLITE_MCNUCLUSTERER_CXX
+#define LARLITE_MCNUCLUSTERER_CXX
 
-#include "MCPi0Clusterer.h"
+#include "MCNuClusterer.h"
 #include "DataFormat/hit.h"
 #include "DataFormat/simch.h"
 #include "DataFormat/cluster.h"
 #include "DataFormat/hit.h"
+#include "DataFormat/vertex.h"
 #include "DataFormat/mcshower.h"
 #include "DataFormat/mctrack.h"
 #include "DataFormat/mctruth.h"
 
 namespace larlite {
 
-  MCPi0Clusterer::MCPi0Clusterer() {
-    _name="MCPi0Clusterer";
+  MCNuClusterer::MCNuClusterer() {
+    _name="MCNuClusterer";
     _fout=0;
     _mc_energy_min = 10; // MeV
     _event = -1;
@@ -24,16 +25,16 @@ namespace larlite {
 
   }
 
-  bool MCPi0Clusterer::initialize() {
+  bool MCNuClusterer::initialize() {
 
     return true;
   }
   
-  bool MCPi0Clusterer::analyze(storage_manager* storage) {
+  bool MCNuClusterer::analyze(storage_manager* storage) {
 
     _event ++;
 
-    std::cout<<"\n\n\nEVENT NUMBER! "<<_event <<std::endl ;
+    //std::cout<<"\n\n\nEVENT NUMBER! "<<_event <<std::endl ;
 
     auto ev_mcs     = storage->get_data<event_mcshower>("mcreco");
     auto ev_mct     = storage->get_data<event_mctrack>("mcreco");
@@ -94,10 +95,29 @@ namespace larlite {
     auto xvtx = traj.at(traj.size() - 1).X();
     auto yvtx = traj.at(traj.size() - 1).Y();
     auto zvtx = traj.at(traj.size() - 1).Z();
+    auto tvtx = traj.at(traj.size()-1).T(); // ns
+
+    auto ev_vtx = storage->get_data<event_vertex>("mcvertex");
+    ev_vtx->reserve(1);
+
+    double xyz[3] = {0.};
+
+    auto vtxtick = (tvtx / 1000.) * 2.;
+    auto vtxtimecm = vtxtick * _time2cm; 
+    auto sce_corr = _SCE->GetPosOffsets(xvtx,yvtx,zvtx);
+    
+    xyz[0] = xvtx + vtxtimecm + _offset - sce_corr.at(0);
+    xyz[1] = yvtx + sce_corr.at(1);
+    xyz[2] = zvtx + sce_corr.at(2);
+    
+    vertex new_vtx(xyz) ;
+    ev_vtx->push_back(new_vtx);
+
     bool found_pi0 = false;
 
     // for each mcshower, find the geant trackIDs associated with that shower
     for (size_t mc_index = 0; mc_index < ev_mcs->size(); ++mc_index) {
+   
       found_pi0 = false;
 
       auto const& mcs = (*ev_mcs)[mc_index];
@@ -108,6 +128,7 @@ namespace larlite {
 
       std::vector<unsigned int> id_v;
       id_v.reserve(mcs.DaughterTrackID().size());
+
       if ( energy > _mc_energy_min && mcs.Origin() == 1 ) {
         if ( mcs.MotherPdgCode() == 111 )
           found_pi0  = true ;
@@ -117,12 +138,14 @@ namespace larlite {
           //if (id == 1) std::cout << "ENTERING TrackID == 1!" << std::endl;
           id_v.push_back(id);
         }
+        
         id_v.push_back(mcs.TrackID());
         used_trk_id.push_back(mcs.TrackID());
         g4_trackid_v.push_back(id_v);
         mc_index_v.push_back(mc_index);
-	pi0_index_v.push_back(found_pi0);
-	track_shower_index_v.push_back(1); // 1 indicates shower
+	    pi0_index_v.push_back(found_pi0);
+	    track_shower_index_v.push_back(1); // 1 indicates shower
+        //std::cout<<" Nu : "<<found_pi0<<std::endl ;
       }// if this shower has enough energy
     }
 
@@ -150,7 +173,7 @@ namespace larlite {
       }
     }
 
-    std::cout << "Finished registering all Track IDs: " << g4_trackid_v.size()<<", and MC index: "<<mc_index_v.size()<<std::endl;
+    //std::cout << "Finished registering all Track IDs: " << g4_trackid_v.size()<<", and MC index: "<<mc_index_v.size()<<std::endl;
     if ( g4_trackid_v.size() == 0 ) return false; 
 
     // reset MCBTAlg
@@ -256,7 +279,7 @@ namespace larlite {
     return true;
   }
 
-  bool MCPi0Clusterer::finalize() {
+  bool MCNuClusterer::finalize() {
   
     return true;
   }

@@ -19,7 +19,7 @@
 #pragma link C++ class larlite::BackgroundObnoxious+;
 #pragma link C++ class larlite::CCEff+;
 #pragma link C++ class larlite::NuMode+;
-#pragma link C++ class larlite::MCPi0Clusterer+;
+#pragma link C++ class larlite::MCNuClusterer+;
 //#pragma link C++ class larlite::MCTrackClusterer+;
 
 //ADD_NEW_CLASS ... do not change this line

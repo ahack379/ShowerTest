@@ -1,9 +1,9 @@
 /**
- * \file MCPi0Clusterer.h
+ * \file MCNuClusterer.h
  *
  * \ingroup MCComp
  * 
- * \brief Class def header for a class MCPi0Clusterer
+ * \brief Class def header for a class MCNuClusterer
  *
  * @author david caratelli
  */
@@ -12,8 +12,8 @@
 
     @{*/
 
-#ifndef LARLITE_MCPi0CLUSTERER_H
-#define LARLITE_MCPi0CLUSTERER_H
+#ifndef LARLITE_MCNUCLUSTERER_H
+#define LARLITE_MCNUCLUSTERER_H
 
 #include "Analysis/ana_base.h"
 #include "MCComp/MCBTAlg.h"
@@ -22,18 +22,18 @@
 
 namespace larlite {
   /**
-     \class MCPi0Clusterer
+     \class MCNuClusterer
      User custom analysis class made by david caratelli
    */
-  class MCPi0Clusterer : public ana_base{
+  class MCNuClusterer : public ana_base{
   
   public:
 
     /// Default constructor
-    MCPi0Clusterer();
+    MCNuClusterer();
 
     /// Default destructor
-    virtual ~MCPi0Clusterer(){}
+    virtual ~MCNuClusterer(){}
 
     virtual bool initialize();
 
