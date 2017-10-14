@@ -147,6 +147,7 @@ namespace larlite {
       if(N == 0){ 
         dqdx.clear(); 
         std::cout<<"No Points!"<<std::endl;
+        ev_t->clear();
 	return false; 
       }
 
@@ -159,6 +160,7 @@ namespace larlite {
         return true;
       else{
         std::cout<<"FAILED DQDX "<<N<<", "<<len<<", "<<TrackTLMeandQdx<<std::endl;
+        ev_t->clear();
         return false;
       }
 

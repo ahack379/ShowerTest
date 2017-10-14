@@ -213,6 +213,7 @@ namespace larlite {
 
     //for ( auto const & t : *ev_trk ){
     for ( int ii = 0; ii < ev_trk->size(); ii++){
+
         auto t = ev_trk->at(ii);
         auto st = t.Vertex() ;
         auto end = t.End() ;
@@ -223,11 +224,13 @@ namespace larlite {
         if (dist_st < 3 || dist_end < 3)
           _mult ++ ;
 
-        auto tag_st = tagged_trk.Vertex() ;
-        auto dist = sqrt( pow(tag_st.X() - vtx.X(),2) + pow(tag_st.Y() - vtx.Y(),2) + pow(tag_st.Z() - vtx.Z(),2) );
+        auto tag_end = tagged_trk.End() ;
+        auto dist = sqrt( pow(tag_end.X() - end.X(),2) + pow(tag_end.Y() - end.Y(),2) + pow(tag_end.Z() - end.Z(),2) );
+        //std::cout<<"dist : "<<dist <<std::endl ;
         if ( dist < min_trk_dist ){
 	  min_trk_dist = dist ;
 	  min_trk_dist_it = ii ;
+         //std::cout<<"Min dist : "<<min_trk_dist <<", "<<min_trk_dist_it<<std::endl;
 	}
 
     }
@@ -337,6 +340,13 @@ namespace larlite {
         return false;
       }
 
+      //for(int i = 0; i < ev_trk->size(); i++){
+      //  for(int j = 0; j < ass_hit_v.at(i).size(); j++){
+      //    auto h = ev_hit_cosRem->at(ass_hit_v.at(i).at(j)) ;
+      //    std::cout<<"Plna**************** "<< h.WireID().Plane<<std::endl;
+      //  }
+      //}
+
       // for each reco cluster, find the origin of all hits and calc purity/completeness 
       pur_ctr_v.resize(ass_mcclus_v.size(),0) ;
       cw_pur_ctr_v.resize(ass_mcclus_v.size(),0) ;
@@ -345,10 +355,13 @@ namespace larlite {
       int max_cw_hits = -1;
       int max_cid = -1 ;
       float tot_reco_cw_hits = 0;
+
+      std::cout<<ass_hit_v.at(min_trk_dist_it).size()<<" stuff"<<std::endl ;
             
       for(int i = 0; i < ass_hit_v.at(min_trk_dist_it).size(); i++){
          auto hid = ass_hit_v.at(min_trk_dist_it).at(i) ;
-         auto h = ev_hit->at(hid);
+         auto h = ev_hit_cosRem->at(hid);
+
          if ( h.WireID().Plane != 2 ) continue;
 
          tot_reco_cw_hits += h.Integral() ;
@@ -359,6 +372,7 @@ namespace larlite {
 
            pur_ctr_v[mcclus_id]++ ; 
            cw_pur_ctr_v[mcclus_id] += h.Integral() ; 
+           //std::cout<<"max hits: "<<max_hits <<", "<< pur_ctr_v[mcclus_id]<<", "<<mcclus_id<<std::endl;
 
            if( pur_ctr_v[mcclus_id] > max_hits ){
             
@@ -368,6 +382,8 @@ namespace larlite {
            }
          }
        }
+
+      std::cout<<"HITS: "<<max_hits<<std::endl ;
 
        if ( max_cid != -1 ){
 
@@ -412,10 +428,14 @@ namespace larlite {
 
        auto ev_mcc = storage->get_data<event_cluster>("mccluster");
        auto mcclus = ev_mcc->at(max_cid) ;
+
+       for ( auto mm : *ev_mcc )
+          std::cout<<"MC: "<<mm.Width()<<std::endl;
        // Remember that I've repurposed the cluster width variable to store info 
        // about whether this mccluster (which we've identified as the match to 
        // our reco particle at this stage) is neutrino or cosmic in origin 
 
+        std::cout<<"mccluster width : "<<mcclus.Width()<<std::endl ;
         if( mcclus.Width() == 2){
           _n_cosmic++;
           _bkgd_id = 1; 
@@ -628,7 +648,7 @@ namespace larlite {
         for ( int k = 0; k < ass_imageclus_v.at(clus_id).size(); k++ ){
 
           auto hid = ass_imageclus_v.at(clus_id).at(k) ; 
-          auto h = ev_hit->at(hid);
+          auto h = ev_hit_cosRem->at(hid);
           tot_reco_cw_hits += h.Integral() ;
           
           if ( _mc_hit_map.find(hid) != _mc_hit_map.end() ){

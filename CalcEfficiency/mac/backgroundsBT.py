@@ -27,6 +27,9 @@ my_proc.set_ana_output_file("");
 my_proc.set_output_file("BTbackground.root")
 
 clusterer = fmwk.BackgroundBT()
+clusterer.UseMCSample(True)
+clusterer.GetPi0Info(True)
+clusterer.GetSingleShowerInfo(False)
 my_proc.add_process(clusterer)
 
 #my_proc.set_data_to_write(fmwk.data.kCluster,clusterproducer)
@@ -37,7 +40,7 @@ print
 print  "Finished configuring ana_processor. Start event loop!"
 print
 
-my_proc.run(0,1)
+my_proc.run()
 
 sys.exit()
 
