@@ -5,6 +5,7 @@
 #include "TMath.h"
 #include "DataFormat/event_ass.h"
 #include "DataFormat/calorimetry.h"
+#include "DataFormat/vertex.h"
 
 namespace larlite {
 
@@ -147,7 +148,10 @@ namespace larlite {
       if(N == 0){ 
         dqdx.clear(); 
         std::cout<<"No Points!"<<std::endl;
+        auto ev_v = storage->get_data<event_vertex> ("numuCC_vertex");
+
         ev_t->clear();
+        ev_v->clear();
 	return false; 
       }
 
@@ -160,7 +164,9 @@ namespace larlite {
         return true;
       else{
         std::cout<<"FAILED DQDX "<<N<<", "<<len<<", "<<TrackTLMeandQdx<<std::endl;
+        auto ev_v = storage->get_data<event_vertex> ("numuCC_vertex");
         ev_t->clear();
+        ev_v->clear();
         return false;
       }
 
