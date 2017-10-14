@@ -111,17 +111,20 @@ namespace larlite {
     std::vector<bool> pi0_index_v;
     std::vector<float> track_shower_index_v;
     std::vector<float> cosmic_neutrino_v;
+    std::vector<float> radiative_v ;
 
 
     // keep track of all the shower and track trackIDs
     g4_trackid_v.reserve(ev_mcs->size()+ev_mct->size());
 
     bool found_pi0 = false;
+    bool radiative = 0;
 
     // for each mcshower, find the geant trackIDs associated with that shower
     for (size_t mc_index = 0; mc_index < ev_mcs->size(); ++mc_index) {
    
       found_pi0 = false;
+      radiative = 0;
 
       auto const& mcs = (*ev_mcs)[mc_index];
       double energy = mcs.DetProfile().E();
@@ -133,8 +136,12 @@ namespace larlite {
       id_v.reserve(mcs.DaughterTrackID().size());
 
       if ( energy > _mc_energy_min && (mcs.Origin() == 1 || mcs.Origin() == 2)) {
-        if ( mcs.MotherPdgCode() == 111 or mcs.AncestorPdgCode() == 111 )
+        if ( mcs.MotherPdgCode() == 111 )
           found_pi0  = true ;
+	if ( mcs.AncestorPdgCode() == 111 ){
+	  found_pi0 = true;
+	  radiative = 1;
+	}
         for (auto const& id : mcs.DaughterTrackID()) {
           if (id == mcs.TrackID()) continue;
           used_trk_id.push_back(id);
@@ -149,6 +156,7 @@ namespace larlite {
 	pi0_index_v.push_back(found_pi0);
 	track_shower_index_v.push_back(1); // 1 indicates shower
 	cosmic_neutrino_v.push_back(mcs.Origin()); // 1 indicate neutrino
+	radiative_v.push_back(radiative); // 1 indicate neutrino
         //std::cout<<" Nu : "<<found_pi0<<std::endl ;
       }// if this shower has enough energy
     }
@@ -176,6 +184,7 @@ namespace larlite {
 	pi0_index_v.push_back(false);
 	track_shower_index_v.push_back(0); // 1 indicates shower
 	cosmic_neutrino_v.push_back(mct.Origin()); // 1 indicates shower
+	radiative_v.push_back(0); // 1 indicate neutrino
       }
     }
 
@@ -194,6 +203,7 @@ namespace larlite {
     std::vector<bool> cluster_pi0_v(cluster_hit_v.size(), false);
     std::vector<float> cluster_ts_v(cluster_hit_v.size(), 0);
     std::vector<float> cluster_cos_nu_v(cluster_hit_v.size(), -1);
+    std::vector<float> cluster_radiative_v(cluster_hit_v.size(), -1);
 
     // loop through hits, use the back-tracker to find which MCX object
     // it should belong to, and add that hit to the cluster that is
@@ -252,6 +262,7 @@ namespace larlite {
 	cluster_pi0_v[ pl * mc_index_v.size() + idx ] = pi0_index_v.at(idx) ;
 	cluster_ts_v[ pl * mc_index_v.size() + idx ] = track_shower_index_v.at(idx) ;
 	cluster_cos_nu_v[ pl * mc_index_v.size() + idx ] = cosmic_neutrino_v.at(idx) ;
+	cluster_radiative_v[ pl * mc_index_v.size() + idx ] = radiative_v.at(idx) ;
     }// for all hits 
 
     // now create the clusters and save them as data-products
@@ -276,6 +287,9 @@ namespace larlite {
       clus.set_is_merged(cluster_pi0_v[idx]); // Is there pi0 here?
       clus.set_start_opening(cluster_ts_v[idx]); // Is this a track or shower?
       clus.set_width(cluster_cos_nu_v[idx]); // Is this a neutrino or a cosmic?
+      clus.set_end_angle(radiative_v[idx]); // Is this a radiative photon? Want to use the full pi0 energy
+                                            // for proper comparison, but also want to be able to remove this
+					    // later if necessary
       ev_mccluster->push_back(clus);
       cluster_hit_ass_v.push_back(cluster_hit_v[idx]);
 
