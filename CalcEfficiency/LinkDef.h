@@ -20,6 +20,7 @@
 #pragma link C++ class larlite::CCEff+;
 #pragma link C++ class larlite::NuMode+;
 #pragma link C++ class larlite::MCNuClusterer+;
+#pragma link C++ class larlite::BackgroundBT+;
 //#pragma link C++ class larlite::MCTrackClusterer+;
 
 //ADD_NEW_CLASS ... do not change this line

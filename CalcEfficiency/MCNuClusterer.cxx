@@ -133,7 +133,7 @@ namespace larlite {
       id_v.reserve(mcs.DaughterTrackID().size());
 
       if ( energy > _mc_energy_min && (mcs.Origin() == 1 || mcs.Origin() == 2)) {
-        if ( mcs.MotherPdgCode() == 111 )
+        if ( mcs.MotherPdgCode() == 111 or mcs.AncestorPdgCode() == 111 )
           found_pi0  = true ;
         for (auto const& id : mcs.DaughterTrackID()) {
           if (id == mcs.TrackID()) continue;

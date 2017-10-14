@@ -159,6 +159,7 @@ namespace larlite {
   bool BackgroundBT::analyze(storage_manager* storage) {
 
     _event++ ;
+    std::cout<<"\n\nEVENT IS: "<<_event<<std::endl;
     clear();
 
     auto ev_vtx= storage->get_data<event_vertex>("numuCC_vertex"); 
@@ -211,7 +212,6 @@ namespace larlite {
     int min_trk_dist = 1e9;
     int min_trk_dist_it = -1;
 
-    //for ( auto const & t : *ev_trk ){
     for ( int ii = 0; ii < ev_trk->size(); ii++){
 
         auto t = ev_trk->at(ii);
@@ -226,13 +226,10 @@ namespace larlite {
 
         auto tag_end = tagged_trk.End() ;
         auto dist = sqrt( pow(tag_end.X() - end.X(),2) + pow(tag_end.Y() - end.Y(),2) + pow(tag_end.Z() - end.Z(),2) );
-        //std::cout<<"dist : "<<dist <<std::endl ;
         if ( dist < min_trk_dist ){
 	  min_trk_dist = dist ;
 	  min_trk_dist_it = ii ;
-         //std::cout<<"Min dist : "<<min_trk_dist <<", "<<min_trk_dist_it<<std::endl;
 	}
-
     }
 
     auto ev_hit = storage->get_data<larlite::event_hit>("gaushit");
@@ -248,6 +245,7 @@ namespace larlite {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Want to be able to access the origin of the tagged muon. Thus, need to find it, and 
     // Ask for its origin.  Need to match to MCtrack to do this
+    ///////////////////////////////////////////////////////////////////////////////////////////////
     if ( _mc_sample ){
 
       auto ev_mctrk = storage->get_data<event_mctrack>("mcreco");
@@ -258,6 +256,8 @@ namespace larlite {
         std::cout<<"Event has no mctruth info "<<std::endl;
         return false;
       }
+
+      auto ev_mcc = storage->get_data<event_cluster>("mccluster");
 
       auto & truth = ev_mctruth->at(0);
       auto & nu  = truth.GetNeutrino();
@@ -293,31 +293,6 @@ namespace larlite {
         return false;
       }   
 
-
-      // Keep track of the charge-weighted hit count
-      std::map<int,float> tot_mc_cw_hits_v ; 
-
-      _mc_hit_map.clear();
-
-      // Fill map with hits from mccluster : clusterID
-      for( int i = 0; i < ass_mcclus_v.size(); i ++ ){
-
-        //std::cout<<"MCCluster id + hits : "<<i<<", "<<ass_mcclus_v[i].size()<<std::endl ;
-        for ( int j = 0; j < ass_mcclus_v[i].size(); j++ ){
-
-          auto hid = ass_mcclus_v[i][j];
-          _mc_hit_map[hid] = i ; 
-
-          auto h = ev_hit->at(hid);
-
-          if ( tot_mc_cw_hits_v.find(i) == tot_mc_cw_hits_v.end() )
-            tot_mc_cw_hits_v[i] = h.Integral() ;
-          else
-            tot_mc_cw_hits_v[i] += h.Integral() ;
-           
-        }
-      }
-
       auto ev_hit_cosRem = storage->get_data<event_hit>("pandoraCosmicHitRemoval"); 
 
       if ( !ev_hit_cosRem || ev_hit_cosRem->size() == 0 ) {
@@ -340,11 +315,45 @@ namespace larlite {
         return false;
       }
 
-      //for(int i = 0; i < ev_trk->size(); i++){
-      //  for(int j = 0; j < ass_hit_v.at(i).size(); j++){
-      //    auto h = ev_hit_cosRem->at(ass_hit_v.at(i).at(j)) ;
-      //    std::cout<<"Plna**************** "<< h.WireID().Plane<<std::endl;
-      //  }
+      // Keep track of the charge-weighted hit count
+      std::map<int,float> tot_mc_cw_hits_v ; 
+
+      _mc_hit_map.clear();
+
+      // Fill map with hits from mccluster : clusterID
+      for( int i = 0; i < ass_mcclus_v.size(); i ++ ){
+
+        auto cid = ev_mcc->at(i) ;
+        if ( cid.View() != 2 ) continue;
+
+        //std::cout<<"OK...filling the mc map here. Cluster:  "<<i<<", "<<cid.NHits()<<", "<<cid.Width()<<std::endl ;
+        for ( int j = 0; j < ass_mcclus_v[i].size(); j++ ){
+
+          auto hid = ass_mcclus_v[i][j];
+          _mc_hit_map[hid] = i ; 
+
+          auto h = ev_hit->at(hid);
+
+          if ( tot_mc_cw_hits_v.find(i) == tot_mc_cw_hits_v.end() )
+            tot_mc_cw_hits_v[i] = h.Integral() ;
+          else
+            tot_mc_cw_hits_v[i] += h.Integral() ;
+           
+        }
+      }
+
+      //std::map<int,int> map;
+      //for ( auto const & m : _mc_hit_map ){
+      //   if ( m.second == 121 ) std::cout<<m.first<<", ";
+
+      //   if ( map.find(m.second) == map.end() )
+      //     map[m.second] = 1;
+      //   else
+      //     map[m.second] ++;
+      //}
+      //for ( auto const & m : map){
+      //  if ( m.second == 264 )
+      //  std::cout<<"Map stuff: "<<m.first<<", "<<m.second<<std::endl ;
       //}
 
       // for each reco cluster, find the origin of all hits and calc purity/completeness 
@@ -356,11 +365,31 @@ namespace larlite {
       int max_cid = -1 ;
       float tot_reco_cw_hits = 0;
 
-      std::cout<<ass_hit_v.at(min_trk_dist_it).size()<<" stuff"<<std::endl ;
-            
+      // This particular headache is necessary because there are no gaushit associations
+      // to pandoraNu tracks, only pandoraNuCosmicRemoval associations. 
+      // We're using gaushit for everything else including clustering + mccluster building though,
+      // so need to find the gaushits that correspond to the cosmic removal hits 
+      // and store these IDs for backtracker to work.
+      std::vector<int> tag_trk_gaushit_v;
       for(int i = 0; i < ass_hit_v.at(min_trk_dist_it).size(); i++){
          auto hid = ass_hit_v.at(min_trk_dist_it).at(i) ;
          auto h = ev_hit_cosRem->at(hid);
+         if ( h.WireID().Plane != 2 ) continue;
+
+         for(int j = 0; j < ev_hit->size(); j++){
+           auto hj = ev_hit->at(j) ; 
+           if ( hj.WireID().Plane != 2 ) continue;
+
+           if ( hj.PeakTime() == h.PeakTime() && hj.WireID().Wire == h.WireID().Wire )
+             tag_trk_gaushit_v.emplace_back(j);
+             
+         }
+      }
+            
+      //for(int i = 0; i < ass_hit_v.at(min_trk_dist_it).size(); i++){
+      for(int i = 0; i < tag_trk_gaushit_v.size(); i++){
+         auto hid = tag_trk_gaushit_v.at(i) ;
+         auto h = ev_hit->at(hid);
 
          if ( h.WireID().Plane != 2 ) continue;
 
@@ -368,11 +397,11 @@ namespace larlite {
          
          if ( _mc_hit_map.find(hid) != _mc_hit_map.end() ){
 
+
            auto mcclus_id = _mc_hit_map[hid] ;
 
            pur_ctr_v[mcclus_id]++ ; 
            cw_pur_ctr_v[mcclus_id] += h.Integral() ; 
-           //std::cout<<"max hits: "<<max_hits <<", "<< pur_ctr_v[mcclus_id]<<", "<<mcclus_id<<std::endl;
 
            if( pur_ctr_v[mcclus_id] > max_hits ){
             
@@ -382,8 +411,6 @@ namespace larlite {
            }
          }
        }
-
-      std::cout<<"HITS: "<<max_hits<<std::endl ;
 
        if ( max_cid != -1 ){
 
@@ -426,16 +453,15 @@ namespace larlite {
             n_gamma++;
         }   
 
-       auto ev_mcc = storage->get_data<event_cluster>("mccluster");
        auto mcclus = ev_mcc->at(max_cid) ;
 
-       for ( auto mm : *ev_mcc )
-          std::cout<<"MC: "<<mm.Width()<<std::endl;
+       //for ( auto mm : *ev_mcc )
+          //std::cout<<"MC: "<<mm.Width()<<std::endl;
        // Remember that I've repurposed the cluster width variable to store info 
        // about whether this mccluster (which we've identified as the match to 
        // our reco particle at this stage) is neutrino or cosmic in origin 
 
-        std::cout<<"mccluster width : "<<mcclus.Width()<<std::endl ;
+        //std::cout<<"mccluster width : "<<mcclus.Width()<<std::endl ;
         if( mcclus.Width() == 2){
           _n_cosmic++;
           _bkgd_id = 1; 
@@ -755,7 +781,7 @@ namespace larlite {
 
     }
 
-    //std::cout<<"Event and ID: "<<_event<<", "<<_bkgd_v[_bkgd_id]<<"\n\n";
+    std::cout<<"Event and ID: "<<_event<<", "<<_bkgd_v[_bkgd_id]<<"\n\n";
     
     _tree->Fill();    
 
