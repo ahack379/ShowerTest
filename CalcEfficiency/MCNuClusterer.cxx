@@ -287,7 +287,7 @@ namespace larlite {
       clus.set_is_merged(cluster_pi0_v[idx]); // Is there pi0 here?
       clus.set_start_opening(cluster_ts_v[idx]); // Is this a track or shower?
       clus.set_width(cluster_cos_nu_v[idx]); // Is this a neutrino or a cosmic?
-      clus.set_end_angle(radiative_v[idx]); // Is this a radiative photon? Want to use the full pi0 energy
+      clus.set_end_angle(cluster_radiative_v[idx]); // Is this a radiative photon? Want to use the full pi0 energy
                                             // for proper comparison, but also want to be able to remove this
 					    // later if necessary
       ev_mccluster->push_back(clus);
