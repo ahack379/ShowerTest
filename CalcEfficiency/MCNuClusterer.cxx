@@ -138,7 +138,7 @@ namespace larlite {
       if ( energy > _mc_energy_min && (mcs.Origin() == 1 || mcs.Origin() == 2)) {
         if ( mcs.MotherPdgCode() == 111 )
           found_pi0  = true ;
-	if ( mcs.AncestorPdgCode() == 111 ){
+	if ( mcs.AncestorPdgCode() == 111 && mcs.MotherPdgCode() != 111 ){
 	  found_pi0 = true;
 	  radiative = 1;
 	}
