@@ -110,6 +110,19 @@ namespace larlite {
   float _pi0_high_cw_purity;
   float _pi0_low_cw_complete;
   float _pi0_high_cw_complete;
+  float _pi0_low_true_gammaE;
+  float _pi0_high_true_gammaE;
+  float _pi0_low_true_detProf_gammaE;
+  float _pi0_high_true_detProf_gammaE;
+  float _pi0_low_reco_gammaE;
+  float _pi0_high_reco_gammaE;
+  // Also add some other truth info from the mccluster
+  float _pi0_low_origin ; // is the corresponding mccluster due to nu(1), cosmic(2), noise(3)
+  float _pi0_low_type ;   // is this mccluster due to track(0) or shower(1)
+  bool _pi0_low_from_pi0;   // is this mccluster from a pi0? yes(1) no(0)
+  float _pi0_high_origin ; // is this mccluster due to nu(1), cosmic(2), noise(3)
+  float _pi0_high_type ;   // is this mccluster due to track(0) or shower(1)
+  bool _pi0_high_from_pi0;   // is this mccluster from a pi0? yes(1) no(0)
 
   //////////////////////////////////////
   float _gamma_E;
@@ -118,6 +131,13 @@ namespace larlite {
   float _gamma_complete; 
   float _gamma_cw_purity; 
   float _gamma_cw_complete; 
+  float _gamma_trueE;
+  float _gamma_trueE_detProf;
+  // Also add some other truth info from the mccluster
+  float _gamma_origin ; // is this mccluster due to nu(1), cosmic(2), noise(-1)
+  float _gamma_type ;   // is this mccluster due to track(0) or shower(1)
+  bool _gamma_from_pi0;   // is this mccluster from a pi0? yes(1) no(0)
+
 
   float _mu_angle ;
   float _mu_len ;
@@ -134,6 +154,9 @@ namespace larlite {
   float _mu_complete ;
   float _mu_cw_purity ;
   float _mu_cw_complete ;
+  // Also add some other truth info from the mccluster
+  float _mu_origin ; // is this mccluster due to nu(1), cosmic(2), noise(3)
+  float _mu_type ;   // is this mccluster due to track(0) or shower(1)
 
   ::geoalgo::GeoAlgo _geoAlgo ;
 
