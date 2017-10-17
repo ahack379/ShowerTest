@@ -350,6 +350,8 @@ namespace larlite {
         return false;
       }
 
+      //auto ev_clus_new = storage->get_data<larlite::event_cluster>("tagged_track_clus"); 
+
       // Keep track of the charge-weighted hit count
       std::map<int,float> tot_mc_cw_hits_v ; 
 
@@ -421,6 +423,8 @@ namespace larlite {
          }
       }
 
+      //std::cout<<"Tagged track : "<<tag_trk_gaushit_v.size()<<std::endl ;
+
       // Now calculate purity and completeness for muon track
       for(int i = 0; i < tag_trk_gaushit_v.size(); i++){
          auto hid = tag_trk_gaushit_v.at(i) ;
@@ -461,12 +465,15 @@ namespace larlite {
        if ( max_cid != ass_mcclus_v.size() ){
 
          auto tot_mc_hits =  ass_mcclus_v[max_cid].size(); 
-         auto tot_reco_hits = ass_hit_v.at(min_trk_dist_it).size();         
+         auto tot_reco_hits = tag_trk_gaushit_v.size() ; //ass_hit_v.at(min_trk_dist_it).size();         
          _mu_purity   = float(max_hits) / tot_reco_hits ;
          _mu_complete = float(max_hits) / tot_mc_hits ;
 
          _mu_cw_purity   = float(max_cw_hits) / tot_reco_cw_hits ;
          _mu_cw_complete = float(max_cw_hits) / tot_mc_cw_hits_v[max_cid]; 
+
+         //std::cout<<"MAX HITS + MIN_TRK_DIST : "<<max_hits<<", "<<tot_reco_hits<<", "<<tot_mc_hits<<std::endl; 
+
        }
       else {
          // Noise category
@@ -503,6 +510,8 @@ namespace larlite {
        _mu_origin = mcclus.Width() ; 
        _mu_type   = mcclus.StartOpeningAngle() ; // Recall I've set this to track (0) or shower(1) in mccluster builder
 
+       std::cout<<"muon purity : "<<_mu_purity<<", "<<_mu_complete<<", "<<_mu_origin<<", "<<_mu_type<<std::endl ; 
+    
        // Remember that I've repurposed the cluster width variable to store info 
        // about whether this mccluster (which we've identified as the match to 
        // our reco particle at this stage) is neutrino or cosmic in origin 
