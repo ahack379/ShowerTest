@@ -62,6 +62,8 @@ namespace larlite {
   std::vector<int> _event_list ;
   std::multimap<float,float> _map;
 
+  float _tot_pot ;
+
   };
 }
 #endif

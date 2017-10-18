@@ -7,6 +7,7 @@
 #include "DataFormat/mctrack.h"
 #include "DataFormat/track.h"
 #include "DataFormat/vertex.h"
+#include "DataFormat/potsummary.h"
 #include "LArUtil/GeometryHelper.h"
 #include "LArUtil/LArProperties.h"
 #include "LArUtil/TimeService.h"
@@ -25,6 +26,8 @@ namespace larlite {
     _n_cc0pi0 = 0;   // 3
     _n_nc1pi0 = 0;   // 4 
     _n_nc0pi0 = 0;   // 5
+
+    _tot_pot = 0;
 
     return true;
   }
@@ -102,6 +105,11 @@ namespace larlite {
         _n_other ++;   
     
 
+    // Now calculate the total POT + total numu neutrinos 
+    auto ev_pot = storage->get_subrundata<potsummary>("generator"); 
+
+    if( storage->subrun_id() != storage->last_subrun_id() )
+      _tot_pot += ev_pot->totgoodpot ;
 
     return true;
   }
@@ -126,6 +134,7 @@ namespace larlite {
     std::cout<<"6) Other   : "<<_n_other<<std::endl; 
 
     std::cout<<"Total accounted backgrounds: "<< _n_other + _n_cosmic + _n_nc1pi0 + _n_nc0pi0 + _n_cc0pi0 <<std::endl ;
+    std::cout<<"Total POT: "<<_tot_pot <<std::endl ;
 
 
 
