@@ -1,9 +1,9 @@
 /**
- * \file POTCalc.h
+ * \file NeutrinoMode.h
  *
  * \ingroup HitDensity
  * 
- * \brief Class def header for a class POTCalc
+ * \brief Class def header for a class NeutrinoMode
  *
  * @author ah673
  */
@@ -12,49 +12,52 @@
 
     @{*/
 
-#ifndef LARLITE_POTCALC_H
-#define LARLITE_POTCALC_H
+#ifndef LARLITE_NEUTRINOMODE_H
+#define LARLITE_NEUTRINOMODE_H
 
 #include "Analysis/ana_base.h"
+#include "GeoAlgo/GeoAlgo.h"
 
 namespace larlite {
   /**
-     \class POTCalc
+     \class NeutrinoMode
      User custom analysis class made by SHELL_USER_NAME
    */
-  class POTCalc : public ana_base{
+  class NeutrinoMode : public ana_base{
   
   public:
 
     /// Default constructor
-    POTCalc(){ _name="POTCalc"; _fout=0;}
+    NeutrinoMode(){ _name="NeutrinoMode"; _fout=0; _tree=0; }
 
     /// Default destructor
-    virtual ~POTCalc(){}
+    virtual ~NeutrinoMode(){}
 
-    /** IMPLEMENT in POTCalc.cc!
+    /** IMPLEMENT in NeutrinoMode.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in POTCalc.cc! 
+    /** IMPLEMENT in NeutrinoMode.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in POTCalc.cc! 
+    /** IMPLEMENT in NeutrinoMode.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
 
+    void clear() ;
+
   protected:
 
-  int _event ;
-  
   std::vector<int> _event_list ;
-  std::multimap<float,float> _map ;
 
-  float _tot_pot ;
+  TTree * _tree ;
+  int _event ;
+  int _bkgd_id ;
+  int _nu_mode;
     
   };
 }

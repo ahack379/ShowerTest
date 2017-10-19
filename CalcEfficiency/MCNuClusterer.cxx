@@ -34,7 +34,7 @@ namespace larlite {
 
     _event ++;
 
-    //std::cout<<"\n\n\nEVENT NUMBER! "<<_event <<std::endl ;
+    std::cout<<"\nMCNuClusterer Events: "<<_event <<std::endl ;
 
     auto ev_mcs     = storage->get_data<event_mcshower>("mcreco");
     auto ev_mct     = storage->get_data<event_mctrack>("mcreco");
