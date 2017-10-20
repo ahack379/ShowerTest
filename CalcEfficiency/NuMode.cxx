@@ -75,7 +75,7 @@ namespace larlite {
             n_pi0 ++;
         }   
 
-        if( nu.Nu().PdgCode() == 14 && nu.CCNC() == 0 && n_pi0 == 1 && infv && e > 0.275 ) 
+        if( nu.Nu().PdgCode() == 14 && nu.CCNC() == 0 && n_pi0 == 1 && infv ) 
           _bkgd_id = 2;
         else if( nu.CCNC() == 0 && n_pi0 == 0 ) 
           _bkgd_id = 3;
