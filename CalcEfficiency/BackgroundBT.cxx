@@ -730,7 +730,8 @@ namespace larlite {
                _pi0_low_purity = purity ;
                _pi0_low_complete = complete;
                _pi0_low_true_detProf_gammaE = mc_clus_e ;
-	       _pi0_low_true_gammaE = ev_mcs->at(closest_mcs_id).Start().E() ;
+	       if ( closest_mcs_id != -1)
+	         _pi0_low_true_gammaE = ev_mcs->at(closest_mcs_id).Start().E() ;
 	       _pi0_low_origin = pi0_origin;
 	       _pi0_low_type = pi0_type;
 	       _pi0_low_from_pi0 = from_pi0 ;
@@ -739,7 +740,8 @@ namespace larlite {
                _pi0_high_purity = purity;
                _pi0_high_complete = complete;
                _pi0_high_true_detProf_gammaE = mc_clus_e ;
-	       _pi0_high_true_gammaE = ev_mcs->at(closest_mcs_id).Start().E() ;
+	       if ( closest_mcs_id != -1)
+	         _pi0_high_true_gammaE = ev_mcs->at(closest_mcs_id).Start().E() ;
 	       _pi0_high_origin = pi0_origin;
 	       _pi0_high_type = pi0_type;
 	       _pi0_high_from_pi0 = from_pi0 ;
@@ -751,7 +753,8 @@ namespace larlite {
                _pi0_low_purity = purity ;
                _pi0_low_complete = complete;
                _pi0_low_true_detProf_gammaE = mc_clus_e ;
-	       _pi0_low_true_gammaE = ev_mcs->at(closest_mcs_id).Start().E() ;
+	       if ( closest_mcs_id != -1)
+	         _pi0_low_true_gammaE = ev_mcs->at(closest_mcs_id).Start().E() ;
 	       _pi0_low_origin = pi0_origin;
 	       _pi0_low_type = pi0_type;
 	       _pi0_low_from_pi0 = from_pi0 ;
@@ -760,7 +763,8 @@ namespace larlite {
                _pi0_high_purity = purity;
                _pi0_high_complete = complete;
                _pi0_high_true_detProf_gammaE = mc_clus_e ;
-	       _pi0_high_true_gammaE = ev_mcs->at(closest_mcs_id).Start().E() ;
+	       if ( closest_mcs_id != -1)
+	         _pi0_high_true_gammaE = ev_mcs->at(closest_mcs_id).Start().E() ;
 	       _pi0_high_origin = pi0_origin;
 	       _pi0_high_type = pi0_type;
 	       _pi0_high_from_pi0 = from_pi0 ;
