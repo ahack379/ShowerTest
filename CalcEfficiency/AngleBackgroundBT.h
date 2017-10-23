@@ -12,8 +12,8 @@
 
     @{*/
 
-#ifndef LARLITE_BACKGROUNDBT_H
-#define LARLITE_BACKGROUNDBT_H
+#ifndef LARLITE_ANGLEBACKGROUNDBT_H
+#define LARLITE_ANGLEBACKGROUNDBT_H
 
 #include "Analysis/ana_base.h"
 #include "GeoAlgo/GeoAlgo.h"
