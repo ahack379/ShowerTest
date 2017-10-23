@@ -300,11 +300,17 @@ namespace larlite {
       _nu_mode = nu.Mode();
       if (_nu_mode == 10) _nu_mode = 4;
 
-      auto traj = nu.Nu().Trajectory();
-      _mc_vtx_x = traj.at(traj.size() - 1).X();
-      _mc_vtx_y = traj.at(traj.size() - 1).Y();
-      _mc_vtx_z = traj.at(traj.size() - 1).Z();
-
+      //auto traj = nu.Nu().Trajectory();
+      //_mc_vtx_x = traj.at(traj.size() - 1).X();
+      //_mc_vtx_y = traj.at(traj.size() - 1).Y();
+      //_mc_vtx_z = traj.at(traj.size() - 1).Z();
+     
+      auto ev_vtx = storage->get_data<event_vertex>("mcvertex");
+      ev_vtx->reserve(1);
+      _mc_vtx_x = ev_vtx->at(0).X() ;
+      _mc_vtx_y = ev_vtx->at(0).Y() ;
+      _mc_vtx_z = ev_vtx->at(0).Z() ;
+      
       //auto vtx_diff = sqrt(pow(_mc_vtx_x - _vtx_x,2) + pow(_mc_vtx_y - _vtx_y,2) + pow(_mc_vtx_z - _vtx_z,2));
 
       // Now get Mccluster info
