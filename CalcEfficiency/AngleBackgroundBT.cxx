@@ -596,7 +596,7 @@ namespace larlite {
 	 }
        }
 
-       if ( max_cid != ass_mcclus_v.size() ){
+       if ( max_cid != ass_mcclus_v.size() && max_cid != -1 ){
 
          auto tot_mc_hits =  ass_mcclus_v[max_cid].size(); 
          auto tot_reco_hits = tag_trk_gaushit_v.size() ; //ass_hit_v.at(min_trk_dist_it).size();         
@@ -640,6 +640,7 @@ namespace larlite {
             n_gamma++;
         }   
 
+       std::cout<<"Clustdr and size: "<<ev_mcc->size() <<", "<<max_cid <<std::endl ;
        auto mcclus = ev_mcc->at(max_cid) ;
        _mu_origin = mcclus.Width() ; 
        _mu_type   = mcclus.StartOpeningAngle() ; // Recall I've set this to track (0) or shower(1) in mccluster builder
