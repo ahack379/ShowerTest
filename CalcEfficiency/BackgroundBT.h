@@ -124,6 +124,20 @@ namespace larlite {
   float _pi0_high_type ;   // is this mccluster due to track(0) or shower(1)
   bool _pi0_high_from_pi0;   // is this mccluster from a pi0? yes(1) no(0)
 
+  float _pi0_low_st_x ;
+  float _pi0_low_st_y ;
+  float _pi0_low_st_z ;
+  float _pi0_high_st_x ;
+  float _pi0_high_st_y ;
+  float _pi0_high_st_z ;
+  float _pi0_low_true_st_x ;
+  float _pi0_low_true_st_y ;
+  float _pi0_low_true_st_z ;
+  float _pi0_high_true_st_x ;
+  float _pi0_high_true_st_y ;
+  float _pi0_high_true_st_z ;
+
+
   //////////////////////////////////////
   float _gamma_E;
   float _gamma_RL ;

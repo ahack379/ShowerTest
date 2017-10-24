@@ -101,6 +101,19 @@ namespace larlite {
       _tree->Branch("pi0_high_type",&_pi0_high_type,"pi0_high_type/F");
       _tree->Branch("pi0_high_from_pi0",&_pi0_high_from_pi0,"pi0_high_from_pi0/B");
 
+      _tree->Branch("pi0_high_st_x",&_pi0_high_st_x,"pi0_high_st_x/F");
+      _tree->Branch("pi0_high_st_y",&_pi0_high_st_y,"pi0_high_st_y/F");
+      _tree->Branch("pi0_high_st_z",&_pi0_high_st_z,"pi0_high_st_z/F");
+      _tree->Branch("pi0_low_st_x",&_pi0_low_st_x,"pi0_low_st_x/F");
+      _tree->Branch("pi0_low_st_y",&_pi0_low_st_y,"pi0_low_st_y/F");
+      _tree->Branch("pi0_low_st_z",&_pi0_low_st_z,"pi0_low_st_z/F");
+      _tree->Branch("pi0_high_true_st_x",&_pi0_high_true_st_x,"pi0_high_true_st_x/F");
+      _tree->Branch("pi0_high_true_st_y",&_pi0_high_true_st_y,"pi0_high_true_st_y/F");
+      _tree->Branch("pi0_high_true_st_z",&_pi0_high_true_st_z,"pi0_high_true_st_z/F");
+      _tree->Branch("pi0_low_true_st_x",&_pi0_low_true_st_x,"pi0_low_true_st_x/F");
+      _tree->Branch("pi0_low_true_st_y",&_pi0_low_true_st_y,"pi0_low_true_st_y/F");
+      _tree->Branch("pi0_low_true_st_z",&_pi0_low_true_st_z,"pi0_low_true_st_z/F");
+
       _tree->Branch("gamma_E",&_gamma_E,"gamma_E/F");
       _tree->Branch("gamma_RL",&_gamma_RL,"gamma_RL/F");
       _tree->Branch("gamma_purity",&_gamma_purity,"gamma_purity/F");
@@ -176,6 +189,19 @@ namespace larlite {
     _pi0_high_origin = -1 ;
     _pi0_high_type = -1  ; // true is shower
     _pi0_high_from_pi0 = false ; 
+
+    _pi0_low_st_x  = -999;
+    _pi0_low_st_y  = -999;
+    _pi0_low_st_z  = -999;
+    _pi0_high_st_x = -999 ;
+    _pi0_high_st_y = -999 ;
+    _pi0_high_st_z = -999 ;
+    _pi0_low_true_st_x = -999;
+    _pi0_low_true_st_y = -999;
+    _pi0_low_true_st_z = -999;
+    _pi0_high_true_st_x= -999 ;
+    _pi0_high_true_st_y= -999 ;
+    _pi0_high_true_st_z= -999 ;
 
     _gamma_E = -999;
     _gamma_RL = -999;
@@ -731,13 +757,23 @@ namespace larlite {
                 from_pi0 = mcclus.IsMergedCluster() ; 
              }
            }
+
+           auto ishr = ev_s->at(i);
+
            if ( i == 0 ){
              if ( lowE_is_shr1 ){ 
                _pi0_low_purity = purity ;
                _pi0_low_complete = complete;
                _pi0_low_true_detProf_gammaE = mc_clus_e ;
-	       if ( closest_mcs_id != -1)
+	       _pi0_low_st_x = ishr.ShowerStart().X();
+	       _pi0_low_st_y = ishr.ShowerStart().Y();
+	       _pi0_low_st_z = ishr.ShowerStart().Z();
+	       if ( closest_mcs_id != -1){
 	         _pi0_low_true_gammaE = ev_mcs->at(closest_mcs_id).Start().E() ;
+	         _pi0_low_true_st_x = ev_mcs->at(closest_mcs_id).DetProfile().X() ;
+	         _pi0_low_true_st_y = ev_mcs->at(closest_mcs_id).DetProfile().Y() ;
+	         _pi0_low_true_st_z = ev_mcs->at(closest_mcs_id).DetProfile().Z() ;
+	       }
 	       _pi0_low_origin = pi0_origin;
 	       _pi0_low_type = pi0_type;
 	       _pi0_low_from_pi0 = from_pi0 ;
@@ -746,8 +782,16 @@ namespace larlite {
                _pi0_high_purity = purity;
                _pi0_high_complete = complete;
                _pi0_high_true_detProf_gammaE = mc_clus_e ;
-	       if ( closest_mcs_id != -1)
+	       _pi0_high_st_x = ishr.ShowerStart().X();
+	       _pi0_high_st_y = ishr.ShowerStart().Y();
+	       _pi0_high_st_z = ishr.ShowerStart().Z();
+	       if ( closest_mcs_id != -1){
 	         _pi0_high_true_gammaE = ev_mcs->at(closest_mcs_id).Start().E() ;
+	         _pi0_high_true_st_x = ev_mcs->at(closest_mcs_id).DetProfile().X() ;
+	         _pi0_high_true_st_y = ev_mcs->at(closest_mcs_id).DetProfile().Y() ;
+	         _pi0_high_true_st_z = ev_mcs->at(closest_mcs_id).DetProfile().Z() ;
+	       }
+
 	       _pi0_high_origin = pi0_origin;
 	       _pi0_high_type = pi0_type;
 	       _pi0_high_from_pi0 = from_pi0 ;
@@ -759,8 +803,15 @@ namespace larlite {
                _pi0_low_purity = purity ;
                _pi0_low_complete = complete;
                _pi0_low_true_detProf_gammaE = mc_clus_e ;
-	       if ( closest_mcs_id != -1)
+	       _pi0_low_st_x = ishr.ShowerStart().X();
+	       _pi0_low_st_y = ishr.ShowerStart().Y();
+	       _pi0_low_st_z = ishr.ShowerStart().Z();
+	       if ( closest_mcs_id != -1){
 	         _pi0_low_true_gammaE = ev_mcs->at(closest_mcs_id).Start().E() ;
+	         _pi0_low_true_st_x = ev_mcs->at(closest_mcs_id).DetProfile().X() ;
+	         _pi0_low_true_st_y = ev_mcs->at(closest_mcs_id).DetProfile().Y() ;
+	         _pi0_low_true_st_z = ev_mcs->at(closest_mcs_id).DetProfile().Z() ;
+	       }
 	       _pi0_low_origin = pi0_origin;
 	       _pi0_low_type = pi0_type;
 	       _pi0_low_from_pi0 = from_pi0 ;
@@ -769,8 +820,15 @@ namespace larlite {
                _pi0_high_purity = purity;
                _pi0_high_complete = complete;
                _pi0_high_true_detProf_gammaE = mc_clus_e ;
-	       if ( closest_mcs_id != -1)
+	       _pi0_high_st_x = ishr.ShowerStart().X();
+	       _pi0_high_st_y = ishr.ShowerStart().Y();
+	       _pi0_high_st_z = ishr.ShowerStart().Z();
+	       if ( closest_mcs_id != -1){
 	         _pi0_high_true_gammaE = ev_mcs->at(closest_mcs_id).Start().E() ;
+	         _pi0_high_true_st_x = ev_mcs->at(closest_mcs_id).DetProfile().X() ;
+	         _pi0_high_true_st_y = ev_mcs->at(closest_mcs_id).DetProfile().Y() ;
+	         _pi0_high_true_st_z = ev_mcs->at(closest_mcs_id).DetProfile().Z() ;
+	       }
 	       _pi0_high_origin = pi0_origin;
 	       _pi0_high_type = pi0_type;
 	       _pi0_high_from_pi0 = from_pi0 ;
