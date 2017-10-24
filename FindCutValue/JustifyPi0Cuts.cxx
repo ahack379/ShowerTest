@@ -36,7 +36,7 @@ namespace larlite {
       _gamma_tree->Branch("_gamma2_vtx_IP",&_gamma2_vtx_IP,"gamma2_vtx_IP/F");
       _gamma_tree->Branch("_pi0_mass",&_pi0_mass,"pi0_mass/F");
       _gamma_tree->Branch("_pi0_mom",&_pi0_mom,"pi0_mom/F");
-      _gamma_tree->Branch("_event_type",&_event_type,"event_type/F");
+      _gamma_tree->Branch("_event_type",&_event_type,"event_type/I");
     }
 
     if( !_one_gamma_tree ){
@@ -387,6 +387,7 @@ namespace larlite {
         if ( s.DetProfile().E() > 0 && s.MotherPdgCode() == 111 ){
           shr_ids.emplace_back(si) ;
 	  _event_type = 1;
+	  std::cout<<"FOUND A 1 event!" <<std::endl ;
 	  }
 	}
     }
