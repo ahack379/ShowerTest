@@ -91,7 +91,7 @@ namespace larlite {
           n_mu ++;
      }
 
-     if( n_pi0 == 1 && n_mu == 1 && infv){ 
+     if( nu.Nu().PdgCode() == 14 && n_pi0 == 1 && nu.CCNC() == 0 && infv){ 
        _event_list.emplace_back(_event-1);
        _n_cc1pi0 ++; 
      }
