@@ -95,7 +95,7 @@ namespace larlite {
     auto vtxtimecm = vtxtick * _time2cm; 
     auto sce_corr = _SCE->GetPosOffsets(xvtx,yvtx,zvtx);
     
-    xyz[0] = xvtx + vtxtimecm + _offset - sce_corr.at(0);
+    xyz[0] = xvtx + vtxtimecm + 0.7 - sce_corr.at(0);
     xyz[1] = yvtx + sce_corr.at(1);
     xyz[2] = zvtx + sce_corr.at(2);
     

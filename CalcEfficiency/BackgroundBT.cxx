@@ -37,6 +37,10 @@ namespace larlite {
     _n_gamma = 0 ; // 10
     _n_kaondecay = 0 ; // 11
 
+    //SetXOffset(0.0);
+    _SCE = new larutil::SpaceChargeMicroBooNE();
+    _time2cm = larutil::GeometryHelper::GetME()->TimeToCm();
+
     _bkgd_v = { "Other","Cosmic","CC1pi0","NC1pi0","CC1pi0_outFV","Multpi0", "nue","antinumu","cccex","nccex","ccgamma","kaondecay","ccother","ncother" };
 
     if ( !_tree ){
@@ -115,6 +119,28 @@ namespace larlite {
       _tree->Branch("gamma_from_pi0",&_gamma_from_pi0,"gamma_from_pi0/B");
    }
 
+
+    if(!_shower_tree){
+      _shower_tree = new TTree("shower_tree","");
+      _shower_tree->Branch("event",&_event,"event/I");
+      _shower_tree->Branch("bkgd_id",&_bkgd_id,"bkgd_id/I");
+      _shower_tree->Branch("shr_startx",&_shr_startx,"shr_startx/F");
+      _shower_tree->Branch("shr_starty",&_shr_starty,"shr_starty/F");
+      _shower_tree->Branch("shr_startz",&_shr_startz,"shr_startz/F");
+      _shower_tree->Branch("shr_startw",&_shr_startw,"shr_startw/F");
+      _shower_tree->Branch("shr_startt",&_shr_startt,"shr_startt/F");
+      _shower_tree->Branch("shr_dirx",&_shr_dirx,"shr_dirx/F");
+      _shower_tree->Branch("shr_diry",&_shr_diry,"shr_diry/F");
+      _shower_tree->Branch("shr_dirz",&_shr_dirz,"shr_dirz/F");
+      _shower_tree->Branch("shr_energy",&_shr_energy,"shr_energy/F");
+      _shower_tree->Branch("shr_oangle",&_shr_oangle,"shr_oangle/F");
+      _shower_tree->Branch("shr_dedx",&_shr_dedx,"shr_dedx/F");
+      _shower_tree->Branch("shr_vtx_dist",&_shr_vtx_dist,"shr_vtx_dist/F");
+      _shower_tree->Branch("shr_trk_delta_theta",&_shr_trk_delta_theta,"shr_trk_delta_theta/F");
+      _shower_tree->Branch("shr_trk_delta_phi",&_shr_trk_delta_phi,"shr_trk_delta_phi/F");
+    }   
+
+
     return true;
   }
 
@@ -188,6 +214,21 @@ namespace larlite {
     _gamma_origin = -1;
     _gamma_type = -1 ;
     _gamma_from_pi0 = false;
+
+    _shr_startx = -999;
+    _shr_starty = -999;
+    _shr_startz = -999;
+    _shr_startw = -999;
+    _shr_startt = -999;
+    _shr_dirx = -999;
+    _shr_diry = -999;
+    _shr_dirz = -999;
+    _shr_energy = -999;
+    _shr_oangle = -999;
+    _shr_dedx = -999;
+    _shr_vtx_dist = -999;
+    _shr_trk_delta_theta = -999;
+    _shr_trk_delta_phi = -999;
 
   }
   
@@ -300,16 +341,25 @@ namespace larlite {
       _nu_mode = nu.Mode();
       if (_nu_mode == 10) _nu_mode = 4;
 
-      //auto traj = nu.Nu().Trajectory();
-      //_mc_vtx_x = traj.at(traj.size() - 1).X();
-      //_mc_vtx_y = traj.at(traj.size() - 1).Y();
-      //_mc_vtx_z = traj.at(traj.size() - 1).Z();
+      auto traj = nu.Nu().Trajectory();
+      auto mc_vtx_x = traj.at(traj.size() - 1).X();
+      auto mc_vtx_y = traj.at(traj.size() - 1).Y();
+      auto mc_vtx_z = traj.at(traj.size() - 1).Z();
+      auto tvtx = traj.at(traj.size() - 1).T();
+
+      auto vtxtick = (tvtx / 1000.) * 2.;
+      auto vtxtimecm = vtxtick * _time2cm; 
+      auto sce_corr = _SCE->GetPosOffsets(mc_vtx_x,mc_vtx_y,mc_vtx_z);
+      
+      _mc_vtx_x = mc_vtx_x + vtxtimecm + 0.7 - sce_corr.at(0);
+      _mc_vtx_y = mc_vtx_y + sce_corr.at(1);
+      _mc_vtx_z = mc_vtx_z + sce_corr.at(2);
      
-      auto ev_vtx = storage->get_data<event_vertex>("mcvertex");
-      ev_vtx->reserve(1);
-      _mc_vtx_x = ev_vtx->at(0).X() ;
-      _mc_vtx_y = ev_vtx->at(0).Y() ;
-      _mc_vtx_z = ev_vtx->at(0).Z() ;
+      //auto ev_vtx = storage->get_data<event_vertex>("mcvertex");
+      //ev_vtx->reserve(1);
+      //_mc_vtx_x = ev_vtx->at(0).X() ;
+      //_mc_vtx_y = ev_vtx->at(0).Y() ;
+      //_mc_vtx_z = ev_vtx->at(0).Z() ;
       
       //auto vtx_diff = sqrt(pow(_mc_vtx_x - _vtx_x,2) + pow(_mc_vtx_y - _vtx_y,2) + pow(_mc_vtx_z - _vtx_z,2));
 
@@ -468,7 +518,7 @@ namespace larlite {
 	 }
        }
 
-       if ( max_cid != ass_mcclus_v.size() ){
+       if ( max_cid != ass_mcclus_v.size() && max_cid != -1 ){
 
          auto tot_mc_hits =  ass_mcclus_v[max_cid].size(); 
          auto tot_reco_hits = tag_trk_gaushit_v.size() ; //ass_hit_v.at(min_trk_dist_it).size();         
@@ -497,7 +547,7 @@ namespace larlite {
         if ( !ev_mcs || !ev_mcs->size() ) {std::cout<<"No MCShower!" <<std::endl ; return false; }
 
         bool infv = true;
-        if( _mc_vtx_x < 20 || _mc_vtx_x > 236.35 || _mc_vtx_y > 96.5 || _mc_vtx_y < -96.5 || _mc_vtx_z < 10 || _mc_vtx_z > 1026.8 )
+        if( mc_vtx_x < 20 || mc_vtx_x > 236.35 || mc_vtx_y > 96.5 || mc_vtx_y < -96.5 || mc_vtx_z < 10 || mc_vtx_z > 1026.8 )
           infv = false;
 
         auto parts = ev_mctruth->at(0).GetParticles();
@@ -516,7 +566,7 @@ namespace larlite {
        _mu_origin = mcclus.Width() ; 
        _mu_type   = mcclus.StartOpeningAngle() ; // Recall I've set this to track (0) or shower(1) in mccluster builder
 
-       std::cout<<"muon purity : "<<_mu_purity<<", "<<_mu_complete<<", "<<_mu_origin<<", "<<_mu_type<<std::endl ; 
+       //std::cout<<"muon purity : "<<_mu_purity<<", "<<_mu_complete<<", "<<_mu_origin<<", "<<_mu_type<<std::endl ; 
     
        // Remember that I've repurposed the cluster width variable to store info 
        // about whether this mccluster (which we've identified as the match to 
@@ -536,7 +586,8 @@ namespace larlite {
           _bkgd_id = 7 ;
         }
         // frmo here we can assume we have a muon neutrino
-        else if( nu.CCNC() == 0 && n_pi0 == 1 && infv ) {
+        else if( nu.Nu().PdgCode() == 14 && n_pi0 == 1 && nu.CCNC() == 0 && infv){
+        //else if( nu.CCNC() == 0 && n_pi0 == 1 && infv ) {
           _bkgd_id = 2;
           _n_cc1pi0++; 
         }
@@ -688,7 +739,7 @@ namespace larlite {
 	        }
               }
 
-              if ( max_cid != ass_mcclus_v.size() ){
+              if ( max_cid != ass_mcclus_v.size() && max_cid != -1){
 
                 auto clocktick = larutil::DetectorProperties::GetME()->SamplingRate() * 1.e-3; //time sample in usec
 		
@@ -703,7 +754,7 @@ namespace larlite {
                 }
 
                 // Find mcs this cluster belongs to in order to store the true shower energy
-                for ( int i = 0; i < ev_mcs->size(); i++ ) { //auto const & s : ev_mcs ){
+                for ( int i = 0; i < ev_mcs->size(); i++ ) { //auto const & s : ev_mcs )
 
 		  auto s = ev_mcs->at(i) ;
 		  if(s.Origin() != 1 || s.MotherPdgCode() != 111 ) continue;
@@ -843,7 +894,7 @@ namespace larlite {
 	  }
         }
 
-        if ( max_cid != ass_imageclus_v.size() ){
+        if ( max_cid != ass_imageclus_v.size() && max_cid == -1 ){
 
           auto clocktick = larutil::DetectorProperties::GetME()->SamplingRate() * 1.e-3; //time sample in usec
 	  
@@ -966,9 +1017,43 @@ namespace larlite {
 
     }
 
-    std::cout<<"Event and ID: "<<_event<<", "<<_bkgd_v[_bkgd_id]<<"\n\n";
+    //if ( _bkgd_id == 2 )
+    //std::cout<<"Event and ID: "<<_event<<", "<<_bkgd_v[_bkgd_id]<<"\n";
     
     _tree->Fill();    
+     
+    if ( ev_shr->size() != 0 ){
+      auto geomH = ::larutil::GeometryHelper::GetME();
+
+      for( auto const & s : *ev_shr ){
+        _shr_startx = s.ShowerStart().X();
+        _shr_starty = s.ShowerStart().Y();
+        _shr_startz = s.ShowerStart().Z();
+
+        std::vector<float> shr_to_proj = { _shr_startx, _shr_starty, _shr_startz } ;
+        auto shr2d = geomH->Point_3Dto2D(shr_to_proj,2) ;
+        _shr_startw = shr2d.w ;
+        _shr_startt = shr2d.t ;
+
+        _shr_dirx = s.Direction().X();
+        _shr_diry = s.Direction().Y();
+        _shr_dirz = s.Direction().Z();
+
+        _shr_energy = s.Energy(2);
+        _shr_oangle = s.OpeningAngle();
+        _shr_dedx = s.dEdx(2);
+
+        _shr_vtx_dist = sqrt( pow(_vtx_x - _shr_startx,2) +
+                              pow(_vtx_y - _shr_starty,2) +
+                              pow(_vtx_z - _shr_startz,2) );
+
+        _shr_trk_delta_theta = s.Direction().Theta() - _mu_angle;
+        _shr_trk_delta_phi = s.Direction().Phi() - _mu_phi ;
+
+        _shower_tree->Fill() ;
+      }
+    }
+
 
     return true;
   }
@@ -1005,6 +1090,7 @@ namespace larlite {
     if ( _fout ){
       _fout->cd();
       _tree->Write();
+      _shower_tree->Write();
     }
   
     return true;
