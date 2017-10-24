@@ -17,6 +17,8 @@
 
 #include "Analysis/ana_base.h"
 #include "GeoAlgo/GeoAlgo.h"
+#include "LArUtil/SpaceChargeMicroBooNE.h"
+
 
 namespace larlite {
   /**
@@ -28,7 +30,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    BackgroundBT(){ _name="BackgroundBT"; _fout=0; _tree=0; }
+    BackgroundBT(){ _name="BackgroundBT"; _fout=0; _tree=0; _shower_tree = 0; }
 
     /// Default destructor
     virtual ~BackgroundBT(){}
@@ -78,6 +80,23 @@ namespace larlite {
   int _n_gamma ;
   int _n_kaondecay;
   int _n_other ;
+
+  // One entry per shower
+  TTree * _shower_tree ;
+  float _shr_startx;
+  float _shr_starty;
+  float _shr_startz;
+  float _shr_startw;
+  float _shr_startt;
+  float _shr_dirx;
+  float _shr_diry;
+  float _shr_dirz;
+  float _shr_energy;
+  float _shr_oangle;
+  float _shr_dedx;
+  float _shr_vtx_dist;
+  float _shr_trk_delta_theta ;
+  float _shr_trk_delta_phi ;
 
   TTree * _tree ;
   int _event ;
@@ -179,6 +198,10 @@ namespace larlite {
   bool _get_single_shower_info ;
 
   std::vector<std::string> _bkgd_v ;
+
+  larutil::SpaceChargeMicroBooNE *_SCE;
+  double _time2cm;
+
     
   };
 }
