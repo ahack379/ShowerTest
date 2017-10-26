@@ -392,7 +392,6 @@ namespace larlite {
       //_mc_vtx_x = ev_vtx->at(0).X() ;
       //_mc_vtx_y = ev_vtx->at(0).Y() ;
       //_mc_vtx_z = ev_vtx->at(0).Z() ;
-      
       //auto vtx_diff = sqrt(pow(_mc_vtx_x - _vtx_x,2) + pow(_mc_vtx_y - _vtx_y,2) + pow(_mc_vtx_z - _vtx_z,2));
 
       // Now get Mccluster info
@@ -438,8 +437,6 @@ namespace larlite {
         return false;
       }
 
-      //auto ev_clus_new = storage->get_data<larlite::event_cluster>("tagged_track_clus"); 
-
       // Keep track of the charge-weighted hit count
       std::map<int,float> tot_mc_cw_hits_v ; 
 
@@ -451,7 +448,6 @@ namespace larlite {
         auto cid = ev_mcc->at(i) ;
         if ( cid.View() != 2 ) continue;
 
-        //std::cout<<"OK...filling the mc map here. Cluster:  "<<i<<", "<<cid.NHits()<<", "<<cid.Width()<<std::endl ;
         for ( int j = 0; j < ass_mcclus_v[i].size(); j++ ){
 
           auto hid = ass_mcclus_v[i][j];
@@ -466,20 +462,6 @@ namespace larlite {
            
         }
       }
-
-      //std::map<int,int> map;
-      //for ( auto const & m : _mc_hit_map ){
-      //   if ( m.second == 121 ) std::cout<<m.first<<", ";
-
-      //   if ( map.find(m.second) == map.end() )
-      //     map[m.second] = 1;
-      //   else
-      //     map[m.second] ++;
-      //}
-      //for ( auto const & m : map){
-      //  if ( m.second == 264 )
-      //  std::cout<<"Map stuff: "<<m.first<<", "<<m.second<<std::endl ;
-      //}
 
       // for each reco cluster, find the origin of all hits and calc purity/completeness 
       // the "...size()+1" is to account for noise category
@@ -619,7 +601,6 @@ namespace larlite {
         }
         // frmo here we can assume we have a muon neutrino
         else if( nu.Nu().PdgCode() == 14 && n_pi0 == 1 && nu.CCNC() == 0 && infv){
-        //else if( nu.CCNC() == 0 && n_pi0 == 1 && infv ) {
           _bkgd_id = 2;
           _n_cc1pi0++; 
         }
@@ -794,7 +775,7 @@ namespace larlite {
                   auto e = fabs(mc_clus_e - s.DetProfile().E()) ;
 
 		  if ( e < closest_e ){
-		    closest_e  = 0;
+		    closest_e  = e;
 		    closest_mcs_id = i ;
 		  }
 		}
@@ -847,6 +828,7 @@ namespace larlite {
 	         _pi0_high_true_st_x = ev_mcs->at(closest_mcs_id).DetProfile().X() ;
 	         _pi0_high_true_st_y = ev_mcs->at(closest_mcs_id).DetProfile().Y() ;
 	         _pi0_high_true_st_z = ev_mcs->at(closest_mcs_id).DetProfile().Z() ;
+
 	       }
 
 	       _pi0_high_origin = pi0_origin;
@@ -892,7 +874,19 @@ namespace larlite {
              }
            }
         }
+      auto sce_corr_h = _SCE->GetPosOffsets(_pi0_high_true_st_x,_pi0_high_true_st_y,_pi0_high_true_st_z);
+      auto sce_corr_l = _SCE->GetPosOffsets(_pi0_low_true_st_x,_pi0_low_true_st_y,_pi0_low_true_st_z);
+      
+      _pi0_high_true_st_x += vtxtimecm + 0.7 - sce_corr_h.at(0);
+      _pi0_high_true_st_y += sce_corr_h.at(1);
+      _pi0_high_true_st_z += sce_corr_h.at(2);
+
+      _pi0_low_true_st_x += vtxtimecm + 0.7 - sce_corr_l.at(0);
+      _pi0_low_true_st_y += sce_corr_l.at(1);
+      _pi0_low_true_st_z += sce_corr_l.at(2);
+     
       }
+     //std::cout<<"High : "<<_pi0_high_true_st_x <<", "<<_pi0_high_true_st_y<<", "<<_pi0_high_true_st_z<<std::endl ;
 
     if ( _get_single_shower_info ){
       auto ev_s = storage->get_data<event_shower>("pi0_1gamma_candidate_showers");
@@ -975,7 +969,7 @@ namespace larlite {
           }
 
           // Find mcs this cluster belongs to in order to store the true shower energy
-          for ( int i = 0; i < ev_mcs->size(); i++ ) { //auto const & s : ev_mcs ){
+          for ( int i = 0; i < ev_mcs->size(); i++ ) { 
 
 	    auto s = ev_mcs->at(i) ;
 	    //if(s.Origin() != 1 || s.MotherPdgCode() != 111 ) continue;
@@ -983,7 +977,7 @@ namespace larlite {
             auto e = fabs(mc_clus_e - s.DetProfile().E()) ;
 
 	    if ( e < closest_e ){
-	      closest_e  = 0;
+	      closest_e  = e;
 	      closest_mcs_id = i ;
 	    }
 	  }
@@ -1020,7 +1014,7 @@ namespace larlite {
     if ( _get_pi0_info ){
 
       auto ev_s = storage->get_data<event_shower>("pi0_candidate_showers");
-      if( !ev_s || !ev_s->size() ){ //|| ev_s->size() < 2 ){
+      if( !ev_s || !ev_s->size() ){
         std::cout<<"Not enough reco'd showers..." <<std::endl;
         return false;
        }   
@@ -1100,6 +1094,7 @@ namespace larlite {
     //if ( _bkgd_id == 2 )
     //std::cout<<"Event and ID: "<<_event<<", "<<_bkgd_v[_bkgd_id]<<"\n";
     
+    //std::cout<<"High : "<<_pi0_high_true_st_x <<", "<<_pi0_high_true_st_y<<", "<<_pi0_high_true_st_z<<std::endl ;
     _tree->Fill();    
      
     if ( ev_shr->size() != 0 ){
