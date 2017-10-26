@@ -729,10 +729,10 @@ namespace larlite {
           }
         }
       }
+    std::cout<<"Event and ID: "<<_event<<", "<<_bkgd_v[_bkgd_id]<<"\n\n";
 
     }
 
-    std::cout<<"Event and ID: "<<_event<<", "<<_bkgd_v[_bkgd_id]<<"\n\n";
     
     _tree->Fill();    
 
