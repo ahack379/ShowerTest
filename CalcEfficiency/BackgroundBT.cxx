@@ -83,6 +83,8 @@ namespace larlite {
       _tree->Branch("pi0_high_shrE",&_pi0_high_shrE,"pi0_high_shrE/F");
       _tree->Branch("pi0_low_radL",&_pi0_low_radL,"pi0_low_radL/F");
       _tree->Branch("pi0_high_radL",&_pi0_high_radL,"pi0_high_radL/F");
+      _tree->Branch("pi0_low_IP_w_vtx",&_pi0_low_IP_w_vtx,"pi0_low_IP_w_vtx/F");
+      _tree->Branch("pi0_high_IP_w_vtx",&_pi0_high_IP_w_vtx,"pi0_high_IP_w_vtx/F");
 
       _tree->Branch("pi0_low_purity",&_pi0_low_purity,"pi0_low_purity/F");
       _tree->Branch("pi0_high_purity",&_pi0_high_purity,"pi0_high_purity/F");
@@ -120,6 +122,7 @@ namespace larlite {
 
       _tree->Branch("gamma_E",&_gamma_E,"gamma_E/F");
       _tree->Branch("gamma_RL",&_gamma_RL,"gamma_RL/F");
+      _tree->Branch("gamma_IP_w_vtx",&_gamma_IP_w_vtx,"gamma_IP_w_vtx/F");
       _tree->Branch("gamma_purity",&_gamma_purity,"gamma_purity/F");
       _tree->Branch("gamma_complete",&_gamma_complete,"gamma_complete/F");
       _tree->Branch("gamma_cw_purity",&_gamma_cw_purity,"gamma_cw_purity/F");
@@ -195,6 +198,8 @@ namespace larlite {
     _pi0_high_shrE = -999;
     _pi0_low_radL = -999;
     _pi0_high_radL = -999;
+    _pi0_low_IP_w_vtx = -999;
+    _pi0_high_IP_w_vtx = -999;
 
     _pi0_high_purity = 0.;
     _pi0_high_complete = 0.;
@@ -231,6 +236,7 @@ namespace larlite {
 
     _gamma_E = -999;
     _gamma_RL = -999;
+    _gamma_IP_w_vtx = -999;
     _gamma_purity = 0.;
     _gamma_complete = 0.;
     _gamma_cw_purity = 0.;
@@ -261,7 +267,7 @@ namespace larlite {
   bool BackgroundBT::analyze(storage_manager* storage) {
 
     _event++ ;
-    std::cout<<"\n\nEVENT IS: "<<_event<<std::endl;
+    //std::cout<<"\n\nEVENT IS: "<<_event<<std::endl;
     clear();
 
     auto ev_vtx= storage->get_data<event_vertex>("numuCC_vertex"); 
@@ -924,7 +930,7 @@ namespace larlite {
         for ( int k = 0; k < ass_imageclus_v.at(clus_id).size(); k++ ){
 
           auto hid = ass_imageclus_v.at(clus_id).at(k) ; 
-          auto h = ev_hit_cosRem->at(hid);
+          auto h = ev_hit->at(hid);
           tot_reco_cw_hits += h.Integral() ;
           
           if ( _mc_hit_map.find(hid) != _mc_hit_map.end() ){
@@ -952,12 +958,14 @@ namespace larlite {
 	  }
         }
 
-        if ( max_cid != ass_imageclus_v.size() && max_cid == -1 ){
+       // if ( max_cid != ass_imageclus_v.size() && max_cid != -1 ){
+        if ( max_cid != ass_mcclus_v.size() && max_cid != -1){
 
           auto clocktick = larutil::DetectorProperties::GetME()->SamplingRate() * 1.e-3; //time sample in usec
 	  
           // Store true shower detprofile energy
           for ( auto const & mcc_hid : ass_mcclus_v[max_cid] ){
+	    //std::cout<<"mcc hit id: "<<mcc_hid<<", "<<ev_hit->size()<<std::endl;
             auto mch = ev_hit->at(mcc_hid) ;
             float lifetime_corr = exp( mch.PeakTime() * clocktick / 1.e20);
             float electrons = mch.Integral() * 198.; //mcc8 value
@@ -997,6 +1005,10 @@ namespace larlite {
           _gamma_type   = mcclus.StartOpeningAngle() ; // Recall I've set this to track (0) or shower(1) in mccluster builder
           _gamma_from_pi0 = mcclus.IsMergedCluster() ; 
         }
+	//else{
+	//std::cout<<"max_cid: ... " <<_event<<", "<<max_cid<<", "<<ass_mcclus_v.size()<<", "<<ass_imageclus_v.size()<<std::endl;
+	//
+	//}
       }
     }
   }
@@ -1022,6 +1034,10 @@ namespace larlite {
       // Make the backwards projection for the showers
       auto shr1_bkwrd_hl = ::geoalgo::HalfLine_t(shr1.ShowerStart(),rev_shr1);
       auto shr2_bkwrd_hl = ::geoalgo::HalfLine_t(shr2.ShowerStart(),rev_shr2);
+
+      ::geoalgo::Point_t temp_vertex(vtx.X(),vtx.Y(),vtx.Z());
+      auto shr1_IP_w_vtx = _geoAlgo.SqDist(temp_vertex, shr1_bkwrd_hl) ;
+      auto shr2_IP_w_vtx = _geoAlgo.SqDist(temp_vertex, shr2_bkwrd_hl) ;
 
       auto IP = pow(_geoAlgo.SqDist(shr1_bkwrd_hl,shr2_bkwrd_hl),0.5);
 
@@ -1058,6 +1074,8 @@ namespace larlite {
       _pi0_high_shrE = shr1.Energy() < shr2.Energy() ? shr2.Energy() : shr1.Energy() ;
       _pi0_low_radL  = shr1.Energy() < shr2.Energy() ? radL_shr1 : radL_shr2 ;
       _pi0_high_radL = shr1.Energy() < shr2.Energy() ? radL_shr2 : radL_shr1 ;
+      _pi0_high_IP_w_vtx = shr1.Energy() < shr2.Energy() ? shr2_IP_w_vtx : shr1_IP_w_vtx ;
+      _pi0_low_IP_w_vtx  = shr1.Energy() < shr2.Energy() ? shr1_IP_w_vtx : shr2_IP_w_vtx ;
 
     }
  
@@ -1070,8 +1088,12 @@ namespace larlite {
       vertex[1] = vtx.Y();
       vertex[2] = vtx.Z();
 
+      geoalgo::Vector_t rev_shr1(-1.*ev_s->at(0).Direction()) ;
+      auto shr1_bkwrd_hl = ::geoalgo::HalfLine_t(ev_s->at(0).ShowerStart(),rev_shr1);
+
       _gamma_E = ev_s->at(0).Energy(2); 
       _gamma_RL = vertex.Dist(ev_s->at(0).ShowerStart());
+      _gamma_IP_w_vtx = _geoAlgo.SqDist(vertex, shr1_bkwrd_hl) ;
 
     }
 

@@ -120,6 +120,8 @@ namespace larlite {
   float _pi0_high_shrE;
   float _pi0_low_radL;
   float _pi0_high_radL;
+  float _pi0_low_IP_w_vtx;
+  float _pi0_high_IP_w_vtx;
 
   float _pi0_low_purity;
   float _pi0_high_purity;
@@ -160,6 +162,7 @@ namespace larlite {
   //////////////////////////////////////
   float _gamma_E;
   float _gamma_RL ;
+  float _gamma_IP_w_vtx;
   float _gamma_purity; 
   float _gamma_complete; 
   float _gamma_cw_purity; 
