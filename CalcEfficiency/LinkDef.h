@@ -13,7 +13,7 @@
 #pragma link C++ class larlite::CrossSection+;
 #pragma link C++ class larlite::BackgroundCalc+;
 #pragma link C++ class larlite::SingleGammaBackgroundCalc+;
-#pragma link C++ class larlite::POTCalc+;
+//#pragma link C++ class larlite::POTCalc+;
 #pragma link C++ class larlite::AcceptanceStudy+;
 #pragma link C++ class larlite::BackgroundAll+;
 #pragma link C++ class larlite::BackgroundObnoxious+;

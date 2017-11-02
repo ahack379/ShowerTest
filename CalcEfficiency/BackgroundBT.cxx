@@ -133,6 +133,16 @@ namespace larlite {
       _tree->Branch("gamma_origin",&_gamma_origin,"gamma_origin/F");
       _tree->Branch("gamma_type",&_gamma_type,"gamma_type/F");
       _tree->Branch("gamma_from_pi0",&_gamma_from_pi0,"gamma_from_pi0/B");
+
+      // post technote version v0.9
+      _tree->Branch("n_track_hits_0",&_n_track_hits_0,"n_track_hits_0/I");
+      _tree->Branch("n_track_hits_1",&_n_track_hits_1,"n_track_hits_1/I");
+      _tree->Branch("n_track_hits_2",&_n_track_hits_2,"n_track_hits_2/I");
+
+      _tree->Branch("n_shower_hits_0",&_n_shower_hits_0,"n_shower_hits_0/I");
+      _tree->Branch("n_shower_hits_1",&_n_shower_hits_1,"n_shower_hits_1/I");
+      _tree->Branch("n_shower_hits_2",&_n_shower_hits_2,"n_shower_hits_2/I");
+
    }
 
 
@@ -154,6 +164,10 @@ namespace larlite {
       _shower_tree->Branch("shr_vtx_dist",&_shr_vtx_dist,"shr_vtx_dist/F");
       _shower_tree->Branch("shr_trk_delta_theta",&_shr_trk_delta_theta,"shr_trk_delta_theta/F");
       _shower_tree->Branch("shr_trk_delta_phi",&_shr_trk_delta_phi,"shr_trk_delta_phi/F");
+
+      // post technote version v0.9
+      _shower_tree->Branch("shr_ip",&_shr_ip,"shr_ip/F");
+      _shower_tree->Branch("shr_rl",&_shr_rl,"shr_rl/F");
     }   
 
 
@@ -262,6 +276,17 @@ namespace larlite {
     _shr_trk_delta_theta = -999;
     _shr_trk_delta_phi = -999;
 
+    // additions post technote version v0.9
+    _n_track_hits_0 = 0;
+    _n_track_hits_1 = 0;
+    _n_track_hits_2 = 0;
+    _n_shower_hits_0 = 0;
+    _n_shower_hits_1 = 0;
+    _n_shower_hits_2 = 0;
+
+    _shr_ip = -999;
+    _shr_rl = -999;
+
   }
   
   bool BackgroundBT::analyze(storage_manager* storage) {
@@ -346,6 +371,30 @@ namespace larlite {
       std::cout << "No hits! exit" << std::endl;
       return false;
     }   
+
+    for ( auto const & h : *ev_hit ){
+
+      if ( h.WireID().Plane == 0 ){
+        if ( h.GoodnessOfFit() >= 0 )
+	  _n_shower_hits_0++;
+	else 
+	  _n_track_hits_0++;
+      }
+
+      if ( h.WireID().Plane == 1 ){
+        if ( h.GoodnessOfFit() >= 0 )
+	  _n_shower_hits_1++;
+	else 
+	  _n_track_hits_1++;
+      }
+
+      if ( h.WireID().Plane == 2 ){
+        if ( h.GoodnessOfFit() >= 0 )
+	  _n_shower_hits_2++;
+	else 
+	  _n_track_hits_2++;
+      }
+    }
 
     std::vector<int> pur_ctr_v ;
     std::vector<float> cw_pur_ctr_v ;
