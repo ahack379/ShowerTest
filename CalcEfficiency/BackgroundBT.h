@@ -205,6 +205,18 @@ namespace larlite {
   larutil::SpaceChargeMicroBooNE *_SCE;
   double _time2cm;
 
+  // Post technote version v0.9 additions
+  // "tree" additions
+  int _n_track_hits_0 ;
+  int _n_track_hits_1 ;
+  int _n_track_hits_2 ;
+  int _n_shower_hits_0 ;
+  int _n_shower_hits_1 ;
+  int _n_shower_hits_2 ;
+
+  // "showertree" additions
+  float _shr_ip ;
+  float _shr_rl;
     
   };
 }

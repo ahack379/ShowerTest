@@ -24,6 +24,7 @@ namespace larlite {
     if( !_gamma_tree ){
       _gamma_tree = new TTree("gamma_tree","");
       _gamma_tree->Branch("_event",&_event,"event/I");
+      _gamma_tree->Branch("bkgd_id",&_bkgd_id,"bkgd_id/I");
       _gamma_tree->Branch("_gamma_low_E",&_gamma_low_E,"gamma_low_E/F");
       _gamma_tree->Branch("_gamma_high_E",&_gamma_high_E,"gamma_high_E/F");
       _gamma_tree->Branch("_gamma_low_RL",&_gamma_low_RL,"gamma_low_RL/F");
@@ -41,6 +42,7 @@ namespace larlite {
 
     if( !_one_gamma_tree ){
       _one_gamma_tree = new TTree("one_gamma_tree","");
+      _one_gamma_tree->Branch("bkgd_id",&_bkgd_id,"bkgd_id/I");
       _one_gamma_tree->Branch("_event",&_event,"event/I");
       _one_gamma_tree->Branch("_gamma_E",&_gamma_E,"gamma_E/F");
       _one_gamma_tree->Branch("_gamma_RL",&_gamma_RL,"gamma_RL/F");
@@ -69,6 +71,7 @@ namespace larlite {
     if(!_compare_tree){
       _compare_tree = new TTree("compare_tree","");
       _compare_tree->Branch("_event",&_event,"event/I");
+      _compare_tree->Branch("bkgd_id",&_bkgd_id,"bkgd_id/I");
       _compare_tree->Branch("_reco_E",&_reco_E,"reco_E/F");
       _compare_tree->Branch("_reco_startx",&_reco_startx,"reco_startx/F");
       _compare_tree->Branch("_reco_starty",&_reco_starty,"reco_starty/F");

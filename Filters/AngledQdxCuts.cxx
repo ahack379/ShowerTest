@@ -110,6 +110,9 @@ namespace larlite {
 
     if ( TrackMaxDeflection > 8 ){
       std::cout<<"Failed track deflection: "<<TrackMaxDeflection<<std::endl;
+      auto ev_v = storage->get_data<event_vertex> ("numuCC_vertex");
+      ev_t->clear();
+      ev_v->clear();
       return false;
     }
     
