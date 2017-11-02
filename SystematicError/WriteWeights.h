@@ -28,7 +28,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    WriteWeights(){ _name="WriteWeights"; _fout=0;}
+    WriteWeights(){ _name="WriteWeights"; _fout=0; _event_producer = "genieeventweight"; }
 
     /// Default destructor
     virtual ~WriteWeights(){}
@@ -48,10 +48,14 @@ namespace larlite {
     */
     virtual bool finalize();
 
+    void SetWeightProducer( std::string prod ) { _event_producer = prod ; }
+
   protected:
 
     std::ofstream event_file;
     int _event ;
+
+    std::string _event_producer ;
     
   };
 }

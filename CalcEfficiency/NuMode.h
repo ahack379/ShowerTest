@@ -28,7 +28,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    NuMode(){ _name="NuMode"; _fout=0; _tree=0; _shower_tree = 0; }
+    NuMode(){ _name="NuMode"; _fout=0; _tree=0; _shower_tree = 0; _get_gt0_shower = false; }
 
     /// Default destructor
     virtual ~NuMode(){}
@@ -53,6 +53,8 @@ namespace larlite {
     void GetPi0Info  ( bool getit=false ) { _get_pi0_info = getit; }
 
     void GetSingleShowerInfo  ( bool getit=false ) { _get_single_shower_info = getit; }
+
+    void GetGT0Shower( bool getit=false ) { _get_gt0_shower = getit; }
 
     void clear() ;
 
@@ -122,6 +124,8 @@ namespace larlite {
   bool _mc_sample ;
   bool _get_pi0_info ;
   bool _get_single_shower_info ;
+
+  bool _get_gt0_shower ;
   
     
   };

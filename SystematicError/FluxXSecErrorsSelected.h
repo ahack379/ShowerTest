@@ -1,9 +1,9 @@
 /**
- * \file GenieXSecErrorsSelected.h
+ * \file FluxXSecErrorsSelected.h
  *
  * \ingroup SystematicError
  * 
- * \brief Class def header for a class GenieXSecErrorsSelected
+ * \brief Class def header for a class FluxXSecErrorsSelected
  *
  * @author ariana hackenburg 
  */
@@ -12,8 +12,8 @@
 
     @{*/
 
-#ifndef LARLITE_GENIEXSECERRORSSELECTED_H
-#define LARLITE_GENIEXSECERRORSSELECTED_H
+#ifndef LARLITE_FLUXXSECERRORSSELECTED_H
+#define LARLITE_FLUXXSECERRORSSELECTED_H
 
 #include "Analysis/ana_base.h"
 #include "GeoAlgo/GeoAlgo.h"
@@ -21,30 +21,30 @@
 
 namespace larlite {
   /**
-     \class GenieXSecErrorsSelected
+     \class FluxXSecErrorsSelected
      User custom analysis class made by SHELL_USER_NAME
    */
-  class GenieXSecErrorsSelected : public ana_base{
+  class FluxXSecErrorsSelected : public ana_base{
   
   public:
 
     /// Default constructor
-    GenieXSecErrorsSelected() ; //{ _name="GenieXSecErrorsSelected"; _fout=0; _event_producer="genieeventweight";}
+    FluxXSecErrorsSelected() ; 
 
     /// Default destructor
-    virtual ~GenieXSecErrorsSelected(){}
+    virtual ~FluxXSecErrorsSelected(){}
 
-    /** IMPLEMENT in GenieXSecErrorsSelected.cc!
+    /** IMPLEMENT in FluxXSecErrorsSelected.cc!
         Initialization method to be called before the analysis event loop.
     */ 
     virtual bool initialize();
 
-    /** IMPLEMENT in GenieXSecErrorsSelected.cc! 
+    /** IMPLEMENT in FluxXSecErrorsSelected.cc! 
         Analyze a data event-by-event  
     */
     virtual bool analyze(storage_manager* storage);
 
-    /** IMPLEMENT in GenieXSecErrorsSelected.cc! 
+    /** IMPLEMENT in FluxXSecErrorsSelected.cc! 
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
@@ -57,15 +57,14 @@ namespace larlite {
     const larutil::Geometry * fGeometry ;
     
     /////////// My extra variables
-    TTree * _tree ;
     float _xsec_mom_truth ;
     float _xsec_theta_truth ;
     std::vector<float> _weight_v ;
 
-    TTree * _final_tree ;
     float _sel_evts_nominal;
     std::vector<float> _sel_evts_m1 ;
     std::vector<float> _sel_evts_p1 ;
+    std::vector<float> _sel_evts_nom ;
 
     float _bkgd_evts_nominal;
     std::vector<float> _bkgd_evts_m1 ;

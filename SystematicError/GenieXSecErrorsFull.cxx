@@ -112,7 +112,7 @@ namespace larlite {
     }
 
     // We know in the fv at this point 
-    if( n_mu == 1 && n_pi0 == 1 && nu_energy > 0.5 && infv ){
+    if( n_mu == 1 && n_pi0 == 1 && infv ){
 
       _all_evts_nominal ++ ;
 

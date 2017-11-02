@@ -11,6 +11,8 @@ namespace larlite {
 
   bool AngledQdxCuts::initialize() {
 
+    _event = 0 ;
+
     return true;
   }
 
@@ -28,6 +30,9 @@ namespace larlite {
   }
 
   double AngledQdxCuts::TrunMean(std::vector <double> poop){
+
+    std::cout<<"\nAngle Cuts Event: "<<_event << std::endl ;
+    _event++;
 
     double RMS = TMath::RMS(poop.begin(),poop.end());
     double median = Median(poop);
@@ -110,6 +115,10 @@ namespace larlite {
 
     if ( TrackMaxDeflection > 8 ){
       std::cout<<"Failed track deflection: "<<TrackMaxDeflection<<std::endl;
+      auto ev_v = storage->get_data<event_vertex> ("numuCC_vertex");
+
+      ev_t->clear();
+      ev_v->clear();
       return false;
     }
     

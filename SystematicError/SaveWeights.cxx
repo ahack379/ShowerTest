@@ -52,7 +52,8 @@ namespace larlite {
     auto event = storage->event_id();
     auto subrun = storage->subrun_id();
 
-    auto ev_wgt = storage->get_data<event_mceventweight>("genieeventweight");
+    //auto ev_wgt = storage->get_data<event_mceventweight>("genieeventweight");
+    auto ev_wgt = storage->get_data<event_mceventweight>(_event_producer);
 
     storage->set_id(run, subrun, event);
 

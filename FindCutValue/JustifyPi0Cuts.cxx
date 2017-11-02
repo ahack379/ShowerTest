@@ -371,7 +371,7 @@ namespace larlite {
 
       if ( s.DetProfile().E() > 0 && s.MotherPdgCode() == 111 && s.Origin() == 1 ) found_pi0 = true;
 
-      if ( dist < 0.0001 && found_pi0 && nu.Nu().PdgCode() == 14 && nu.CCNC() == 0 ){
+      if ( dist < 0.00001 && found_pi0 && nu.Nu().PdgCode() == 14 && nu.CCNC() == 0 ){
         shr_ids.emplace_back(si) ;
         _event_type = 0;
       }

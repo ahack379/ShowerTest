@@ -88,6 +88,8 @@ namespace larlite {
 
     std::string _vtx_producer ;
 
+    int _more_than_one ;
+
   };
 }
 #endif

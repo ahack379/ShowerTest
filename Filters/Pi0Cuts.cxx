@@ -30,6 +30,7 @@ namespace larlite {
       }
 
     _event = -1;
+    _more_than_one = 0;
 
     return true;
   }
@@ -170,6 +171,7 @@ namespace larlite {
             _pi0_high_radL = shr1.Energy() < shr2.Energy() ? radL_shr2 : radL_shr1 ;
         }// shower ID 2 
       }// shower ID 1 
+      if ( candidate_pairs.size() > 1 ) _more_than_one ++ ;
 
       if( candidate_pairs.size() != 1 || cand_ids.size() != 2 ){
 
@@ -243,6 +245,8 @@ namespace larlite {
    //  std::cout<<e <<", "; 
 
   std::cout<<"\n\n\n";
+
+  std::cout<<_more_than_one<<" events renmoved because more than one pair foudn! "<<std::endl ;
   
     return true;
   }

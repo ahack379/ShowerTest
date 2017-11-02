@@ -10,8 +10,9 @@
 #pragma link off all functions;
 
 #pragma link C++ class larlite::GenieXSecErrorsFull+;
-#pragma link C++ class larlite::FluxXSecErrorsFull+;
 #pragma link C++ class larlite::GenieXSecErrorsSelected+;
+#pragma link C++ class larlite::FluxXSecErrorsFull+;
+#pragma link C++ class larlite::FluxXSecErrorsSelected+;
 #pragma link C++ class larlite::GetEventRunNumbers+;
 #pragma link C++ class larlite::DataGetEventRunNumbers+;
 #pragma link C++ class larlite::EvtWeightFilter+;
