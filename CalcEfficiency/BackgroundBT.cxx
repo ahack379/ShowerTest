@@ -657,7 +657,7 @@ namespace larlite {
           _bkgd_id = 3;
           _n_nc1pi0 ++; 
         }
-        else if ( nu.CCNC() == 0 & n_pi0 == 1 && !infv ){
+        else if ( nu.CCNC() == 0 && n_pi0 == 1 && !infv ){
           _bkgd_id = 4 ;
           _n_cc1pi0_outFV ++; 
         }
