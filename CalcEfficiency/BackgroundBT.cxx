@@ -9,6 +9,7 @@
 #include "DataFormat/shower.h"
 #include "DataFormat/vertex.h"
 #include "DataFormat/cluster.h"
+#include "DataFormat/opflash.h"
 #include "DataFormat/hit.h"
 
 #include "LArUtil/GeometryHelper.h"
@@ -56,6 +57,13 @@ namespace larlite {
       _tree->Branch("mc_vtx_x",&_mc_vtx_x,"mc_vtx_x/F");
       _tree->Branch("mc_vtx_y",&_mc_vtx_y,"mc_vtx_y/F");
       _tree->Branch("mc_vtx_z",&_mc_vtx_z,"mc_vtx_z/F");
+
+      _tree->Branch("flash_time",&_flash_time,"flash_time/F");
+      _tree->Branch("flash_pe",&_flash_pe,"flash_pe/I");
+      _tree->Branch("flash_y_center",&_flash_y_center,"flash_y_center/F");
+      _tree->Branch("flash_z_center",&_flash_z_center,"flash_z_center/F");
+      _tree->Branch("flash_y_width",&_flash_y_width,"flash_y_width/F");
+      _tree->Branch("flash_z_width",&_flash_z_width,"flash_z_width/F");
 
       _tree->Branch("mu_angle",&_mu_angle,"mu_angle/F");
       _tree->Branch("mu_len",&_mu_len,"mu_len/F");
@@ -186,6 +194,13 @@ namespace larlite {
     _mc_vtx_x   = -999;
     _mc_vtx_y   = -999;
     _mc_vtx_z   = -999;
+
+    _flash_time = -999;
+    _flash_pe = -1 ;
+    _flash_y_center = -999;
+    _flash_z_center = -999;
+    _flash_y_width = -999;
+    _flash_z_width = -999;
 
     _mu_angle = -999;
     _mu_len   = -999;
@@ -363,6 +378,31 @@ namespace larlite {
 	  min_trk_dist = dist ;
 	  min_trk_dist_it = ii ;
 	}
+    }
+    auto ev_flash = storage->get_data<larlite::event_opflash>("simpleFlashBeam");
+    if ( ev_flash->size() ){
+      
+      int max_it = -1;
+      int max_pe = -1;
+      for( int ff = 0; ff < ev_flash->size(); ff++){
+        auto f = ev_flash->at(ff);
+        if ( f.TotalPE() > max_pe ) {
+	  max_pe = f.TotalPE();
+	  max_it = ff;
+	}
+      }
+
+     if ( max_it != -1 ){
+      auto f = ev_flash->at(max_it);
+
+      _flash_pe = f.TotalPE();
+      _flash_time = f.Time();
+      _flash_y_center = f.YCenter();
+      _flash_z_center = f.ZCenter();
+      _flash_y_width = f.YWidth();
+      _flash_z_width = f.ZWidth();
+     }
+    
     }
 
     auto ev_hit = storage->get_data<larlite::event_hit>("gaushit");
@@ -657,7 +697,7 @@ namespace larlite {
           _bkgd_id = 3;
           _n_nc1pi0 ++; 
         }
-        else if ( nu.CCNC() == 0 & n_pi0 == 1 && !infv ){
+        else if ( nu.CCNC() == 0 && n_pi0 == 1 && !infv ){
           _bkgd_id = 4 ;
           _n_cc1pi0_outFV ++; 
         }
@@ -732,7 +772,7 @@ namespace larlite {
 
         auto const& shr1 = ev_s->at(0) ;
         auto const& shr2 = ev_s->at(1);
-        bool lowE_is_shr1 = shr1.Energy() < shr2.Energy() ? 1 : 0 ;
+        bool lowE_is_shr1 = shr1.Energy(2) < shr2.Energy(2) ? 1 : 0 ;
 
         // Get the association from shower -> cluster
         auto ev_ass_s = storage->get_data<larlite::event_ass>("pi0_candidate_showers");
@@ -1058,7 +1098,16 @@ namespace larlite {
 
     auto ev_shr = storage->get_data<event_shower>("showerreco");
 
-    if ( ev_shr ) _nshrs = ev_shr->size(); 
+    if ( ev_shr ){ 
+
+      int shr_it = 0;
+
+      for ( auto const & s : *ev_shr ){
+        if ( s.Energy(2) != 0 )
+	  shr_it++ ; 
+      }
+      _nshrs = shr_it;
+    } 
 
     if ( _get_pi0_info ){
 
@@ -1109,16 +1158,16 @@ namespace larlite {
       auto radL_shr2 = vertex.Dist(shr2.ShowerStart());
       //===========================================
 
-      _pi0_mass      = sqrt(2 * shr1.Energy() * shr2.Energy() *(1.-cos(oangle)));
+      _pi0_mass      = sqrt(2 * shr1.Energy(2) * shr2.Energy(2) *(1.-cos(oangle)));
       _pi0_mom       = tot_pi0_mom;
       _pi0_oangle    = oangle;
       _pi0_IP        = IP ;
-      _pi0_low_shrE  = shr1.Energy() < shr2.Energy() ? shr1.Energy() : shr2.Energy() ;
-      _pi0_high_shrE = shr1.Energy() < shr2.Energy() ? shr2.Energy() : shr1.Energy() ;
-      _pi0_low_radL  = shr1.Energy() < shr2.Energy() ? radL_shr1 : radL_shr2 ;
-      _pi0_high_radL = shr1.Energy() < shr2.Energy() ? radL_shr2 : radL_shr1 ;
-      _pi0_high_IP_w_vtx = shr1.Energy() < shr2.Energy() ? shr2_IP_w_vtx : shr1_IP_w_vtx ;
-      _pi0_low_IP_w_vtx  = shr1.Energy() < shr2.Energy() ? shr1_IP_w_vtx : shr2_IP_w_vtx ;
+      _pi0_low_shrE  = shr1.Energy(2) < shr2.Energy(2) ? shr1.Energy(2) : shr2.Energy(2) ;
+      _pi0_high_shrE = shr1.Energy(2) < shr2.Energy(2) ? shr2.Energy(2) : shr1.Energy(2) ;
+      _pi0_low_radL  = shr1.Energy(2) < shr2.Energy(2) ? radL_shr1 : radL_shr2 ;
+      _pi0_high_radL = shr1.Energy(2) < shr2.Energy(2) ? radL_shr2 : radL_shr1 ;
+      _pi0_high_IP_w_vtx = shr1.Energy(2) < shr2.Energy(2) ? shr2_IP_w_vtx : shr1_IP_w_vtx ;
+      _pi0_low_IP_w_vtx  = shr1.Energy(2) < shr2.Energy(2) ? shr1_IP_w_vtx : shr2_IP_w_vtx ;
 
     }
  

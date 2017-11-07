@@ -627,7 +627,7 @@ namespace larlite {
 
        auto const& shr1 = ev_s->at(s1);
 
-       _gamma_E  = shr1.Energy()  ;
+       _gamma_E  = shr1.Energy(2)  ;
        ::geoalgo::Point_t vertex_reco(v.X(),v.Y(),v.Z());
         _gamma_RL = vertex_reco.Dist(shr1.ShowerStart());
 
@@ -743,13 +743,13 @@ namespace larlite {
 
             //std::cout<<"DISTANCE: "<<dist_temp<<", "<<_gamma1_vtx_IP <<std::endl ;
 
-            _pi0_mass      = sqrt(2 * shr1.Energy() * shr2.Energy() *(1.-cos(oangle))); 
+            _pi0_mass      = sqrt(2 * shr1.Energy(2) * shr2.Energy(2) *(1.-cos(oangle))); 
             _pi0_mom       = tot_pi0_mom;
             _gamma_oangle    = oangle;
-            _gamma_low_E  = shr1.Energy() < shr2.Energy() ? shr1.Energy() : shr2.Energy() ;
-            _gamma_high_E = shr1.Energy() < shr2.Energy() ? shr2.Energy() : shr1.Energy() ;
-            _gamma_low_RL  = shr1.Energy() < shr2.Energy() ? radL_shr1 : radL_shr2 ;
-            _gamma_high_RL = shr1.Energy() < shr2.Energy() ? radL_shr2 : radL_shr1 ;
+            _gamma_low_E  = shr1.Energy(2) < shr2.Energy(2) ? shr1.Energy(2) : shr2.Energy(2) ;
+            _gamma_high_E = shr1.Energy(2) < shr2.Energy(2) ? shr2.Energy(2) : shr1.Energy(2) ;
+            _gamma_low_RL  = shr1.Energy(2) < shr2.Energy(2) ? radL_shr1 : radL_shr2 ;
+            _gamma_high_RL = shr1.Energy(2) < shr2.Energy(2) ? radL_shr2 : radL_shr1 ;
             _gamma_IP = IP;
             _gamma1_vtx_IP = sqrt( pow( v.X() - st1.X(),2) + pow( v.Y() - st1.Y(),2) + pow( v.Z() - st1.Z(),2)); 
             _gamma2_vtx_IP = sqrt( pow( v.X() - st2.X(),2) + pow( v.Y() - st2.Y(),2) + pow( v.Z() - st2.Z(),2)); 

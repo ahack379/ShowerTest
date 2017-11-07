@@ -130,7 +130,7 @@ namespace larlite {
             auto tot_pi0_mom = sqrt(pow(mom_vect[0],2) + pow(mom_vect[1],2) + pow(mom_vect[2],2) );
 
             //mom_vect.Normalize();
-            //momentum = mom_vect * sqrt(pow(shr1.Energy(),2)+pow(shr2.Energy(),2)+2*shr2.Energy()*shr1.Energy()*cos(oangle));
+            //momentum = mom_vect * sqrt(pow(shr1.Energy(2),2)+pow(shr2.Energy(2),2)+2*shr2.Energy(2)*shr1.Energy(2)*cos(oangle));
             //===========================================
             auto IP = pow(_geoAlgo.SqDist(shr1_bkwrd_hl,shr2_bkwrd_hl),0.5);
             auto radL_shr1 = vertex.Dist(shr1.ShowerStart());
@@ -162,13 +162,13 @@ namespace larlite {
             cand_ids.emplace_back(s1);
             cand_ids.emplace_back(s2);
 
-            _pi0_mass      = sqrt(2 * shr1.Energy() * shr2.Energy() *(1.-cos(oangle))); 
+            _pi0_mass      = sqrt(2 * shr1.Energy(2) * shr2.Energy(2) *(1.-cos(oangle))); 
             _pi0_mom       = tot_pi0_mom;
             _pi0_oangle    = oangle;
-            _pi0_low_shrE  = shr1.Energy() < shr2.Energy() ? shr1.Energy() : shr2.Energy() ;
-            _pi0_high_shrE = shr1.Energy() < shr2.Energy() ? shr2.Energy() : shr1.Energy() ;
-            _pi0_low_radL  = shr1.Energy() < shr2.Energy() ? radL_shr1 : radL_shr2 ;
-            _pi0_high_radL = shr1.Energy() < shr2.Energy() ? radL_shr2 : radL_shr1 ;
+            _pi0_low_shrE  = shr1.Energy(2) < shr2.Energy(2) ? shr1.Energy(2) : shr2.Energy(2) ;
+            _pi0_high_shrE = shr1.Energy(2) < shr2.Energy(2) ? shr2.Energy(2) : shr1.Energy(2) ;
+            _pi0_low_radL  = shr1.Energy(2) < shr2.Energy(2) ? radL_shr1 : radL_shr2 ;
+            _pi0_high_radL = shr1.Energy(2) < shr2.Energy(2) ? radL_shr2 : radL_shr1 ;
         }// shower ID 2 
       }// shower ID 1 
       if ( candidate_pairs.size() > 1 ) _more_than_one ++ ;

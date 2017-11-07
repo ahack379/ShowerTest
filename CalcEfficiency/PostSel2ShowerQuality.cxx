@@ -34,16 +34,33 @@ namespace larlite {
       _tree->Branch("type",&_type,"type/F");
       _tree->Branch("from_pi0",&_from_pi0,"from_pi0/B");
 
+      _tree->Branch("reco_e",&_reco_e,"reco_e/F");
       _tree->Branch("st_x",&_st_x,"st_x/F");
       _tree->Branch("st_y",&_st_y,"st_y/F");
       _tree->Branch("st_z",&_st_z,"st_z/F");
-      _tree->Branch("reco_e",&_reco_e,"reco_e/F");
+      _tree->Branch("dir_x",&_dir_x,"dir_x/F");
+      _tree->Branch("dir_y",&_dir_y,"dir_y/F");
+      _tree->Branch("dir_z",&_dir_z,"dir_z/F");
 
+
+      _tree->Branch("mc_e",&_mc_e,"mc_e/F");
+      _tree->Branch("mc_detProf_e",&_mc_detProf_e,"_mc_detProf_e/F");
       _tree->Branch("mc_st_x",&_mc_st_x,"mc_st_x/F");
       _tree->Branch("mc_st_y",&_mc_st_y,"mc_st_y/F");
       _tree->Branch("mc_st_z",&_mc_st_z,"mc_st_z/F");
-      _tree->Branch("mc_e",&_mc_e,"mc_e/F");
-      _tree->Branch("mc_detProf_e",&_mc_detProf_e,"_mc_detProf_e/F");
+      _tree->Branch("mc_dir_x",&_mc_dir_x,"mc_dir_x/F");
+      _tree->Branch("mc_dir_y",&_mc_dir_y,"mc_dir_y/F");
+      _tree->Branch("mc_dir_z",&_mc_dir_z,"mc_dir_z/F");
+      _tree->Branch("mc_detProf_x",&_mc_detProf_x,"mc_detProf_x/F");
+      _tree->Branch("mc_detProf_y",&_mc_detProf_y,"mc_detProf_y/F");
+      _tree->Branch("mc_detProf_z",&_mc_detProf_z,"mc_detProf_z/F");
+      _tree->Branch("mc_dir_sce_corr_x",&_mc_dir_sce_corr_x,"mc_dir_sce_corr_x/F");
+      _tree->Branch("mc_dir_sce_corr_y",&_mc_dir_sce_corr_y,"mc_dir_sce_corr_y/F");
+      _tree->Branch("mc_dir_sce_corr_z",&_mc_dir_sce_corr_z,"mc_dir_sce_corr_z/F");
+      _tree->Branch("mc_detProf_sce_corr_x",&_mc_detProf_sce_corr_x,"mc_detProf_sce_corr_x/F");
+      _tree->Branch("mc_detProf_sce_corr_y",&_mc_detProf_sce_corr_y,"mc_detProf_sce_corr_y/F");
+      _tree->Branch("mc_detProf_sce_corr_z",&_mc_detProf_sce_corr_z,"mc_detProf_sce_corr_z/F");
+
    }
 
     return true;
@@ -65,9 +82,26 @@ namespace larlite {
     _st_x  = -999;
     _st_y  = -999;
     _st_z  = -999;
+    _dir_x  = -999;
+    _dir_y  = -999;
+    _dir_z  = -999;
+
     _mc_st_x = -999;
     _mc_st_y = -999;
     _mc_st_z = -999;
+    _mc_dir_x = -999;
+    _mc_dir_y = -999;
+    _mc_dir_z = -999;
+    _mc_detProf_x = -999;
+    _mc_detProf_y = -999;
+    _mc_detProf_z = -999;
+    _mc_dir_sce_corr_x = -999;
+    _mc_dir_sce_corr_y = -999;
+    _mc_dir_sce_corr_z = -999;
+    _mc_detProf_sce_corr_x = -999;
+    _mc_detProf_sce_corr_y = -999;
+    _mc_detProf_sce_corr_z = -999;
+
 
   }
   
@@ -267,32 +301,106 @@ namespace larlite {
 
            auto ishr = ev_s->at(i);
 
-	       _reco_e = ishr.Energy(2);
-	       _st_x = ishr.ShowerStart().X();
-	       _st_y = ishr.ShowerStart().Y();
-	       _st_z = ishr.ShowerStart().Z();
+	   _reco_e = ishr.Energy(2);
+	   _st_x = ishr.ShowerStart().X();
+	   _st_y = ishr.ShowerStart().Y();
+	   _st_z = ishr.ShowerStart().Z();
+           _dir_x = ishr.Direction().X();
+           _dir_y = ishr.Direction().Y();
+           _dir_z = ishr.Direction().Z();
 
-	       _mc_detProf_e = mc_clus_e;
-	       _mc_e = ev_mcs->at(closest_mcs_id).Start().E() ;
+	   _mc_detProf_e = mc_clus_e;
+	   _mc_e = ev_mcs->at(closest_mcs_id).Start().E() ;
 
-           //auto traj = nu.Nu().Trajectory();
-           //auto mc_vtx_x = traj.at(traj.size() - 1).X();
-           //auto mc_vtx_y = traj.at(traj.size() - 1).Y();
-           //auto mc_vtx_z = traj.at(traj.size() - 1).Z();
-           //auto tvtx = traj.at(traj.size() - 1).T();
-
-	       auto mcx = ev_mcs->at(closest_mcs_id).DetProfile().X() ;
-	       auto mcy = ev_mcs->at(closest_mcs_id).DetProfile().Y() ;
-	       auto mcz = ev_mcs->at(closest_mcs_id).DetProfile().Z() ;
-	       auto mct = ev_mcs->at(closest_mcs_id).DetProfile().T() ;
-	       auto sce_corr = _SCE->GetPosOffsets(mcx,mcy,mcz);
-
+           // 00) Start - calculate SC-corrected start Point
+           auto mcx = ev_mcs->at(closest_mcs_id).Start().X() ;
+           auto mcy = ev_mcs->at(closest_mcs_id).Start().Y() ;
+           auto mcz = ev_mcs->at(closest_mcs_id).Start().Z() ;
+           auto mct = ev_mcs->at(closest_mcs_id).Start().T() ;
            auto vtxtick = (mct/ 1000.) * 2.;
-           auto vtxtimecm = vtxtick * _time2cm; 
-		     
-	       _mc_st_x = mcx + vtxtimecm + 0.7 - sce_corr.at(0);
-	       _mc_st_y = mcy + sce_corr.at(1);
-	       _mc_st_z = mcz + sce_corr.at(2);
+           auto vtxtimecm = vtxtick * _time2cm;
+           auto sce_corr = _SCE->GetPosOffsets(mcx,mcy,mcz);
+
+           auto mc_st_corr_x = mcx + vtxtimecm + 0.7 - sce_corr.at(0);
+           auto mc_st_corr_y = mcy + sce_corr.at(1);
+           auto mc_st_corr_z = mcz + sce_corr.at(2);
+
+           // 0) Start Dir - calculate normalized directions
+           auto mc_dir_x = ev_mcs->at(closest_mcs_id).Start().Px() ;
+           auto mc_dir_y = ev_mcs->at(closest_mcs_id).Start().Py() ;
+           auto mc_dir_z = ev_mcs->at(closest_mcs_id).Start().Pz() ;
+           auto momNorm = sqrt( pow(mc_dir_x,2) + pow(mc_dir_y,2) + pow(mc_dir_z,2) );
+           _mc_dir_x = mc_dir_x / momNorm ;
+           _mc_dir_y = mc_dir_y / momNorm ;
+           _mc_dir_z = mc_dir_z / momNorm ;
+
+           // 1) Calculate next traj point using detProf directions 
+           auto next_dir_x = ev_mcs->at(closest_mcs_id).Start().X() + _mc_dir_x ;
+           auto next_dir_y = ev_mcs->at(closest_mcs_id).Start().Y() + _mc_dir_y ;
+           auto next_dir_z = ev_mcs->at(closest_mcs_id).Start().Z() + _mc_dir_z ;
+
+           // 2) Calculate SC corrections for the second detProf traj point
+           sce_corr = _SCE->GetPosOffsets(next_dir_x,next_dir_y,next_dir_z);
+           auto next_dir_sce_corr_x = next_dir_x + vtxtimecm + 0.7 - sce_corr.at(0);
+           auto next_dir_sce_corr_y = next_dir_y + sce_corr.at(1);
+           auto next_dir_sce_corr_z = next_dir_z + sce_corr.at(2);
+
+           // 3) Calculate corrected direction
+           _mc_dir_sce_corr_x = next_dir_sce_corr_x - mc_st_corr_x ;
+           _mc_dir_sce_corr_y = next_dir_sce_corr_y - mc_st_corr_y ;
+           _mc_dir_sce_corr_z = next_dir_sce_corr_z - mc_st_corr_z ;
+
+           // 00) DetProfile - calculate SC-corrected start point
+           mcx = ev_mcs->at(closest_mcs_id).DetProfile().X() ;
+           mcy = ev_mcs->at(closest_mcs_id).DetProfile().Y() ;
+           mcz = ev_mcs->at(closest_mcs_id).DetProfile().Z() ;
+           mct = ev_mcs->at(closest_mcs_id).DetProfile().T() ;
+           vtxtick = (mct/ 1000.) * 2.;
+           vtxtimecm = vtxtick * _time2cm;
+           sce_corr = _SCE->GetPosOffsets(mcx,mcy,mcz);
+
+           _mc_st_x = mcx + vtxtimecm + 0.7 - sce_corr.at(0);
+           _mc_st_y = mcy + sce_corr.at(1);
+           _mc_st_z = mcz + sce_corr.at(2);
+
+           // 0) DetProfile - calculate normalized detprof directions 
+           auto mc_detProf_x = ev_mcs->at(closest_mcs_id).DetProfile().Px() ;
+           auto mc_detProf_y = ev_mcs->at(closest_mcs_id).DetProfile().Py() ;
+           auto mc_detProf_z = ev_mcs->at(closest_mcs_id).DetProfile().Pz() ;
+           momNorm = sqrt( pow(mc_detProf_x,2) + pow(mc_detProf_y,2) + pow(mc_detProf_z,2) );
+           _mc_detProf_x = mc_detProf_x / momNorm ;
+           _mc_detProf_y = mc_detProf_y / momNorm ;
+           _mc_detProf_z = mc_detProf_z / momNorm ;
+
+           // 1) Calculate next traj point using detProf directions 
+           auto next_detProf_x = ev_mcs->at(closest_mcs_id).DetProfile().X() + _mc_detProf_x ;
+           auto next_detProf_y = ev_mcs->at(closest_mcs_id).DetProfile().Y() + _mc_detProf_y ;
+           auto next_detProf_z = ev_mcs->at(closest_mcs_id).DetProfile().Z() + _mc_detProf_z ;
+
+           // 2) Calculate SC corrections for the second detProf traj point
+           sce_corr = _SCE->GetPosOffsets(next_detProf_x,next_detProf_y,next_detProf_z);
+           auto next_detProf_sce_corr_x = next_detProf_x + vtxtimecm + 0.7 - sce_corr.at(0);
+           auto next_detProf_sce_corr_y = next_detProf_y + sce_corr.at(1);
+           auto next_detProf_sce_corr_z = next_detProf_z + sce_corr.at(2);
+
+           // 3) Calculate corrected direction
+           _mc_detProf_sce_corr_x = next_detProf_sce_corr_x - _mc_st_x ;
+           _mc_detProf_sce_corr_y = next_detProf_sce_corr_y - _mc_st_y ;
+           _mc_detProf_sce_corr_z = next_detProf_sce_corr_z - _mc_st_z ;
+
+
+	   //auto mcx = ev_mcs->at(closest_mcs_id).DetProfile().X() ;
+	   //auto mcy = ev_mcs->at(closest_mcs_id).DetProfile().Y() ;
+	   //auto mcz = ev_mcs->at(closest_mcs_id).DetProfile().Z() ;
+	   //auto mct = ev_mcs->at(closest_mcs_id).DetProfile().T() ;
+	   //auto sce_corr = _SCE->GetPosOffsets(mcx,mcy,mcz);
+
+           //auto vtxtick = (mct/ 1000.) * 2.;
+           //auto vtxtimecm = vtxtick * _time2cm; 
+	   //          
+	   //_mc_st_x = mcx + vtxtimecm + 0.7 - sce_corr.at(0);
+	   //_mc_st_y = mcy + sce_corr.at(1);
+	   //_mc_st_z = mcz + sce_corr.at(2);
     
            _tree->Fill();    
      }
