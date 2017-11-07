@@ -772,7 +772,7 @@ namespace larlite {
 
         auto const& shr1 = ev_s->at(0) ;
         auto const& shr2 = ev_s->at(1);
-        bool lowE_is_shr1 = shr1.Energy() < shr2.Energy() ? 1 : 0 ;
+        bool lowE_is_shr1 = shr1.Energy(2) < shr2.Energy(2) ? 1 : 0 ;
 
         // Get the association from shower -> cluster
         auto ev_ass_s = storage->get_data<larlite::event_ass>("pi0_candidate_showers");
@@ -1158,16 +1158,16 @@ namespace larlite {
       auto radL_shr2 = vertex.Dist(shr2.ShowerStart());
       //===========================================
 
-      _pi0_mass      = sqrt(2 * shr1.Energy() * shr2.Energy() *(1.-cos(oangle)));
+      _pi0_mass      = sqrt(2 * shr1.Energy(2) * shr2.Energy(2) *(1.-cos(oangle)));
       _pi0_mom       = tot_pi0_mom;
       _pi0_oangle    = oangle;
       _pi0_IP        = IP ;
-      _pi0_low_shrE  = shr1.Energy() < shr2.Energy() ? shr1.Energy() : shr2.Energy() ;
-      _pi0_high_shrE = shr1.Energy() < shr2.Energy() ? shr2.Energy() : shr1.Energy() ;
-      _pi0_low_radL  = shr1.Energy() < shr2.Energy() ? radL_shr1 : radL_shr2 ;
-      _pi0_high_radL = shr1.Energy() < shr2.Energy() ? radL_shr2 : radL_shr1 ;
-      _pi0_high_IP_w_vtx = shr1.Energy() < shr2.Energy() ? shr2_IP_w_vtx : shr1_IP_w_vtx ;
-      _pi0_low_IP_w_vtx  = shr1.Energy() < shr2.Energy() ? shr1_IP_w_vtx : shr2_IP_w_vtx ;
+      _pi0_low_shrE  = shr1.Energy(2) < shr2.Energy(2) ? shr1.Energy(2) : shr2.Energy(2) ;
+      _pi0_high_shrE = shr1.Energy(2) < shr2.Energy(2) ? shr2.Energy(2) : shr1.Energy(2) ;
+      _pi0_low_radL  = shr1.Energy(2) < shr2.Energy(2) ? radL_shr1 : radL_shr2 ;
+      _pi0_high_radL = shr1.Energy(2) < shr2.Energy(2) ? radL_shr2 : radL_shr1 ;
+      _pi0_high_IP_w_vtx = shr1.Energy(2) < shr2.Energy(2) ? shr2_IP_w_vtx : shr1_IP_w_vtx ;
+      _pi0_low_IP_w_vtx  = shr1.Energy(2) < shr2.Energy(2) ? shr1_IP_w_vtx : shr2_IP_w_vtx ;
 
     }
  

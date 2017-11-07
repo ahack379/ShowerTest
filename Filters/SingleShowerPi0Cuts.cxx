@@ -70,7 +70,7 @@ namespace larlite {
     for ( int s1 = 0; s1 < ev_s->size(); s1++ ){
 
         auto const& shr1 = ev_s->at(s1);
-        _pi0_high_shrE = shr1.Energy() ;
+        _pi0_high_shrE = shr1.Energy(2) ;
 
 	 auto vtx = ev_v->at(0);
          ::geoalgo::Point_t vertex(vtx.X(),vtx.Y(),vtx.Z());
@@ -102,7 +102,7 @@ namespace larlite {
            continue;
 	 }
 
-     	cand_map.emplace(1./shr1.Energy(),s1);
+     	cand_map.emplace(1./shr1.Energy(2),s1);
 
         //std::cout<<" Dist to vtx : "<<dist_to_vtx<<", IP: "<<dist <<", energy: "<<_pi0_high_shrE<<std::endl ;
 
