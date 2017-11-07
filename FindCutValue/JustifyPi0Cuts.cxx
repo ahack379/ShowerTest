@@ -10,6 +10,8 @@
 #include "DataFormat/mctrack.h"
 #include "DataFormat/mcshower.h"
 
+#include "DataFormat/hit.h"
+
 namespace larlite {
 
   bool JustifyPi0Cuts::initialize() {
@@ -249,103 +251,276 @@ namespace larlite {
       auto vtxtick = (tvtx / 1000.) * 2.; // time in tick :
       auto vtxtimecm = vtxtick * _time2cm; // time in cm :
 
-      //Map of lengths -> track id
-      std::multimap<float,int> trk_map ;
+      auto ev_mcc = storage->get_data<event_cluster>("mccluster");
 
-      // Grab the origin of the track and assess backgrounds properly
-      std::multimap<float,int> mctrk_map ;
-      auto tag_st = t.Vertex() ;
-      auto tag_end = t.End() ;
+      // Now get Mccluster info
+      auto ev_ass = storage->get_data<larlite::event_ass>("mccluster");
+      auto const& ass_keys = ev_ass->association_keys();
 
-      for ( size_t ti = 0; ti < ev_mctrk->size(); ti++ ) { 
+      if ( ass_keys.size() == 0 ) return false; 
 
-        auto mc_vtx = ev_mctrk->at(ti).Start() ;
-        auto mc_end = ev_mctrk->at(ti).End() ;
-      
-        float dist_st = sqrt(  pow(mc_vtx.X() - _mu_startx,2) + 
-                               pow(mc_vtx.Y() - _mu_starty,2) + 
-                               pow(mc_vtx.Z() - _mu_startz,2) );  
+      larlite::event_cluster *ev_mcclus = nullptr;
+      auto ass_hit_clus_v = storage->find_one_ass( ass_keys[0].first, ev_mcclus, ev_ass->name() );
 
-        float dist_end = sqrt( pow(mc_vtx.X() - _mu_endx,2) + 
-                               pow(mc_vtx.Y() - _mu_endx,2) + 
-                               pow(mc_vtx.Z() - _mu_endx,2) );  
+      larlite::event_hit *ev_mchit = nullptr;
+      auto ass_mcclus_v = storage->find_one_ass( ass_keys[0].second, ev_mchit, ev_ass->name() );
 
-         
-         if ( dist_st < 25 || dist_end < 25){
-            float length = sqrt( pow(mc_end.X() - mc_vtx.X(),2) + 
-                             pow(mc_end.Y() - mc_vtx.Y(),2) + 
-                             pow(mc_end.Z() - mc_vtx.Z(),2) );  
+      if (ass_hit_clus_v.size() == 0){
+        std::cout << "No hit ass! exit" << std::endl;
+        return false;
+      }    
+      if (ass_mcclus_v.size() == 0){
+        std::cout << "No mcclus ass! exit" << std::endl;
+        return false;
+      }    
 
-            mctrk_map.emplace(1./length,ti);
-         }   
-       }   
-       
-       int mc_max_it = -1;
-       float mc_max_dot = -1.;
+      auto ev_hit_cosRem = storage->get_data<event_hit>("pandoraCosmicHitRemoval"); 
 
-       if( mctrk_map.size() ) { 
+      if ( !ev_hit_cosRem || ev_hit_cosRem->size() == 0 ) {
+        std::cout << "No such hits associated to track! " << std::endl;
+        return false;
+      }    
 
-        auto tag_st = t.VertexDirection();     
-        auto tag_norm = sqrt( pow(tag_st.Px(),2) + pow(tag_st.Py(),2) + pow(tag_st.Pz(),2)); 
+      auto ev_hr_ass = storage->get_data<larlite::event_ass>("pandoraNu"); 
 
-        for( auto & ti : mctrk_map ){
-              
-          auto mc = ev_mctrk->at(ti.second);
-          auto mc_st = mc.Start();
-          auto mc_norm = sqrt( pow(mc_st.Px(),2) + pow(mc_st.Py(),2) + pow(mc_st.Pz(),2) );
-          
-          auto dot = (tag_st.Px() * mc_st.Px() + tag_st.Py() * mc_st.Py() + tag_st.Pz() * mc_st.Pz())/tag_norm / mc_norm ;
+      if ( !ev_hr_ass || ev_hr_ass->size() == 0 ) {
+        std::cout << "No such association! " << std::endl;
+        return false;
+      }    
 
-          if ( fabs(dot) > mc_max_dot ){
-               mc_max_dot = dot;
-               mc_max_it = ti.second ;
-          }
+      // Get association to trk => hit and hit => trk
+      auto const& ass_hit_v = ev_hr_ass->association(ev_trk->id(), ev_hit_cosRem->id());
+
+      if ( ass_hit_v.size() == 0) { 
+        std::cout << "No ass from track => hit! " << std::endl;
+        return false;
+      }    
+
+      auto ev_hit = storage->get_data<larlite::event_hit>("gaushit");
+
+      if (!ev_hit || ev_hit->size() == 0){
+        std::cout << "No hits! exit" << std::endl;
+        return false;
+      }      
+
+    // Fill multiplicity info + find ID of pandora track that is numuCC_track
+    int min_trk_dist = 1e9;
+    int min_trk_dist_it = -1;
+
+    for ( int ii = 0; ii < ev_trk->size(); ii++){
+
+        auto t = ev_trk->at(ii);
+        auto st = t.Vertex() ;
+        auto end = t.End() ;
+
+        auto tag_end = ev_t->at(0).End() ;
+        auto dist = sqrt( pow(tag_end.X() - end.X(),2) + pow(tag_end.Y() - end.Y(),2) + pow(tag_end.Z() - end.Z(),2) );
+        if ( dist < min_trk_dist ){
+          min_trk_dist = dist ;
+          min_trk_dist_it = ii ;
         }
-      }   
-      // If no true tracks aligned with reco track, mark it as cosmic 
-      else {
-        _n_cosmic++;
-        _bkgd_id = 1 ;
+    }
+
+
+      std::vector<int> pur_ctr_v ;
+      std::vector<float> cw_pur_ctr_v ;
+
+      // Keep track of the charge-weighted hit count
+      std::map<int,float> tot_mc_cw_hits_v ; 
+
+      _mc_hit_map.clear();
+
+      // Fill map with hits from mccluster : clusterID
+      for( int i = 0; i < ass_mcclus_v.size(); i ++ ){
+
+        auto cid = ev_mcc->at(i) ;
+        if ( cid.View() != 2 ) continue;
+
+
+        for ( int j = 0; j < ass_mcclus_v[i].size(); j++ ){
+
+          auto hid = ass_mcclus_v[i][j];
+          _mc_hit_map[hid] = i ;
+
+          auto h = ev_hit->at(hid);
+
+          if ( tot_mc_cw_hits_v.find(i) == tot_mc_cw_hits_v.end() )
+            tot_mc_cw_hits_v[i] = h.Integral() ;
+          else
+            tot_mc_cw_hits_v[i] += h.Integral() ;
+
+        }
       }
 
+      // for each reco cluster, find the origin of all hits and calc purity/completeness 
+      // the "...size()+1" is to account for noise category
+      pur_ctr_v.resize(ass_mcclus_v.size()+1,0) ;
+      cw_pur_ctr_v.resize(ass_mcclus_v.size()+1,0) ;
+
+      int max_hits = -1;
+      int max_cw_hits = -1;
+      int max_cid = -1 ;
+      float tot_reco_cw_hits = 0;
+
+      // This particular headache is necessary because there are no gaushit associations
+      // to pandoraNu tracks, only pandoraNuCosmicRemoval associations. 
+      // We're using gaushit for everything else including clustering + mccluster building though,
+      // so need to find the gaushits that correspond to the cosmic removal hits 
+      // and store these IDs for backtracker to work.
+      std::vector<int> tag_trk_gaushit_v;
+      for(int i = 0; i < ass_hit_v.at(min_trk_dist_it).size(); i++){
+         auto hid = ass_hit_v.at(min_trk_dist_it).at(i) ;
+         auto h = ev_hit_cosRem->at(hid);
+         if ( h.WireID().Plane != 2 ) continue;
+
+         for(int j = 0; j < ev_hit->size(); j++){
+           auto hj = ev_hit->at(j) ;
+           if ( hj.WireID().Plane != 2 ) continue;
+
+           if ( hj.PeakTime() == h.PeakTime() && hj.WireID().Wire == h.WireID().Wire )
+             tag_trk_gaushit_v.emplace_back(j);
+         }
+      }
+
+      //std::cout<<"Tagged track : "<<tag_trk_gaushit_v.size()<<std::endl ;
+
+      // Now calculate purity and completeness for muon track
+      for(int i = 0; i < tag_trk_gaushit_v.size(); i++){
+         auto hid = tag_trk_gaushit_v.at(i) ;
+         auto h = ev_hit->at(hid);
+
+         if ( h.WireID().Plane != 2 ) continue;
+         tot_reco_cw_hits += h.Integral() ;
+
+         if ( _mc_hit_map.find(hid) != _mc_hit_map.end() ){
+
+           auto mcclus_id = _mc_hit_map[hid] ;
+
+           pur_ctr_v[mcclus_id]++ ;
+           cw_pur_ctr_v[mcclus_id] += h.Integral() ;
+
+           if( pur_ctr_v[mcclus_id] > max_hits ){
+
+             max_hits = pur_ctr_v[mcclus_id];
+             max_cid = mcclus_id ;
+             max_cw_hits = cw_pur_ctr_v[mcclus_id] ;
+           }
+         }
+         // our "else" here is to account for noise category in which there is no corresponding true charge
+         else {
+           auto mcclus_id = ass_mcclus_v.size() ;
+           pur_ctr_v[mcclus_id]++ ;
+           cw_pur_ctr_v[mcclus_id] += h.Integral() ;
+           if( pur_ctr_v[mcclus_id] > max_hits ){
+
+             max_hits = pur_ctr_v[mcclus_id];
+             max_cid = mcclus_id ;
+             max_cw_hits = cw_pur_ctr_v[mcclus_id] ;
+           }
+         }
+       }
+
+       if ( max_cid != ass_mcclus_v.size() && max_cid != -1 ){
+
+         auto tot_mc_hits =  ass_mcclus_v[max_cid].size();
+         auto tot_reco_hits = tag_trk_gaushit_v.size() ; //ass_hit_v.at(min_trk_dist_it).size();         
+
+       }
+      else 
+         _bkgd_id = 0 ;
+
+      ///////////////////////////////////////////////////////////////////////////////////////////////
+      /// Now count the number of backgrounds and signals
+      ///////////////////////////////////////////////////////////////////////////////////////////////
       if( _bkgd_id == -1 ){
+        auto ev_mcs = storage->get_data<event_mcshower>("mcreco") ;
+        if ( !ev_mcs || !ev_mcs->size() ) {std::cout<<"No MCShower!" <<std::endl ; return false; }
 
         bool infv = true;
-        if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1] > 96.5 || xyz[1] < -96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
+        if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1]> 96.5 || xyz[1] < -96.5 || xyz[2]< 10 || xyz[2]> 1026.8 )
           infv = false;
 
         auto parts = ev_mctruth->at(0).GetParticles();
         int n_pi0 = 0;
+        int n_gamma = 0;
 
-        if( ev_mctrk->at(mc_max_it).Origin() == 2 ){
-          _n_cosmic++;
-          _bkgd_id = 1; 
-        }
         for ( auto const & p : parts ){
           if( p.StatusCode() == 1 && p.PdgCode() == 111 )
-            n_pi0 ++;
-        }   
+            n_pi0++;
 
-        if( nu.CCNC() == 0 && n_pi0 == 1 && infv ) {
+          if( p.StatusCode() == 1 && p.PdgCode() == 22 )
+            n_gamma++;
+        }
+
+       auto mcclus = ev_mcc->at(max_cid) ;
+       auto mu_origin = mcclus.Width() ;
+
+       //std::cout<<"muon purity : "<<_mu_purity<<", "<<_mu_complete<<", "<<_mu_origin<<", "<<_mu_type<<std::endl ; 
+
+       // Remember that I've repurposed the cluster width variable to store info 
+       // about whether this mccluster (which we've identified as the match to 
+       // our reco particle at this stage) is neutrino or cosmic in origin 
+
+        //std::cout<<"mccluster width : "<<mcclus.Width()<<std::endl ;
+        if( mu_origin == 2)
+          _bkgd_id = 1;
+        else if( abs(nu.Nu().PdgCode()) == 12 ){
+          _bkgd_id = 6 ;
+        }
+        else if( nu.Nu().PdgCode() == -14 ){
+          _bkgd_id = 7 ;
+        }
+        // frmo here we can assume we have a muon neutrino
+        else if( nu.Nu().PdgCode() == 14 && n_pi0 == 1 && nu.CCNC() == 0 && infv){
           _bkgd_id = 2;
-          _n_cc1pi0 ++; 
         }
-        else if( nu.CCNC() == 0 && n_pi0 == 0 ) {
+        else if( nu.CCNC() == 1 && n_pi0 > 0 ) {
           _bkgd_id = 3;
-          _n_cc0pi0++;
         }
-        else if( nu.CCNC() == 1 && n_pi0 == 1 ) {
-          _bkgd_id = 4;
-          _n_nc1pi0 ++; 
-        }
-        else if( nu.CCNC() == 1 && n_pi0 == 0 ) {
+        else if ( nu.CCNC() == 0 && n_pi0 == 1 && !infv )
+          _bkgd_id = 4 ;
+       else if( nu.CCNC() == 0 && n_pi0 > 1 ) {
           _bkgd_id = 5;
-          _n_nc0pi0++;
         }
-        else {
-          _bkgd_id = 6;
-          _n_other ++;   
+        else if( n_pi0 == 0 && n_gamma > 0 ){
+          _bkgd_id = 10 ;
+        }
+        else{
 
+          bool charge_ex = false;
+          bool kaon_decay = false;
+          for ( auto const & s : *ev_mcs ){
+            if ( s.MotherPdgCode() == 111 && s.Origin() == 1 && abs(s.AncestorPdgCode()) == 211 ){
+              charge_ex = true;
+              break;
+            }
+
+            if ( s.MotherPdgCode() == 111 && s.Origin() == 1 && abs(s.AncestorPdgCode()) == 321 ){
+              kaon_decay = true;
+              break;
+            }
+
+          }
+
+          if( charge_ex && nu.CCNC() == 0 ){
+            _bkgd_id = 8;
+          }
+          else if( charge_ex && nu.CCNC() == 1 ) {
+            _bkgd_id = 9;
+          }
+          else if( kaon_decay ){
+            _bkgd_id = 11;
+          }
+          else if( !charge_ex && nu.CCNC() == 0 ){
+            _bkgd_id = 12;
+
+          }
+          else if( !charge_ex && nu.CCNC() == 1 ){
+            _bkgd_id = 13;
+          }
+          else {
+            _bkgd_id = 14;
+          }
         }
       }
 
