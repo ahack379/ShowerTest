@@ -194,6 +194,14 @@ namespace larlite {
   float _mu_origin ; // is this mccluster due to nu(1), cosmic(2), noise(3)
   float _mu_type ;   // is this mccluster due to track(0) or shower(1)
 
+  // Flashes
+  float _flash_time ;
+  int _flash_pe ;
+  float _flash_y_center ;
+  float _flash_z_center ;
+  float _flash_y_width;
+  float _flash_z_width ;
+
   ::geoalgo::GeoAlgo _geoAlgo ;
 
   bool _mc_sample ;

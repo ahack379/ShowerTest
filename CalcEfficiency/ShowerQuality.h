@@ -105,6 +105,20 @@ namespace larlite {
   float _mc_st_y ;
   float _mc_st_z ;
 
+  float _mc_dir_x ;
+  float _mc_dir_y ;
+  float _mc_dir_z ;
+  float _mc_detProf_x ;
+  float _mc_detProf_y ;
+  float _mc_detProf_z ;
+  // MC Direction is NOT normalized by default; we will normalize here
+  float _mc_dir_sce_corr_x ;
+  float _mc_dir_sce_corr_y ;
+  float _mc_dir_sce_corr_z ;
+  float _mc_detProf_sce_corr_x ;
+  float _mc_detProf_sce_corr_y ;
+  float _mc_detProf_sce_corr_z ;
+
   float _origin ; // is the corresponding mccluster due to nu(1), cosmic(2), noise(3)
   float _type ;   // is this mccluster due to track(0) or shower(1)
   bool _from_pi0;   // is this mccluster from a pi0? yes(1) no(0)
@@ -113,6 +127,10 @@ namespace larlite {
   float _st_x ;
   float _st_y ;
   float _st_z ;
+  // Reco direction is already normalized
+  float _dir_x ;
+  float _dir_y ;
+  float _dir_z ;
 
   float _mu_angle ;
   float _mu_len ;

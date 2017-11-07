@@ -13,7 +13,9 @@
 #pragma link C++ class larlite::RunSubrunEvent+;
 #pragma link C++ class larlite::MCC8TestFilter+;
 #pragma link C++ class larlite::LeadingPhoton+;
+#pragma link C++ class larlite::MCClusterCheck+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
+
 
 
