@@ -65,6 +65,8 @@ namespace larlite {
   bool _use_onbeam ;
   bool _use_offbeam ;
   bool _use_mcbnbcos ;
+
+  int _event ;
     
   };
 }
