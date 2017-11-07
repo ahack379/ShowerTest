@@ -33,6 +33,7 @@ namespace larlite {
      std::cout<<"GENIE LABLES: "<<_genie_label_v.size()<<std::endl ;
     
     fGeometry = nullptr;
+    _event_producer = "genieeventweight" ;
 
     _events = 0;
   }
@@ -75,7 +76,8 @@ namespace larlite {
   bool GenieXSecErrorsSelected::analyze(storage_manager* storage) {
 
     auto ev_mctruth = storage->get_data<event_mctruth>("generator"); 
-    auto ev_wgt= storage->get_data<event_mceventweight>("genieeventweight"); 
+    //auto ev_wgt= storage->get_data<event_mceventweight>("genieeventweight"); 
+    auto ev_wgt= storage->get_data<event_mceventweight>(_event_producer); 
 
     if(!ev_mctruth || !ev_mctruth->size() ){ 
        std::cout<<"No Truth..."<<std::endl ;
@@ -130,7 +132,7 @@ namespace larlite {
 //    _events++ ;
 
     // We know in the fv at this point 
-    if( n_mu == 1 && n_pi0 == 1 && nu_energy > 0.5 && infv){
+    if( n_mu == 1 && n_pi0 == 1 && infv){
 
       _xsec_mom_truth = lep_mom_truth; 
       _xsec_theta_truth = lep_dcosz_truth;

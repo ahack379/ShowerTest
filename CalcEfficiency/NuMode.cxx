@@ -49,7 +49,13 @@ namespace larlite {
     if(!ev_mctruth || !ev_mctruth->size() ) {
         std::cout<<"Event has no mctruth info "<<std::endl;
         return false;
-      }
+    }
+
+    if ( _get_gt0_shower ){
+      auto ev_s = storage->get_data<event_shower>("showerreco"); 
+      if ( ev_s->size() == 0 ) return false;
+    }
+
 
     auto & truth = ev_mctruth->at(0);
     auto & nu  = truth.GetNeutrino();
@@ -75,16 +81,28 @@ namespace larlite {
             n_pi0 ++;
         }   
 
-        if( nu.Nu().PdgCode() == 14 && nu.CCNC() == 0 && n_pi0 == 1 && infv ) 
+        if( nu.Nu().PdgCode() == 14 && nu.CCNC() == 0 && n_pi0 == 1 && infv ){ 
           _bkgd_id = 2;
-        else if( nu.Nu().PdgCode() == 14 && nu.CCNC() == 0 && n_pi0 == 0 ) 
+          _n_cc1pi0++;
+        }
+        else if( nu.Nu().PdgCode() == 14 && nu.CCNC() == 0 && n_pi0 == 0 ){ 
           _bkgd_id = 3;
-        else if( nu.Nu().PdgCode() == 14 && nu.CCNC() == 1 && n_pi0 > 0 ) 
+          _n_cc0pi0++;
+        }
+        else if( nu.Nu().PdgCode() == 14 && nu.CCNC() == 1 && n_pi0 > 0 ){ 
           _bkgd_id = 4;
-        else if( nu.Nu().PdgCode() == 14 && nu.CCNC() == 1 && n_pi0 == 0 ) 
+          _n_nc1pi0++;
+        }
+        else if( nu.Nu().PdgCode() == 14 && nu.CCNC() == 1 && n_pi0 == 0 ){ 
           _bkgd_id = 5;
-        else 
+          _n_nc0pi0++;
+        }
+        else{ 
           _bkgd_id = 6;
+          _n_other++;
+        }
+
+    //if ( _bkgd_id == 2 ) std::cout<<"Found a cc1pi0!" <<_event <<std::endl ;
 
     _tree->Fill();    
 

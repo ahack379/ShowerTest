@@ -31,7 +31,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    SaveWeights(){ _name="SaveWeights"; _fout=0; _wgtmap.clear(); }
+    SaveWeights(){ _name="SaveWeights"; _fout=0; _wgtmap.clear(); _event_producer = "genieeventweight"; }
 
     /// Default destructor
     virtual ~SaveWeights(){}
@@ -42,6 +42,8 @@ namespace larlite {
 
     virtual bool finalize();
 
+    void SetWeightProducer( std::string prod ) { _event_producer = prod ; }
+
     //void addWeight(const int& run, const int & subrun, const int& event, double *) ; //std::vector<double> ); 
 
   protected:
@@ -51,6 +53,8 @@ namespace larlite {
     std::map< std::pair<int,int> , std::vector<double> > _wgtmap;
 
     std::vector<std::string> _func_v ;
+
+    std::string _event_producer ;
     
   };
 }

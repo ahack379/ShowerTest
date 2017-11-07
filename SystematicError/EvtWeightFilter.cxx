@@ -47,24 +47,6 @@ namespace larlite {
     }
    if ( !foundit) return false;
 
-   //it = _map.find(storage->subrun_id());
-   //foundit = false;
-
-   //if( it != _map.end() ){
-   //  while ( it->first == storage->subrun_id() ){ 
-   //    auto temp_event = it->second ; 
-   //    if( temp_event == storage->event_id() )
-   //      foundit = true;
-
-   //    it++; 
-   //    }
-   //   if ( !foundit)
-   //    _map.emplace(storage->subrun_id(), storage->event_id() );
-   //   else return false;
-   //  }
-   // else 
-   //    _map.emplace(storage->subrun_id(), storage->event_id() );
-
     return true;
   }
 

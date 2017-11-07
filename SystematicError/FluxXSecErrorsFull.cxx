@@ -51,7 +51,7 @@ namespace larlite {
   bool FluxXSecErrorsFull::analyze(storage_manager* storage) {
 
     auto ev_mctruth = storage->get_data<event_mctruth>("generator"); 
-    auto ev_wgt= storage->get_data<event_mceventweight>("genieeventweight"); 
+    auto ev_wgt= storage->get_data<event_mceventweight>("fluxeventweight"); 
 
      if(!ev_mctruth || !ev_mctruth->size() ){ 
        std::cout<<"No Truth..."<<std::endl ;
@@ -92,7 +92,7 @@ namespace larlite {
         n_mu += 1;
     }
 
-    if( n_mu == 1 && n_pi0 == 1 && nu_energy > 0.5 && infv ){
+    if( n_mu == 1 && n_pi0 == 1 && infv ){
 
       _all_evts_nominal ++ ;
       
@@ -101,11 +101,11 @@ namespace larlite {
       int kk = 0;
       for ( auto const & m : wgt ) { 
         for ( int jj = 0; jj < m.second.size(); jj++){
-	  mean_v[kk] += (m.second.at(jj)/1000);
-	}
-	kk++; 
+	      mean_v[kk] += (m.second.at(jj)/1000);
+	    }
+        //std::cout<<"MEAN: "<<mean_v[kk]<<std::endl ;
+	    kk++; 
       }
-      std::cout<<"KK: "<<kk<<std::endl ;
 
       std::vector<float> diff_v(13,0) ;
       std::vector<float> weight_p1sig_v(13,0) ;
@@ -120,8 +120,8 @@ namespace larlite {
 
 	//weight_p1sig_v[kk] = mean_v[kk] + sqrt(diff_v[kk]);
 	//weight_m1sig_v[kk] = mean_v[kk] - sqrt(diff_v[kk]);
-        _all_evts_p1[kk] =  mean_v[kk] + sqrt(diff_v[kk]);
-        _all_evts_m1[kk] = mean_v[kk] - sqrt(diff_v[kk]);
+        _all_evts_p1[kk] += ( mean_v[kk] + sqrt(diff_v[kk]));
+        _all_evts_m1[kk] += (mean_v[kk] - sqrt(diff_v[kk]));
 	
 	kk ++;
       }
