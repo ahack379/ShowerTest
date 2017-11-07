@@ -127,6 +127,7 @@ namespace larlite {
     double _time2cm;
     larutil::SpaceChargeMicroBooNE *_SCE;
 
+    std::map<int,int> _mc_hit_map ;
 
   };
 }

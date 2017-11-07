@@ -310,7 +310,9 @@ namespace larlite {
            _dir_z = ishr.Direction().Z();
 
 	   _mc_detProf_e = mc_clus_e;
-	   _mc_e = ev_mcs->at(closest_mcs_id).Start().E() ;
+
+       if ( closest_mcs_id != -1){
+	       _mc_e = ev_mcs->at(closest_mcs_id).Start().E() ;
 
            // 00) Start - calculate SC-corrected start Point
            auto mcx = ev_mcs->at(closest_mcs_id).Start().X() ;
@@ -401,6 +403,7 @@ namespace larlite {
 	   //_mc_st_x = mcx + vtxtimecm + 0.7 - sce_corr.at(0);
 	   //_mc_st_y = mcy + sce_corr.at(1);
 	   //_mc_st_z = mcz + sce_corr.at(2);
+	  }
     
            _tree->Fill();    
      }

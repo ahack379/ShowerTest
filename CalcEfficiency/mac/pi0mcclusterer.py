@@ -26,20 +26,23 @@ my_proc.set_ana_output_file("");
 # Specify data output root file name
 my_proc.set_output_file("larlite_mcclusters.root")
 
-clusterer = fmwk.MCPi0Clusterer()
-clusterer.setMinEnergy(10) #MeV
+clusterer = fmwk.MCNuClusterer()
+clusterer.setMinEnergy(5) #MeV
 
 my_proc.add_process(clusterer)
 
 #my_proc.set_data_to_write(fmwk.data.kCluster,clusterproducer)
 my_proc.set_data_to_write(fmwk.data.kCluster,'mccluster')
+my_proc.set_data_to_write(fmwk.data.kHit,'gaushit')
 my_proc.set_data_to_write(fmwk.data.kAssociation,'mccluster')
+my_proc.set_data_to_write(fmwk.data.kVertex,'mcvertex')
+my_proc.set_data_to_write(fmwk.data.kVertex,'numuCC_vertex')
 
 print
 print  "Finished configuring ana_processor. Start event loop!"
 print
 
-my_proc.run(0,1)
+my_proc.run(0,20)
 
 sys.exit()
 
