@@ -1098,7 +1098,16 @@ namespace larlite {
 
     auto ev_shr = storage->get_data<event_shower>("showerreco");
 
-    if ( ev_shr ) _nshrs = ev_shr->size(); 
+    if ( ev_shr ){ 
+
+      int shr_it = 0;
+
+      for ( auto const & s : *ev_shr ){
+        if ( s.Energy(2) != 0 )
+	  shr_it++ ; 
+      }
+      _nshrs = shr_it;
+    } 
 
     if ( _get_pi0_info ){
 

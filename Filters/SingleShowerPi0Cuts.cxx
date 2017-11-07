@@ -90,7 +90,7 @@ namespace larlite {
          auto radL_shr1 = vertex.Dist(shr1.ShowerStart());
         _pi0_high_radL = radL_shr1 ;
 
-	if ( shr1.Energy(2) < 0.1 ) continue;
+	if ( shr1.Energy(2) == 0 ) continue;
 
 	if( dist > 4 ){ 
 	   std::cout<<"Impact Parameter: "<<dist<<std::endl ;
@@ -98,21 +98,9 @@ namespace larlite {
 	}
 
         if( radL_shr1 > 62 ) { 
-         //if( radL_shr1 > 80 || radL_shr1 < 6 ){
 	   std::cout<<"Radiation length : "<<radL_shr1<<std::endl ;
            continue;
 	 }
-
-        // Slope cut option -- see google drive slides
-        //auto y = 4 - (4./62) * radL_shr1 ;
-	//if ( dist > y )
-	//  continue;
-
-
-         //if( _pi0_high_shrE < 40 ){
-	 //  std::cout<<"Energy: "<<_pi0_high_shrE<<std::endl ;
-         //  continue;
-	 //}
 
      	cand_map.emplace(1./shr1.Energy(),s1);
 
