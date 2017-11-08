@@ -379,31 +379,31 @@ namespace larlite {
 	  min_trk_dist_it = ii ;
 	}
     }
-    auto ev_flash = storage->get_data<larlite::event_opflash>("simpleFlashBeam");
-    if ( ev_flash->size() ){
-      
-      int max_it = -1;
-      int max_pe = -1;
-      for( int ff = 0; ff < ev_flash->size(); ff++){
-        auto f = ev_flash->at(ff);
-        if ( f.TotalPE() > max_pe ) {
-	  max_pe = f.TotalPE();
-	  max_it = ff;
-	}
-      }
+    //auto ev_flash = storage->get_data<larlite::event_opflash>("simpleFlashBeam");
+    //if ( ev_flash->size() ){
+    //  
+    //  int max_it = -1;
+    //  int max_pe = -1;
+    //  for( int ff = 0; ff < ev_flash->size(); ff++){
+    //    auto f = ev_flash->at(ff);
+    //    if ( f.TotalPE() > max_pe ) {
+	//  max_pe = f.TotalPE();
+	//  max_it = ff;
+	//}
+    //  }
 
-     if ( max_it != -1 ){
-      auto f = ev_flash->at(max_it);
+    // if ( max_it != -1 ){
+    //  auto f = ev_flash->at(max_it);
 
-      _flash_pe = f.TotalPE();
-      _flash_time = f.Time();
-      _flash_y_center = f.YCenter();
-      _flash_z_center = f.ZCenter();
-      _flash_y_width = f.YWidth();
-      _flash_z_width = f.ZWidth();
-     }
-    
-    }
+    //  _flash_pe = f.TotalPE();
+    //  _flash_time = f.Time();
+    //  _flash_y_center = f.YCenter();
+    //  _flash_z_center = f.ZCenter();
+    //  _flash_y_width = f.YWidth();
+    //  _flash_z_width = f.ZWidth();
+    // }
+    //
+    //}
 
     auto ev_hit = storage->get_data<larlite::event_hit>("gaushit");
 
@@ -1199,6 +1199,8 @@ namespace larlite {
       auto geomH = ::larutil::GeometryHelper::GetME();
 
       for( auto const & s : *ev_shr ){
+
+        if ( s.Energy(2) == 0 ) continue ;
         _shr_startx = s.ShowerStart().X();
         _shr_starty = s.ShowerStart().Y();
         _shr_startz = s.ShowerStart().Z();
