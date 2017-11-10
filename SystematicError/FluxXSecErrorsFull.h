@@ -60,7 +60,6 @@ namespace larlite {
     std::multimap<float,float> _map ;
     
     /////////// My extra variables
-    TTree * _tree ;
     float _xsec_mom_truth ;
     float _xsec_theta_truth ;
     std::vector<float> _weight_v ;
@@ -70,6 +69,14 @@ namespace larlite {
     std::vector<float> _all_evts_m1 ;
     std::vector<float> _all_evts_p1 ;
     std::vector<std::string> _genie_label_v ;
+
+    TTree * _tree ;
+    float _cv;
+    std::vector<float> _up ;
+    std::vector<float> _down;
+    float _gtruth_wgt ;
+
+
 
   };
 }
