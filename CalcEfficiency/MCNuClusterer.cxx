@@ -16,7 +16,7 @@ namespace larlite {
   MCNuClusterer::MCNuClusterer() {
     _name="MCNuClusterer";
     _fout=0;
-    _mc_energy_min = 10; // MeV
+    _mc_energy_min = 1e-9 ; // MeV
     _event = -1;
 
     //SetXOffset(0.0);
@@ -111,8 +111,10 @@ namespace larlite {
     std::vector<bool> pi0_index_v;
     std::vector<float> track_shower_index_v;
     std::vector<float> cosmic_neutrino_v;
+    std::vector<float> pdg_v;
+    std::vector<float> mother_pdg_v;
+    std::vector<float> ancestor_pdg_v;
     std::vector<float> mcs_energy_v ;
-
 
     // keep track of all the shower and track trackIDs
     g4_trackid_v.reserve(ev_mcs->size()+ev_mct->size());
@@ -150,7 +152,10 @@ namespace larlite {
 	pi0_index_v.push_back(found_pi0);
 	track_shower_index_v.push_back(1); // 1 indicates shower
 	cosmic_neutrino_v.push_back(mcs.Origin()); // 1 indicate neutrino
-	mcs_energy_v.push_back(mcs.Start().E()); // 1 indicate neutrino
+	pdg_v.push_back(mcs.PdgCode()); // 1 indicate neutrino
+	mother_pdg_v.push_back(mcs.MotherPdgCode()); // 1 indicate neutrino
+	ancestor_pdg_v.push_back(mcs.AncestorPdgCode()); // 1 indicate neutrino
+	mcs_energy_v.push_back(mcs.Start().E()); // 
         //std::cout<<" Nu : "<<found_pi0<<std::endl ;
       }// if this shower has enough energy
     }
@@ -169,7 +174,7 @@ namespace larlite {
       // the list of track IDs for an MCTrack consists only of
       // the track's trackID.
       std::vector<unsigned int> id_v = {mct_id};
-      if ( _mc_energy_min < energy ) {
+      if ( energy > _mc_energy_min ) {
         //std::cout << "MCTrack id : "   << mct_id
         //	  << " w/ PDG code : " << mct.PdgCode()
         //	  << " w/ energy : "   << energy << std::endl;
@@ -178,6 +183,9 @@ namespace larlite {
 	pi0_index_v.push_back(false);
 	track_shower_index_v.push_back(0); // 1 indicates shower
 	cosmic_neutrino_v.push_back(mct.Origin()); // 1 indicates shower
+	pdg_v.push_back(mct.PdgCode()); // 1 indicate neutrino
+	mother_pdg_v.push_back(mct.MotherPdgCode()); // 1 indicate neutrino
+	ancestor_pdg_v.push_back(mct.AncestorPdgCode()); // 1 indicate neutrino
 	mcs_energy_v.push_back(-999.); // 1 indicate neutrino
       }
     }
@@ -197,6 +205,9 @@ namespace larlite {
     std::vector<bool> cluster_pi0_v(cluster_hit_v.size(), false);
     std::vector<float> cluster_ts_v(cluster_hit_v.size(), 0);
     std::vector<float> cluster_cos_nu_v(cluster_hit_v.size(), -1);
+    std::vector<float> cluster_pdg_v(cluster_hit_v.size(), -1);
+    std::vector<float> cluster_mother_pdg_v(cluster_hit_v.size(), -1);
+    std::vector<float> cluster_ancestor_pdg_v(cluster_hit_v.size(), -1);
     std::vector<float> cluster_mcs_energy_v(cluster_hit_v.size(), -1);
 
     // loop through hits, use the back-tracker to find which MCX object
@@ -256,6 +267,9 @@ namespace larlite {
 	cluster_pi0_v[ pl * mc_index_v.size() + idx ] = pi0_index_v.at(idx) ;
 	cluster_ts_v[ pl * mc_index_v.size() + idx ] = track_shower_index_v.at(idx) ;
 	cluster_cos_nu_v[ pl * mc_index_v.size() + idx ] = cosmic_neutrino_v.at(idx) ;
+	cluster_pdg_v[ pl * mc_index_v.size() + idx ] = pdg_v.at(idx) ;
+	cluster_mother_pdg_v[ pl * mc_index_v.size() + idx ] = mother_pdg_v.at(idx) ;
+	cluster_ancestor_pdg_v[ pl * mc_index_v.size() + idx ] = ancestor_pdg_v.at(idx) ;
 	cluster_mcs_energy_v[ pl * mc_index_v.size() + idx ] = mcs_energy_v.at(idx) ;
     }// for all hits 
 
@@ -282,6 +296,9 @@ namespace larlite {
       clus.set_start_opening(cluster_ts_v[idx]); // Is this a track or shower?
       clus.set_width(cluster_cos_nu_v[idx]); // Is this a neutrino or a cosmic?
       clus.set_end_angle(cluster_mcs_energy_v[idx]); // Set the cluster's mcshower true energy for later correction
+      clus.set_end_charge(cluster_pdg_v[idx]); // Set cluster's pdg 
+      clus.set_end_opening(cluster_mother_pdg_v[idx]); // Set cluster's mother pdg 
+      clus.set_multiple_hit_density(cluster_ancestor_pdg_v[idx]); // Set cluster's ancestor pdg 
                                             // for proper comparison, but also want to be able to remove this
 					    // later if necessary
       ev_mccluster->push_back(clus);
