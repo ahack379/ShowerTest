@@ -196,6 +196,12 @@ namespace larlite {
 
     std::cout<<std::endl ;
 
+    if ( _fout ){
+      _fout->cd();
+      _tree->Write();
+    
+    }
+
     return true;
   }
 
