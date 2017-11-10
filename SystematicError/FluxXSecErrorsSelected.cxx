@@ -24,6 +24,7 @@ namespace larlite {
    
     _name                    = "FluxXSecErrorsSelected";
     _fout                    = 0;
+    _tree = 0;
 
    _genie_label_v = {"expskin_FluxUnisim", "horncurrent_FluxUnisim", "kminus_PrimaryHadronNormalization", "kplus_PrimaryHadronFeynmanScaling", "kzero_PrimaryHadronSanfordWang", "nucleoninexsec_FluxUnisim", "nucleonqexsec_FluxUnisim", "nucleontotxsec_FluxUnisim", "piminus_PrimaryHadronSWCentralSplineVariation", "pioninexsec_FluxUnisim",  "pionqexsec_FluxUnisim",  "piontotxsec_FluxUnisim",  "piplus_PrimaryHadronSWCentralSplineVariation"};
 
@@ -40,16 +41,23 @@ namespace larlite {
 
     fGeometry = larutil::Geometry::GetME();
     _tot_pot = 0. ;
-    int funcs = _genie_label_v.size() ; //78 total, +- for each func
+    int funcs = _genie_label_v.size() ; // 13 total for flux
 
     _sel_evts_nominal = 0;
     _sel_evts_m1.resize(funcs,0) ; 
     _sel_evts_p1.resize(funcs,0) ; 
     _sel_evts_nom.resize(funcs,0) ; 
 
-    _bkgd_evts_nominal = 0;
-    _bkgd_evts_m1.resize(funcs,0) ; 
-    _bkgd_evts_p1.resize(funcs,0) ;
+    if( !_tree) {
+       _tree = new TTree("flux_tree","");
+       _tree->Branch("cv",&_cv,"cv/F"); 
+       _tree->Branch("up","std::vector<float>",&_up); 
+       _tree->Branch("down","std::vector<float>",&_down); 
+     }
+
+    _cv = -1;
+    _up.resize(funcs,-1);
+    _down.resize(funcs,-1);
 
     return true;
    }
@@ -78,8 +86,8 @@ namespace larlite {
     xyz[0] = traj.at(traj.size() - 1).X();
     xyz[1] = traj.at(traj.size() - 1).Y();
     xyz[2] = traj.at(traj.size() - 1).Z();
-
     auto nue = traj.at(0).E();
+    _cv = nue ;
 
     bool infv = true;
 
@@ -88,15 +96,11 @@ namespace larlite {
 
     auto parts = ev_mctruth->at(0).GetParticles();
 
-    int n_pi0 = 0;
-    int n_mu = 0;
+    std::vector<float> mean_v(13,0) ;
+    int kk = 0;
 
-    _weight_v.clear();
     auto wgt  = ev_wgt->at(0).GetWeights();
 
-    std::vector<float> mean_v(13,0) ;
-
-    int kk = 0;
     for ( auto const & m : wgt ) {
       //std::cout<<"Size fo weights: "<<m.second.size()<<std::endl ;
       for ( int jj = 0; jj < m.second.size(); jj++){
@@ -112,15 +116,25 @@ namespace larlite {
       for ( int jj = 0; jj < m.second.size(); jj++){
         sigma_v[kk] += ( m.second.at(jj) - mean_v.at(kk) ) * ( m.second.at(jj) - mean_v.at(kk));
       }
+
       sigma_v[kk] /= 1000;
+
+      _up[kk] = 1 + sqrt( sigma_v[kk] ) ;
+      _down[kk] = 1 - sqrt( sigma_v[kk] ) ;
+     //if ( kk == 12 ){
+     //  std::cout<<"sig : "<<_up[kk]<<", "<<_down[kk]<<std::endl ;
+     //  std::cout<<"Mean, sigma: "<< sigma_v[kk]<<", "<<mean_v[kk]<<std::endl ;
+     //}
 
       kk ++;
     }
+    _tree->Fill();
 
     _sel_evts_nominal ++ ;
 
       kk = 0 ;
       for ( auto const & m : wgt ) {
+        
         _sel_evts_p1[kk] += ( (mean_v[kk] + sqrt(sigma_v[kk])) );
         _sel_evts_m1[kk] += ( (mean_v[kk] - sqrt(sigma_v[kk])) );
         _sel_evts_nom[kk] += ( mean_v[kk] );
@@ -135,11 +149,6 @@ namespace larlite {
     std::cout<<"All events: "<<_sel_evts_nominal<<std::endl ;
 
     std::cout<<"Events: "<<_events <<std::endl ;
-    //for( int i = 0 ; i < _sel_evts_m1.size(); i++) {
-    //  std::cout<<"\nFunction: "<<_genie_label_v[i]<<std::endl ;
-    //  std::cout<<"All events (-3sig): "<<_sel_evts_m1.at(i)<<std::endl ;
-    //  std::cout<<"All events (+3sig): "<<_sel_evts_p1.at(i)<<std::endl ;
-    //}
 
     for( int i = 0 ; i < _sel_evts_nom.size(); i++) 
       std::cout<<_sel_evts_nom[i]<<", " ;
@@ -154,6 +163,11 @@ namespace larlite {
       std::cout<<_sel_evts_p1[i]<<", " ;
 
     std::cout<<std::endl ;
+
+   if (_fout) {
+    _fout->cd();
+    _tree->Write();
+   }
 
     return true;
   }

@@ -1103,8 +1103,9 @@ namespace larlite {
       int shr_it = 0;
 
       for ( auto const & s : *ev_shr ){
-        if ( s.Energy(2) != 0 )
-	  shr_it++ ; 
+        if ( s.Energy(2) > 1e-30 )
+	      shr_it++ ; 
+          //std::cout<<"Shower energy : "<<s.Energy(2) <<std::endl ;
       }
       _nshrs = shr_it;
     } 
@@ -1200,7 +1201,9 @@ namespace larlite {
 
       for( auto const & s : *ev_shr ){
 
-        if ( s.Energy(2) == 0 ) continue ;
+        //if ( s.Energy(2) < 1e-30 ){ std::cout<<"Shower energy 0 :( "<<std::endl; continue ; }
+        if ( s.Energy(2) < 1e-30 ){ continue ; }
+
         _shr_startx = s.ShowerStart().X();
         _shr_starty = s.ShowerStart().Y();
         _shr_startz = s.ShowerStart().Z();

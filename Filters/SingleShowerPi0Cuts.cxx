@@ -90,7 +90,7 @@ namespace larlite {
          auto radL_shr1 = vertex.Dist(shr1.ShowerStart());
         _pi0_high_radL = radL_shr1 ;
 
-	if ( shr1.Energy(2) == 0 ) continue;
+	if ( shr1.Energy(2) < 1e-30 ) continue;
 
 	if( dist > 4 ){ 
 	   std::cout<<"Impact Parameter: "<<dist<<std::endl ;

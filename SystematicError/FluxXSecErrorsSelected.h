@@ -76,6 +76,11 @@ namespace larlite {
 
     std::string _event_producer ;
      
+    TTree * _tree ;
+    float _cv;
+    std::vector<float> _up ;
+    std::vector<float> _down;
+
   };
 }
 #endif

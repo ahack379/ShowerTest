@@ -95,6 +95,8 @@ namespace larlite {
 
         auto const& shr1 = ev_s->at(s1);
 
+        if ( shr1.Energy(2) < 1e-30 ) continue;
+
         for ( int s2 = 0; s2 < ev_s->size(); s2++ ){
 
             if (s2 <= s1) continue;
