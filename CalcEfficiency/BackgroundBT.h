@@ -30,7 +30,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    BackgroundBT(){ _name="BackgroundBT"; _fout=0; _tree=0; _shower_tree = 0; }
+    BackgroundBT(){ _name="BackgroundBT"; _fout=0; _tree=0; _shower_tree = 0; _get_genie_info=false; }
 
     /// Default destructor
     virtual ~BackgroundBT(){}
@@ -55,6 +55,8 @@ namespace larlite {
     void GetPi0Info  ( bool getit=false ) { _get_pi0_info = getit; }
 
     void GetSingleShowerInfo  ( bool getit=false ) { _get_single_shower_info = getit; }
+
+    void GetGenieInfo  ( bool getit=false ) { _get_genie_info = getit; }
 
     void clear() ;
 
@@ -207,6 +209,7 @@ namespace larlite {
   bool _mc_sample ;
   bool _get_pi0_info ;
   bool _get_single_shower_info ;
+  bool _get_genie_info ;
 
   std::vector<std::string> _bkgd_v ;
 
@@ -225,7 +228,13 @@ namespace larlite {
   // "showertree" additions
   float _shr_ip ;
   float _shr_rl;
-    
+
+  // genie addition
+  std::vector<float> _sel_evts_m1;
+  std::vector<float> _sel_evts_p1;
+
+  std::vector<std::string> _genie_label_v ;
+
   };
 }
 #endif

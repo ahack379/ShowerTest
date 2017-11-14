@@ -28,7 +28,7 @@ my_proc.set_output_file("BTbackground.root")
 
 clusterer = fmwk.BackgroundBT()
 clusterer.UseMCSample(True)
-clusterer.GetPi0Info(True)
+clusterer.GetPi0Info(False)
 clusterer.GetSingleShowerInfo(False)
 my_proc.add_process(clusterer)
 

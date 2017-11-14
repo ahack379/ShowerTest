@@ -108,20 +108,33 @@ namespace larlite {
 
         auto s = ev_mcshr->at(si);
         auto st = s.Start();
+        auto end = s.End();
         auto det = s.DetProfile();
         auto dist = sqrt( pow(st.X() - xvtx,2) + pow(st.Y() - yvtx,2) + pow(st.Z() - zvtx,2) );
 
         if ( dist < 0.0001 && s.MotherPdgCode() == 111 ){
-          if ( s.DetProfile().E() > 0 ){
-            shr_ids.emplace_back(si) ;
-           //if( det.X() < 0 || det.X() > 256.35 || det.Y() < -116.5 || det.Y() > 116.5 || det.Z() < 0 || det.Z() > 1036.8 ) 
-	   //  out = true; 
-          }
-	  else {
-	    std::cout<<"Det energy: "<<det.E()<<", "<<st.E()<<std::endl ;
-	    std::cout<<"det: "<<det.X()<<", "<<det.Y()<<", "<<det.Z()<<std::endl ;
-	    //std::cout<<"st: "<<st.X()<<", "<<st.Y()<<", "<<st.Z()<<std::endl ;
-	  }
+
+         if( end.X() < 0 || end.X() > 256.35 || end.Y() > 116.5 || end.Y() < -116.5 || end.Z() < 0 || end.Z() > 1036.8 ){
+
+	   std::cout<<"\nEVENT, "<<_event<<" Det energy: "<<det.E()<<std::endl ; //", "<<st.E()<<std::endl ;
+	   //std::cout<<" ENd! " <<end.X()<<", "<<end.Y()<<", "<<end.Z()<<std::endl;
+	 }
+	 else{
+	   shr_ids.emplace_back(si);
+	 
+	 }
+
+	 
+          //if ( s.DetProfile().E() > 0 ){
+          //  shr_ids.emplace_back(si) ;
+          // //if( det.X() < 0 || det.X() > 256.35 || det.Y() < -116.5 || det.Y() > 116.5 || det.Z() < 0 || det.Z() > 1036.8 ) 
+	  // //  out = true; 
+          //}
+	  //else {
+	  //  std::cout<<"Det energy: "<<det.E()<<", "<<st.E()<<std::endl ;
+	  //  std::cout<<"det: "<<det.X()<<", "<<det.Y()<<", "<<det.Z()<<std::endl ;
+	  //  //std::cout<<"st: "<<st.X()<<", "<<st.Y()<<", "<<st.Z()<<std::endl ;
+	  //}
 	}
      }
 
