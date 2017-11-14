@@ -180,7 +180,10 @@ namespace larlite {
 
     _genie_label_v = {"AGKYpT","AGKYxF","DISAth","DISBth","DISCv1u","DISCv2u","FermiGasModelKf", "FermiGasModelSf","FormZone", "IntraNukeNabs", "IntraNukeNcex", "IntraNukeNel", "IntraNukeNinel", "IntraNukeNmfp", "IntraNukeNpi", "IntraNukePIabs", "IntraNukePIcex", "IntraNukePIel", "IntraNukePIinel", "IntraNukePImfp", "IntraNukePIpi", "NC", "NonResRvbarp1pi", "NonResRvbarp2pi", "NonResRvp1pi", "NonResRvp2pi", "ResDecayEta", "ResDecayGamma", "ResDecayTheta", "ccresAxial", "ccresVector", "cohMA", "cohR0", "ncelAxial", "ncelEta", "ncresAxial", "ncresVector", "qema", "qevec"};
 
+    int funcs = _genie_label_v.size() ; //78 total, +- for each func
 
+    _sel_evts_m1.resize(funcs,0) ;
+    _sel_evts_p1.resize(funcs,0) ;
 
     return true;
   }
@@ -1191,6 +1194,24 @@ namespace larlite {
       _gamma_RL = vertex.Dist(ev_s->at(0).ShowerStart());
       _gamma_IP_w_vtx = _geoAlgo.SqDist(vertex, shr1_bkwrd_hl) ;
 
+    }
+
+    if ( _get_genie_info ) {
+
+      auto ev_wgt= storage->get_data<event_mceventweight>("genieeventweight");
+
+      if( !ev_wgt || !ev_wgt->size() ){
+        std::cout<<"No event weights..." <<std::endl;
+        return false;
+      }
+
+      int it = 0;
+      for ( auto const & m : wgt ) {
+         auto w_v = m.second ;
+         _sel_evts_p1[it] = (w_v.at(0)) ;
+         _sel_evts_m1[it] = (w_v.at(1)) ;
+         it++;
+      }
     }
 
     //if ( _bkgd_id == 2 )
