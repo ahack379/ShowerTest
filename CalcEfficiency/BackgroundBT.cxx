@@ -1202,7 +1202,7 @@ namespace larlite {
 
     if ( _get_genie_info ) {
 
-      auto ev_wgt = storage->get_data<event_mceventweight>("genieeventweight");
+      auto ev_wgt= storage->get_data<event_mceventweight>(_eventweight_producer);
 
       if( !ev_wgt || !ev_wgt->size() ){
         std::cout<<"No event weights..." <<std::endl;
