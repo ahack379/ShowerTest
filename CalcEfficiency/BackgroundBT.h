@@ -100,6 +100,12 @@ namespace larlite {
   float _shr_trk_delta_theta ;
   float _shr_trk_delta_phi ;
 
+  float _shr_purity ;
+  float _shr_complete ;
+  float _shr_origin ;
+  float _shr_type;
+  bool _shr_from_pi0 ;
+
   TTree * _tree ;
   int _event ;
   int _bkgd_id ;

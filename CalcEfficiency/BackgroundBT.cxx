@@ -11,6 +11,7 @@
 #include "DataFormat/cluster.h"
 #include "DataFormat/opflash.h"
 #include "DataFormat/hit.h"
+#include "DataFormat/mceventweight.h"
 
 #include "LArUtil/GeometryHelper.h"
 
@@ -151,6 +152,9 @@ namespace larlite {
       _tree->Branch("n_shower_hits_1",&_n_shower_hits_1,"n_shower_hits_1/I");
       _tree->Branch("n_shower_hits_2",&_n_shower_hits_2,"n_shower_hits_2/I");
 
+      _tree->Branch("sel_evts_m1","std::vector<float>",&_sel_evts_m1);
+      _tree->Branch("sel_evts_p1","std::vector<float>",&_sel_evts_p1);
+
    }
 
 
@@ -176,6 +180,11 @@ namespace larlite {
       // post technote version v0.9
       _shower_tree->Branch("shr_ip",&_shr_ip,"shr_ip/F");
       _shower_tree->Branch("shr_rl",&_shr_rl,"shr_rl/F");
+      _shower_tree->Branch("shr_purity",&_shr_purity,"shr_purity/F");
+      _shower_tree->Branch("shr_complete",&_shr_complete,"shr_complete/F");
+      _shower_tree->Branch("shr_origin",&_shr_origin,"shr_origin/F");
+      _shower_tree->Branch("shr_type",&_shr_type,"shr_type/F");
+      _shower_tree->Branch("shr_from_pi0",&_shr_from_pi0,"shr_from_pi0/B");
     }   
 
     _genie_label_v = {"AGKYpT","AGKYxF","DISAth","DISBth","DISCv1u","DISCv2u","FermiGasModelKf", "FermiGasModelSf","FormZone", "IntraNukeNabs", "IntraNukeNcex", "IntraNukeNel", "IntraNukeNinel", "IntraNukeNmfp", "IntraNukeNpi", "IntraNukePIabs", "IntraNukePIcex", "IntraNukePIel", "IntraNukePIinel", "IntraNukePImfp", "IntraNukePIpi", "NC", "NonResRvbarp1pi", "NonResRvbarp2pi", "NonResRvp1pi", "NonResRvp2pi", "ResDecayEta", "ResDecayGamma", "ResDecayTheta", "ccresAxial", "ccresVector", "cohMA", "cohR0", "ncelAxial", "ncelEta", "ncresAxial", "ncresVector", "qema", "qevec"};
@@ -307,6 +316,11 @@ namespace larlite {
 
     _shr_ip = -999;
     _shr_rl = -999;
+    _shr_complete = -999;
+    _shr_purity = -999;
+    _shr_origin = -999;
+    _shr_type = -999;
+    _shr_from_pi0 = false;
 
   }
   
@@ -315,6 +329,9 @@ namespace larlite {
     _event++ ;
     //std::cout<<"\n\nEVENT IS: "<<_event<<std::endl;
     clear();
+
+    //auto ev_shr = storage->get_data<event_shower>("showerreco");
+    //if ( ev_shr->size() == 0 ) return false ;
 
     auto ev_vtx= storage->get_data<event_vertex>("numuCC_vertex"); 
     if(!ev_vtx || !ev_vtx->size() ) {
@@ -1102,19 +1119,6 @@ namespace larlite {
     }
   }
 
-    auto ev_shr = storage->get_data<event_shower>("showerreco");
-
-    if ( ev_shr ){ 
-
-      int shr_it = 0;
-
-      for ( auto const & s : *ev_shr ){
-        if ( s.Energy(2) > 1e-30 )
-	      shr_it++ ; 
-          //std::cout<<"Shower energy : "<<s.Energy(2) <<std::endl ;
-      }
-      _nshrs = shr_it;
-    } 
 
     if ( _get_pi0_info ){
 
@@ -1198,12 +1202,14 @@ namespace larlite {
 
     if ( _get_genie_info ) {
 
-      auto ev_wgt= storage->get_data<event_mceventweight>("genieeventweight");
+      auto ev_wgt = storage->get_data<event_mceventweight>("genieeventweight");
 
       if( !ev_wgt || !ev_wgt->size() ){
         std::cout<<"No event weights..." <<std::endl;
         return false;
       }
+
+      auto wgt  = ev_wgt->at(0).GetWeights();
 
       int it = 0;
       for ( auto const & m : wgt ) {
@@ -1217,17 +1223,37 @@ namespace larlite {
     //if ( _bkgd_id == 2 )
     //std::cout<<"Event and ID: "<<_event<<", "<<_bkgd_v[_bkgd_id]<<"\n";
     
-    //std::cout<<"High : "<<_pi0_high_true_st_x <<", "<<_pi0_high_true_st_y<<", "<<_pi0_high_true_st_z<<std::endl ;
+    auto ev_shr = storage->get_data<event_shower>("showerreco");
+
+    if ( ev_shr ){ 
+
+      int shr_it = 0;
+
+      for ( auto const & s : *ev_shr ){
+        if ( s.Energy(2) > 1e-30 )
+	      shr_it++ ; 
+      }
+      _nshrs = shr_it;
+    } 
+    
     _tree->Fill();    
      
     if ( ev_shr->size() != 0 ){
       auto geomH = ::larutil::GeometryHelper::GetME();
 
-      for( auto const & s : *ev_shr ){
+      auto const & ev_clus = storage->get_data<event_cluster>("ImageClusterHit");
+      auto const & ev_ass_c = storage->get_data<larlite::event_ass>("ImageClusterHit");
+      auto const & ass_imageclus_v = ev_ass_c->association(ev_clus->id(), ev_hit->id());
 
-        //if ( s.Energy(2) < 1e-30 ){ std::cout<<"Shower energy 0 :( "<<std::endl; continue ; }
-        if ( s.Energy(2) < 1e-30 ){ continue ; }
+      auto ev_ass_s = storage->get_data<larlite::event_ass>("showerreco");
+      auto const& ass_showerreco_v = ev_ass_s->association(ev_shr->id(), ev_clus->id());
 
+      // Loop over showers
+      for (size_t i = 0; i < ass_showerreco_v.size(); i++ ){
+
+        auto s = ev_shr->at(i);
+        if ( s.Energy(2) <= 1e-30 ){ continue ; }
+            
         _shr_startx = s.ShowerStart().X();
         _shr_starty = s.ShowerStart().Y();
         _shr_startz = s.ShowerStart().Z();
@@ -1245,17 +1271,90 @@ namespace larlite {
         _shr_oangle = s.OpeningAngle();
         _shr_dedx = s.dEdx(2);
 
-        _shr_vtx_dist = sqrt( pow(_vtx_x - _shr_startx,2) +
-                              pow(_vtx_y - _shr_starty,2) +
-                              pow(_vtx_z - _shr_startz,2) );
-
+        _shr_vtx_dist = sqrt( pow(_vtx_x - _shr_startx,2) + pow(_vtx_y - _shr_starty,2) + pow(_vtx_z - _shr_startz,2) ); 
         _shr_trk_delta_theta = s.Direction().Theta() - _mu_angle;
         _shr_trk_delta_phi = s.Direction().Phi() - _mu_phi ;
 
+        if ( _mc_sample ) {
+
+          float mc_clus_e = 0.;
+	      int closest_mcs_id = -1 ;
+	      float closest_e = 1e9 ;
+
+          // Now get Mccluster info
+          auto ev_ass = storage->get_data<larlite::event_ass>("mccluster");
+          auto const& ass_keys = ev_ass->association_keys();
+
+          if ( ass_keys.size() == 0 ) return false; 
+
+          larlite::event_cluster *ev_mcclus = nullptr;
+          auto ass_hit_clus_v = storage->find_one_ass( ass_keys[0].first, ev_mcclus, ev_ass->name() );
+
+          larlite::event_hit *ev_mchit = nullptr;
+          auto ass_mcclus_v = storage->find_one_ass( ass_keys[0].second, ev_mchit, ev_ass->name() );
+
+          auto ev_mcc = storage->get_data<event_cluster>("mccluster");
+
+          // Loop over clusters associated to this shower
+          for (size_t j = 0; j < ass_showerreco_v.at(i).size(); j++ ){
+
+            auto clus_id = ass_showerreco_v.at(i).at(j); 
+            auto iclus = ev_clus->at(clus_id);
+            
+            int plane = iclus.Plane().Plane ;
+            if ( plane != 2 ) continue;
+
+            pur_ctr_v.clear();
+            pur_ctr_v.resize(ass_mcclus_v.size()+1,0) ;
+
+            int max_hits = -1;
+            int max_cid = -1 ;
+
+            // Loop through all hits associared to the cluster 
+            for ( int k = 0; k < ass_imageclus_v.at(clus_id).size(); k++ ){
+
+              auto hid = ass_imageclus_v.at(clus_id).at(k) ; 
+              auto h = ev_hit->at(hid);
+              
+              if ( _mc_hit_map.find(hid) != _mc_hit_map.end() ){
+
+                auto mcclus_id = _mc_hit_map[hid] ;
+
+                pur_ctr_v[mcclus_id]++ ; 
+
+                if( pur_ctr_v[ mcclus_id] > max_hits ){
+                  max_hits = pur_ctr_v[mcclus_id];
+                  max_cid = mcclus_id ; 
+                }
+              }
+	          else {
+	            auto mcclus_id = ass_mcclus_v.size() ;
+                pur_ctr_v[mcclus_id]++ ; 
+                if( pur_ctr_v[mcclus_id] > max_hits ){
+                  max_hits = pur_ctr_v[mcclus_id];
+                  max_cid = mcclus_id ; 
+                }
+	          }
+            }
+
+            if ( max_cid != ass_mcclus_v.size() && max_cid != -1 ){
+
+              auto tot_mc_hits =  ass_mcclus_v[max_cid].size(); 
+              auto tot_reco_hits = ass_imageclus_v[clus_id].size();
+              
+              _shr_purity   = float(max_hits) / tot_reco_hits ;
+              _shr_complete = float(max_hits) / tot_mc_hits ;
+
+              auto mcclus = ev_mcc->at(max_cid) ;
+              _shr_origin = mcclus.Width() ; 
+              _shr_type   = mcclus.StartOpeningAngle() ; // Recall I've set this to track (0) or shower(1) in mccluster builder
+              _shr_from_pi0 = mcclus.IsMergedCluster() ; 
+            }
+          }
+        }
         _shower_tree->Fill() ;
       }
     }
-
 
     return true;
   }
