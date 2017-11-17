@@ -30,7 +30,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    BackgroundBT(){ _name="BackgroundBT"; _fout=0; _tree=0; _shower_tree = 0; _get_genie_info=false; }
+    BackgroundBT(){ _name="BackgroundBT"; _fout=0; _tree=0; _shower_tree = 0; _get_genie_info=false; _eventweight_producer = "";}
 
     /// Default destructor
     virtual ~BackgroundBT(){}
@@ -57,6 +57,8 @@ namespace larlite {
     void GetSingleShowerInfo  ( bool getit=false ) { _get_single_shower_info = getit; }
 
     void GetGenieInfo  ( bool getit=false ) { _get_genie_info = getit; }
+
+    void SetEWProducer( std::string producer ) { _eventweight_producer = producer ; }
 
     void clear() ;
 
@@ -234,6 +236,8 @@ namespace larlite {
   std::vector<float> _sel_evts_p1;
 
   std::vector<std::string> _genie_label_v ;
+
+  std::string _eventweight_producer ;
 
   };
 }

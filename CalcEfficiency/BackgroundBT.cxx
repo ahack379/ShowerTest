@@ -11,6 +11,7 @@
 #include "DataFormat/cluster.h"
 #include "DataFormat/opflash.h"
 #include "DataFormat/hit.h"
+#include "DataFormat/mceventweight.h"
 
 #include "LArUtil/GeometryHelper.h"
 
@@ -1198,12 +1199,14 @@ namespace larlite {
 
     if ( _get_genie_info ) {
 
-      auto ev_wgt= storage->get_data<event_mceventweight>("genieeventweight");
+      auto ev_wgt= storage->get_data<event_mceventweight>(_eventweight_producer);
 
       if( !ev_wgt || !ev_wgt->size() ){
         std::cout<<"No event weights..." <<std::endl;
         return false;
       }
+
+      auto wgt  = ev_wgt->at(0).GetWeights();
 
       int it = 0;
       for ( auto const & m : wgt ) {
