@@ -23,6 +23,7 @@
 #pragma link C++ class larlite::BackgroundBT+;
 #pragma link C++ class larlite::AngleBackgroundBT+;
 #pragma link C++ class larlite::PostSel2ShowerQuality+;
+#pragma link C++ class larlite::ShowerRecoEff++;
 //#pragma link C++ class larlite::MCTrackClusterer+;
 
 //ADD_NEW_CLASS ... do not change this line

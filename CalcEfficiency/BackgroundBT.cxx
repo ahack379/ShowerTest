@@ -155,6 +155,12 @@ namespace larlite {
       _tree->Branch("sel_evts_m1","std::vector<float>",&_sel_evts_m1);
       _tree->Branch("sel_evts_p1","std::vector<float>",&_sel_evts_p1);
 
+      _tree->Branch("n_shr_pi0",&_n_shr_pi0,"n_shr_pi0/I");
+      _tree->Branch("n_shr_nushr",&_n_shr_nushr,"n_shr_nushr/I");
+      _tree->Branch("n_shr_nutrk",&_n_shr_nutrk,"n_shr_nutrk/I");
+      _tree->Branch("n_shr_cosmic",&_n_shr_cosmic,"n_shr_cosmic/I");
+      _tree->Branch("n_shr_noise",&_n_shr_noise,"n_shr_noise/I");
+
    }
 
 
@@ -190,6 +196,8 @@ namespace larlite {
     _genie_label_v = {"AGKYpT","AGKYxF","DISAth","DISBth","DISCv1u","DISCv2u","FermiGasModelKf", "FermiGasModelSf","FormZone", "IntraNukeNabs", "IntraNukeNcex", "IntraNukeNel", "IntraNukeNinel", "IntraNukeNmfp", "IntraNukeNpi", "IntraNukePIabs", "IntraNukePIcex", "IntraNukePIel", "IntraNukePIinel", "IntraNukePImfp", "IntraNukePIpi", "NC", "NonResRvbarp1pi", "NonResRvbarp2pi", "NonResRvp1pi", "NonResRvp2pi", "ResDecayEta", "ResDecayGamma", "ResDecayTheta", "ccresAxial", "ccresVector", "cohMA", "cohR0", "ncelAxial", "ncelEta", "ncresAxial", "ncresVector", "qema", "qevec"};
 
     int funcs = _genie_label_v.size() ; //78 total, +- for each func
+    if ( _eventweight_producer == "fluxeventweight" )
+      funcs = 13;
 
     _sel_evts_m1.resize(funcs,0) ;
     _sel_evts_p1.resize(funcs,0) ;
@@ -322,6 +330,21 @@ namespace larlite {
     _shr_type = -999;
     _shr_from_pi0 = false;
 
+    _n_shr_pi0 = 0;   
+    _n_shr_nutrk = 0;   
+    _n_shr_nushr = 0;   
+    _n_shr_cosmic = 0;   
+    _n_shr_noise = 0;   
+
+    int funcs = _genie_label_v.size() ; //78 total, +- for each func
+    if ( _eventweight_producer == "fluxeventweight" )
+      funcs = 13;
+
+    _sel_evts_m1.clear();
+    _sel_evts_p1.clear();
+    _sel_evts_m1.resize(funcs,0) ;
+    _sel_evts_p1.resize(funcs,0) ;
+
   }
   
   bool BackgroundBT::analyze(storage_manager* storage) {
@@ -330,7 +353,7 @@ namespace larlite {
     //std::cout<<"\n\nEVENT IS: "<<_event<<std::endl;
     clear();
 
-    //auto ev_shr = storage->get_data<event_shower>("showerreco");
+    auto ev_shr = storage->get_data<event_shower>("showerreco");
     //if ( ev_shr->size() == 0 ) return false ;
 
     auto ev_vtx= storage->get_data<event_vertex>("numuCC_vertex"); 
@@ -1211,19 +1234,50 @@ namespace larlite {
 
       auto wgt  = ev_wgt->at(0).GetWeights();
 
-      int it = 0;
-      for ( auto const & m : wgt ) {
-         auto w_v = m.second ;
-         _sel_evts_p1[it] = (w_v.at(0)) ;
-         _sel_evts_m1[it] = (w_v.at(1)) ;
-         it++;
+      if ( _eventweight_producer == "genieeventweight" ){
+        int it = 0;
+        for ( auto const & m : wgt ) {
+           auto w_v = m.second ;
+           _sel_evts_p1[it] = (w_v.at(0)) ;
+           _sel_evts_m1[it] = (w_v.at(1)) ;
+           it++;
+        }
+      }
+      else{
+        std::vector<float> mean_v(13,0) ;
+        int kk = 0;
+
+        for ( auto const & m : wgt ) { 
+          for ( int jj = 0; jj < m.second.size(); jj++){
+            mean_v[kk] += (m.second.at(jj)/1000);
+          }
+          kk++;
+        }   
+
+        std::vector<float> sigma_v(13,0) ;
+        kk = 0;
+
+        //std::cout<<"EVENT! "<<_event<<std::endl ;
+        for ( auto const & m : wgt ) { 
+          //std::cout<<"Parameter: "<< m.first<<std::endl ;
+          for ( int jj = 0; jj < m.second.size(); jj++){
+            sigma_v[kk] += ( m.second.at(jj) - mean_v.at(kk) ) * ( m.second.at(jj) - mean_v.at(kk));
+          }   
+
+          sigma_v[kk] /= 1000;
+
+          _sel_evts_p1[kk] = 1 + sqrt( sigma_v[kk] ) ; 
+          _sel_evts_m1[kk] = 1 - sqrt( sigma_v[kk] ) ; 
+
+          kk ++; 
+        }   
       }
     }
 
     //if ( _bkgd_id == 2 )
     //std::cout<<"Event and ID: "<<_event<<", "<<_bkgd_v[_bkgd_id]<<"\n";
     
-    auto ev_shr = storage->get_data<event_shower>("showerreco");
+    //auto ev_shr = storage->get_data<event_shower>("showerreco");
 
     if ( ev_shr ){ 
 
@@ -1234,9 +1288,9 @@ namespace larlite {
 	      shr_it++ ; 
       }
       _nshrs = shr_it;
+      //std::cout<<"For event: "<<_event<<" nshr: "<<_nshrs<<" > e-30 and "<<ev_shr->size() <<" total "<<std::endl;
     } 
     
-    _tree->Fill();    
      
     if ( ev_shr->size() != 0 ){
       auto geomH = ::larutil::GeometryHelper::GetME();
@@ -1249,6 +1303,7 @@ namespace larlite {
       auto const& ass_showerreco_v = ev_ass_s->association(ev_shr->id(), ev_clus->id());
 
       // Loop over showers
+      //std::cout<<" ass shower size: "<<ass_showerreco_v.size() <<", "<<ev_shr->size()<<std::endl ;
       for (size_t i = 0; i < ass_showerreco_v.size(); i++ ){
 
         auto s = ev_shr->at(i);
@@ -1276,10 +1331,6 @@ namespace larlite {
         _shr_trk_delta_phi = s.Direction().Phi() - _mu_phi ;
 
         if ( _mc_sample ) {
-
-          float mc_clus_e = 0.;
-	      int closest_mcs_id = -1 ;
-	      float closest_e = 1e9 ;
 
           // Now get Mccluster info
           auto ev_ass = storage->get_data<larlite::event_ass>("mccluster");
@@ -1350,11 +1401,20 @@ namespace larlite {
               _shr_type   = mcclus.StartOpeningAngle() ; // Recall I've set this to track (0) or shower(1) in mccluster builder
               _shr_from_pi0 = mcclus.IsMergedCluster() ; 
             }
+
+
+            if( _shr_type == -999 ) _n_shr_noise++;
+            else if ( _shr_origin == 2 ) _n_shr_cosmic ++ ;
+            else if ( _shr_origin == 1 && _shr_type == 0 ) _n_shr_nutrk++;
+            else if ( _shr_origin == 1 && _shr_type == 1 && _shr_from_pi0 == 0 ) _n_shr_nushr++; 
+            else if ( _shr_origin == 1 && _shr_type == 1 && _shr_from_pi0 == 1 ) _n_shr_pi0++; 
+
           }
         }
         _shower_tree->Fill() ;
       }
     }
+    _tree->Fill();    
 
     return true;
   }

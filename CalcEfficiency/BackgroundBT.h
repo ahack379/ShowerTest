@@ -204,6 +204,12 @@ namespace larlite {
   float _mu_origin ; // is this mccluster due to nu(1), cosmic(2), noise(3)
   float _mu_type ;   // is this mccluster due to track(0) or shower(1)
 
+  int _n_shr_pi0 ;
+  int _n_shr_nushr ;
+  int _n_shr_nutrk ;
+  int _n_shr_cosmic ;
+  int _n_shr_noise ;
+
   // Flashes
   float _flash_time ;
   int _flash_pe ;
