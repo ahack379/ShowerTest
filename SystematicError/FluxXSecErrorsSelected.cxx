@@ -54,11 +54,16 @@ namespace larlite {
        _tree->Branch("up","std::vector<float>",&_up); 
        _tree->Branch("down","std::vector<float>",&_down); 
        _tree->Branch("signal",&_signal,"signal/B"); 
+       _tree->Branch("weights_by_universe","std::vector<std::vector<float>>",&_weights_by_universe);
      }
 
     _cv = -1;
     _up.resize(funcs,-1);
     _down.resize(funcs,-1);
+
+    _weights_by_universe.resize(funcs);
+    for ( int i = 0; i < funcs ; i++ )
+      _weights_by_universe.at(i).resize(1000,0) ;
 
     return true;
    }
@@ -116,6 +121,7 @@ namespace larlite {
     for ( auto const & m : wgt ) {
       //std::cout<<"Size fo weights: "<<m.second.size()<<std::endl ;
       for ( int jj = 0; jj < m.second.size(); jj++){
+       _weights_by_universe[kk][jj] = m.second.at(jj);
         mean_v[kk] += (m.second.at(jj)/1000);
       }
       kk++;

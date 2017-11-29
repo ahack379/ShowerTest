@@ -82,6 +82,8 @@ namespace larlite {
     std::vector<float> _down;
     bool _signal ;
 
+    std::vector<std::vector<float>>  _weights_by_universe ;
+
   };
 }
 #endif
