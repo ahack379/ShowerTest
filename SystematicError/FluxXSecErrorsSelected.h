@@ -80,6 +80,7 @@ namespace larlite {
     float _cv;
     std::vector<float> _up ;
     std::vector<float> _down;
+    bool _signal ;
 
   };
 }

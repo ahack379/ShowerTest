@@ -72,8 +72,10 @@ namespace larlite {
 
     TTree * _tree ;
     float _cv;
+    int _nu_pdg;
     std::vector<float> _up ;
     std::vector<float> _down;
+    bool _signal ;
     float _gtruth_wgt ;
 
 

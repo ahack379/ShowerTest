@@ -53,6 +53,7 @@ namespace larlite {
        _tree->Branch("cv",&_cv,"cv/F"); 
        _tree->Branch("up","std::vector<float>",&_up); 
        _tree->Branch("down","std::vector<float>",&_down); 
+       _tree->Branch("signal",&_signal,"signal/B"); 
      }
 
     _cv = -1;
@@ -94,7 +95,18 @@ namespace larlite {
    if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1] > 96.5 || xyz[1] < -96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
       infv = false; 
 
-    auto parts = ev_mctruth->at(0).GetParticles();
+   int n_pi0 = 0;
+   int n_mu = 0;
+
+   auto parts = ev_mctruth->at(0).GetParticles();
+   for ( auto const & p : parts ){
+   
+     if( p.StatusCode() == 1 && p.PdgCode() == 111 )
+       n_pi0 += 1;
+
+     if( p.StatusCode() == 1 && p.PdgCode() == 13 )
+       n_mu += 1;
+   }
 
     std::vector<float> mean_v(13,0) ;
     int kk = 0;
@@ -121,6 +133,7 @@ namespace larlite {
 
       _up[kk] = 1 + sqrt( sigma_v[kk] ) ;
       _down[kk] = 1 - sqrt( sigma_v[kk] ) ;
+
      //if ( kk == 12 ){
      //  std::cout<<"sig : "<<_up[kk]<<", "<<_down[kk]<<std::endl ;
      //  std::cout<<"Mean, sigma: "<< sigma_v[kk]<<", "<<mean_v[kk]<<std::endl ;
@@ -128,18 +141,25 @@ namespace larlite {
 
       kk ++;
     }
+
+    if ( n_pi0 == 1 && n_mu == 1 && infv ){
+      _signal = true ;
+    }
+    else
+      _signal = false;
+
     _tree->Fill();
 
     _sel_evts_nominal ++ ;
 
-      kk = 0 ;
-      for ( auto const & m : wgt ) {
-        
-        _sel_evts_p1[kk] += ( (mean_v[kk] + sqrt(sigma_v[kk])) );
-        _sel_evts_m1[kk] += ( (mean_v[kk] - sqrt(sigma_v[kk])) );
-        _sel_evts_nom[kk] += ( mean_v[kk] );
-        kk ++;
-      }
+    //  kk = 0 ;
+    //  for ( auto const & m : wgt ) {
+    //    
+    //    _sel_evts_p1[kk] += ( (mean_v[kk] + sqrt(sigma_v[kk])) );
+    //    _sel_evts_m1[kk] += ( (mean_v[kk] - sqrt(sigma_v[kk])) );
+    //    _sel_evts_nom[kk] += ( mean_v[kk] );
+    //    kk ++;
+    //  }
 
     return true;
   }
@@ -150,19 +170,19 @@ namespace larlite {
 
     std::cout<<"Events: "<<_events <<std::endl ;
 
-    for( int i = 0 ; i < _sel_evts_nom.size(); i++) 
-      std::cout<<_sel_evts_nom[i]<<", " ;
+    //for( int i = 0 ; i < _sel_evts_nom.size(); i++) 
+    //  std::cout<<_sel_evts_nom[i]<<", " ;
 
-    std::cout<<std::endl;
+    //std::cout<<std::endl;
 
-    for( int i = 0 ; i < _sel_evts_m1.size(); i++) 
-      std::cout<<_sel_evts_m1[i]<<", " ;
+    //for( int i = 0 ; i < _sel_evts_m1.size(); i++) 
+    //  std::cout<<_sel_evts_m1[i]<<", " ;
 
-    std::cout<<std::endl ;
-    for( int i = 0 ; i < _sel_evts_p1.size(); i++) 
-      std::cout<<_sel_evts_p1[i]<<", " ;
+    //std::cout<<std::endl ;
+    //for( int i = 0 ; i < _sel_evts_p1.size(); i++) 
+    //  std::cout<<_sel_evts_p1[i]<<", " ;
 
-    std::cout<<std::endl ;
+    //std::cout<<std::endl ;
 
    if (_fout) {
     _fout->cd();

@@ -73,6 +73,11 @@ namespace larlite {
     float _gamma1_vtx_IP ;
     float _gamma2_vtx_IP ;
 
+    int _nu_pdg ;
+    bool _isCC ;
+    bool _found_pi0 ; 
+    int _n_nu_origin_pi0 ; 
+
     TTree * _one_gamma_tree ;
     float _gamma_E;
     float _gamma_RL;
@@ -128,6 +133,8 @@ namespace larlite {
     larutil::SpaceChargeMicroBooNE *_SCE;
 
     std::map<int,int> _mc_hit_map ;
+
+
 
   };
 }

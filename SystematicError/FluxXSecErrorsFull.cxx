@@ -50,6 +50,8 @@ namespace larlite {
        _tree->Branch("up","std::vector<float>",&_up); 
        _tree->Branch("down","std::vector<float>",&_down); 
        _tree->Branch("gtruth_wgt",&_gtruth_wgt,"gtruth_wgt/F"); 
+       _tree->Branch("nu_pdg",&_nu_pdg,"nu_pdg/I");
+       _tree->Branch("signal",&_signal,"signal/B");
      }
 
     _cv = -1;
@@ -90,6 +92,7 @@ namespace larlite {
     xyz[2] = traj.at(traj.size() - 1).Z();
     auto nue = traj.at(traj.size() - 1).E();
     _cv = nue ;
+    _nu_pdg = nu.Nu().PdgCode();
 
     std::vector<float> mean_v(13,0) ;
     int kk = 0;
@@ -121,22 +124,29 @@ namespace larlite {
 
 
 
-    //bool infv = true;
-    //if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1] > 96.5 || xyz[1] < -96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
-    //   infv = false ;
+    bool infv = true;
+    if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1] > 96.5 || xyz[1] < -96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
+       infv = false ;
 
-    //auto parts = ev_mctruth->at(0).GetParticles();
-    //int n_pi0 = 0;
-    //int n_mu = 0;
-    //
-    //for ( auto const & p : parts ){
-    //
-    //  if( p.StatusCode() == 1 && p.PdgCode() == 111 )
-    //    n_pi0 += 1;
+    auto parts = ev_mctruth->at(0).GetParticles();
+    int n_pi0 = 0;
+    int n_mu = 0;
+    
+    for ( auto const & p : parts ){
+    
+      if( p.StatusCode() == 1 && p.PdgCode() == 111 )
+        n_pi0 += 1;
 
-    //  if( p.StatusCode() == 1 && p.PdgCode() == 13 )
-    //    n_mu += 1;
-    //}
+      if( p.StatusCode() == 1 && p.PdgCode() == 13 )
+        n_mu += 1;
+    }
+
+    if ( n_pi0 == 1 && n_mu == 1 && infv )
+      _signal = true ;
+    else 
+      _signal = false;
+    
+
 
     //if( n_mu == 1 && n_pi0 == 1 && infv ){
 
@@ -178,21 +188,21 @@ namespace larlite {
 
   bool FluxXSecErrorsFull::finalize() {
 
-    std::cout<<"All events: "<<_all_evts_nominal<<std::endl ;
-    for( int i = 0 ; i < _all_evts_m1.size(); i++) {
-      std::cout<<"\nFunction: "<<_genie_label_v[i]<<std::endl ;
-      std::cout<<"All events (-3sig): "<<_all_evts_m1.at(i)<<std::endl ;
-      std::cout<<"All events (+3sig): "<<_all_evts_p1.at(i)<<std::endl ;
-    }
+    //std::cout<<"All events: "<<_all_evts_nominal<<std::endl ;
+    //for( int i = 0 ; i < _all_evts_m1.size(); i++) {
+    //  std::cout<<"\nFunction: "<<_genie_label_v[i]<<std::endl ;
+    //  std::cout<<"All events (-3sig): "<<_all_evts_m1.at(i)<<std::endl ;
+    //  std::cout<<"All events (+3sig): "<<_all_evts_p1.at(i)<<std::endl ;
+    //}
 
-    std::cout<<"All events: "<<_all_evts_nominal<<std::endl ;
+    //std::cout<<"All events: "<<_all_evts_nominal<<std::endl ;
 
-    for( int i = 0 ; i < _all_evts_m1.size(); i++) 
-      std::cout<<_all_evts_m1[i]<<", " ;
+    //for( int i = 0 ; i < _all_evts_m1.size(); i++) 
+    //  std::cout<<_all_evts_m1[i]<<", " ;
 
-    std::cout<<std::endl ;
-    for( int i = 0 ; i < _all_evts_p1.size(); i++) 
-      std::cout<<_all_evts_p1[i]<<", " ;
+    //std::cout<<std::endl ;
+    //for( int i = 0 ; i < _all_evts_p1.size(); i++) 
+    //  std::cout<<_all_evts_p1[i]<<", " ;
 
     std::cout<<std::endl ;
 
