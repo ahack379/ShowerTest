@@ -25,6 +25,8 @@ namespace larlite {
     _name                    = "FluxXSecErrorsSelected";
     _fout                    = 0;
     _tree = 0;
+    _univ = 0;
+    _N    = 0 ;
 
    _genie_label_v = {"expskin_FluxUnisim", "horncurrent_FluxUnisim", "kminus_PrimaryHadronNormalization", "kplus_PrimaryHadronFeynmanScaling", "kzero_PrimaryHadronSanfordWang", "nucleoninexsec_FluxUnisim", "nucleonqexsec_FluxUnisim", "nucleontotxsec_FluxUnisim", "piminus_PrimaryHadronSWCentralSplineVariation", "pioninexsec_FluxUnisim",  "pionqexsec_FluxUnisim",  "piontotxsec_FluxUnisim",  "piplus_PrimaryHadronSWCentralSplineVariation"};
 
@@ -44,9 +46,6 @@ namespace larlite {
     int funcs = _genie_label_v.size() ; // 13 total for flux
 
     _sel_evts_nominal = 0;
-    _sel_evts_m1.resize(funcs,0) ; 
-    _sel_evts_p1.resize(funcs,0) ; 
-    _sel_evts_nom.resize(funcs,0) ; 
 
     if( !_tree) {
        _tree = new TTree("flux_tree","");
@@ -54,20 +53,27 @@ namespace larlite {
        _tree->Branch("up","std::vector<float>",&_up); 
        _tree->Branch("down","std::vector<float>",&_down); 
        _tree->Branch("signal",&_signal,"signal/B"); 
-       _tree->Branch("s_weights_by_universe","std::vector<std::vector<float>>",&_s_weights_by_universe);
-       _tree->Branch("b_weights_by_universe","std::vector<std::vector<float>>",&_b_weights_by_universe);
+       //_tree->Branch("s_weights_by_universe","std::vector<std::vector<float>>",&_s_weights_by_universe);
+       //_tree->Branch("b_weights_by_universe","std::vector<std::vector<float>>",&_b_weights_by_universe);
+     }
+
+    if( !_univ) {
+       _univ = new TTree("univ","");
+       _univ->Branch("xsec_v","std::vector<std::vector<float>>",&_xsec_v); 
      }
 
     _cv = -1;
     _up.resize(funcs,-1);
     _down.resize(funcs,-1);
 
+    _xsec_v.resize(funcs);
     _s_weights_by_universe.resize(funcs);
     _b_weights_by_universe.resize(funcs);
 
     for ( int i = 0; i < funcs ; i++ ){
       _s_weights_by_universe.at(i).resize(1000,0) ;
       _b_weights_by_universe.at(i).resize(1000,0) ;
+      _xsec_v.at(i).resize(1000,0);
     }
 
     return true;
@@ -166,23 +172,19 @@ namespace larlite {
 
   bool FluxXSecErrorsSelected::finalize() {
 
-    std::cout<<"All events: "<<_sel_evts_nominal<<std::endl ;
-
     std::cout<<"Events: "<<_events <<std::endl ;
 
-    //for( int i = 0 ; i < _sel_evts_nom.size(); i++) 
-    //  std::cout<<_sel_evts_nom[i]<<", " ;
+    auto funcs = _genie_label_v.size(); 
+    float dataPOT = 0.492;
+    float mcbnbcos_POT = 4.23214; 
+    float mc_to_onbeam = dataPOT/mcbnbcos_POT;
 
-    //std::cout<<std::endl;
-
-    //for( int i = 0 ; i < _sel_evts_m1.size(); i++) 
-    //  std::cout<<_sel_evts_m1[i]<<", " ;
-
-    //std::cout<<std::endl ;
-    //for( int i = 0 ; i < _sel_evts_p1.size(); i++) 
-    //  std::cout<<_sel_evts_p1[i]<<", " ;
-
-    //std::cout<<std::endl ;
+    for( int i = 0; i < funcs; i++){
+      for( int j= 0; j < 1000; j++){
+        float eff = 1 ; //_s_weights_by_universe[i][j] / _t_weights_by_universe[i][j] ;
+        _xsec_v[i][j] = float( _N -  mc_to_onbeam*_b_weights_by_universe[i][j])/eff; 
+      } 
+    }
 
    if (_fout) {
     _fout->cd();

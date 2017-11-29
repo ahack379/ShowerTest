@@ -58,6 +58,11 @@ namespace larlite {
     _up.resize(funcs,-1);
     _down.resize(funcs,-1);
 
+    _t_weights_by_universe.resize(funcs);
+
+    for ( int i = 0; i < funcs ; i++ )
+      _t_weights_by_universe.at(i).resize(1000,0) ;
+
     _file.open("list.txt",std::ios_base::in);
  
     return true;
@@ -94,11 +99,38 @@ namespace larlite {
     _cv = nue ;
     _nu_pdg = nu.Nu().PdgCode();
 
+    bool infv = true;
+    if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1] > 96.5 || xyz[1] < -96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
+       infv = false ;
+
+    auto parts = ev_mctruth->at(0).GetParticles();
+    int n_pi0 = 0;
+    int n_mu = 0;
+    
+    for ( auto const & p : parts ){
+    
+      if( p.StatusCode() == 1 && p.PdgCode() == 111 )
+        n_pi0 += 1;
+
+      if( p.StatusCode() == 1 && p.PdgCode() == 13 )
+        n_mu += 1;
+    }
+
+    if ( n_pi0 == 1 && n_mu == 1 && infv )
+      _signal = true ;
+    else 
+      _signal = false;
+
+
     std::vector<float> mean_v(13,0) ;
     int kk = 0;
 
     for ( auto const & m : wgt ) {
       for ( int jj = 0; jj < m.second.size(); jj++){
+
+        if (_signal)
+          _t_weights_by_universe[kk][jj] += m.second.at(jj);
+
         mean_v[kk] += (m.second.at(jj)/1000);
       }
       kk++;
@@ -122,87 +154,25 @@ namespace larlite {
     _tree->Fill();
 
 
-
-
-    bool infv = true;
-    if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1] > 96.5 || xyz[1] < -96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
-       infv = false ;
-
-    auto parts = ev_mctruth->at(0).GetParticles();
-    int n_pi0 = 0;
-    int n_mu = 0;
-    
-    for ( auto const & p : parts ){
-    
-      if( p.StatusCode() == 1 && p.PdgCode() == 111 )
-        n_pi0 += 1;
-
-      if( p.StatusCode() == 1 && p.PdgCode() == 13 )
-        n_mu += 1;
-    }
-
-    if ( n_pi0 == 1 && n_mu == 1 && infv )
-      _signal = true ;
-    else 
-      _signal = false;
-    
-
-
-    //if( n_mu == 1 && n_pi0 == 1 && infv ){
-
-    //  _all_evts_nominal ++ ;
-    //  
-    //  std::vector<float> mean_v(13,0) ;
-
-    //  int kk = 0;
-    //  for ( auto const & m : wgt ) { 
-    //    for ( int jj = 0; jj < m.second.size(); jj++){
-    //          mean_v[kk] += (m.second.at(jj)/1000);
-    //        }
-    //    //std::cout<<"MEAN: "<<mean_v[kk]<<std::endl ;
-    //        kk++; 
-    //  }
-
-    //  std::vector<float> diff_v(13,0) ;
-    //  std::vector<float> weight_p1sig_v(13,0) ;
-    //  std::vector<float> weight_m1sig_v(13,0) ;
-    //  kk = 0;
-
-    //  for ( auto const & m : wgt ) { 
-    //    for ( int jj = 0; jj < m.second.size(); jj++){
-    //      diff_v[kk] += ( m.second.at(jj) - mean_v.at(kk) ) * ( m.second.at(jj) - mean_v.at(kk));
-    //    }
-    //    diff_v[kk] /= 1000;
-
-    //    //weight_p1sig_v[kk] = mean_v[kk] + sqrt(diff_v[kk]);
-    //    //weight_m1sig_v[kk] = mean_v[kk] - sqrt(diff_v[kk]);
-    //    _all_evts_p1[kk] += ( mean_v[kk] + sqrt(diff_v[kk]));
-    //    _all_evts_m1[kk] += (mean_v[kk] - sqrt(diff_v[kk]));
-    //    
-    //    kk ++;
-    //  }
-    // }
-
     return true;
   }
 
   bool FluxXSecErrorsFull::finalize() {
 
-    //std::cout<<"All events: "<<_all_evts_nominal<<std::endl ;
-    //for( int i = 0 ; i < _all_evts_m1.size(); i++) {
-    //  std::cout<<"\nFunction: "<<_genie_label_v[i]<<std::endl ;
-    //  std::cout<<"All events (-3sig): "<<_all_evts_m1.at(i)<<std::endl ;
-    //  std::cout<<"All events (+3sig): "<<_all_evts_p1.at(i)<<std::endl ;
-    //}
+    auto funcs = _genie_label_v.size();
 
-    //std::cout<<"All events: "<<_all_evts_nominal<<std::endl ;
+    std::cout<<"{";
 
-    //for( int i = 0 ; i < _all_evts_m1.size(); i++) 
-    //  std::cout<<_all_evts_m1[i]<<", " ;
-
-    //std::cout<<std::endl ;
-    //for( int i = 0 ; i < _all_evts_p1.size(); i++) 
-    //  std::cout<<_all_evts_p1[i]<<", " ;
+    for( int i = 0; i < funcs; i++){
+      std::cout<<"{";
+      for( int j= 0; j < 1000; j++){
+        if ( j != 999 )
+          std::cout<<  _t_weights_by_universe[i][j]<<", ";
+        else 
+          std::cout<<  _t_weights_by_universe[i][j];
+      }
+      std::cout<<"}";
+    }
 
     std::cout<<std::endl ;
 

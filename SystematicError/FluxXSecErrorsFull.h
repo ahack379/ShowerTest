@@ -78,6 +78,8 @@ namespace larlite {
     bool _signal ;
     float _gtruth_wgt ;
 
+    std::vector<std::vector<float>> _t_weights_by_universe ;
+
 
 
   };

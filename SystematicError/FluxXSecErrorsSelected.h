@@ -51,25 +51,17 @@ namespace larlite {
 
     void SetWeightProducer(std::string prod ) { _event_producer = prod; }
 
+    void SetNominal ( float nom ) { _N = nom ; }
+
   protected:
 
     float _tot_pot ;
     const larutil::Geometry * fGeometry ;
     
     /////////// My extra variables
-    float _xsec_mom_truth ;
-    float _xsec_theta_truth ;
     std::vector<float> _weight_v ;
-
     float _sel_evts_nominal;
-    std::vector<float> _sel_evts_m1 ;
-    std::vector<float> _sel_evts_p1 ;
-    std::vector<float> _sel_evts_nom ;
-
     float _bkgd_evts_nominal;
-    std::vector<float> _bkgd_evts_m1 ;
-    std::vector<float> _bkgd_evts_p1 ;
-
     std::vector<std::string> _genie_label_v ;
 
     int _events ;
@@ -84,6 +76,11 @@ namespace larlite {
 
     std::vector<std::vector<float>>  _s_weights_by_universe ;
     std::vector<std::vector<float>>  _b_weights_by_universe ;
+
+    TTree * _univ;
+    std::vector<std::vector<float>> _xsec_v ;
+
+    float _N ;
 
   };
 }
