@@ -54,16 +54,21 @@ namespace larlite {
        _tree->Branch("up","std::vector<float>",&_up); 
        _tree->Branch("down","std::vector<float>",&_down); 
        _tree->Branch("signal",&_signal,"signal/B"); 
-       _tree->Branch("weights_by_universe","std::vector<std::vector<float>>",&_weights_by_universe);
+       _tree->Branch("s_weights_by_universe","std::vector<std::vector<float>>",&_s_weights_by_universe);
+       _tree->Branch("b_weights_by_universe","std::vector<std::vector<float>>",&_b_weights_by_universe);
      }
 
     _cv = -1;
     _up.resize(funcs,-1);
     _down.resize(funcs,-1);
 
-    _weights_by_universe.resize(funcs);
-    for ( int i = 0; i < funcs ; i++ )
-      _weights_by_universe.at(i).resize(1000,0) ;
+    _s_weights_by_universe.resize(funcs);
+    _b_weights_by_universe.resize(funcs);
+
+    for ( int i = 0; i < funcs ; i++ ){
+      _s_weights_by_universe.at(i).resize(1000,0) ;
+      _b_weights_by_universe.at(i).resize(1000,0) ;
+    }
 
     return true;
    }
@@ -111,7 +116,12 @@ namespace larlite {
 
      if( p.StatusCode() == 1 && p.PdgCode() == 13 )
        n_mu += 1;
-   }
+    }
+
+    if ( n_pi0 == 1 && n_mu == 1 && infv )
+      _signal = true ;
+    else
+      _signal = false;
 
     std::vector<float> mean_v(13,0) ;
     int kk = 0;
@@ -121,7 +131,10 @@ namespace larlite {
     for ( auto const & m : wgt ) {
       //std::cout<<"Size fo weights: "<<m.second.size()<<std::endl ;
       for ( int jj = 0; jj < m.second.size(); jj++){
-       _weights_by_universe[kk][jj] = m.second.at(jj);
+        if (_signal)
+          _s_weights_by_universe[kk][jj] += m.second.at(jj);
+        else
+          _b_weights_by_universe[kk][jj] += m.second.at(jj);
         mean_v[kk] += (m.second.at(jj)/1000);
       }
       kk++;
@@ -140,32 +153,13 @@ namespace larlite {
       _up[kk] = 1 + sqrt( sigma_v[kk] ) ;
       _down[kk] = 1 - sqrt( sigma_v[kk] ) ;
 
-     //if ( kk == 12 ){
-     //  std::cout<<"sig : "<<_up[kk]<<", "<<_down[kk]<<std::endl ;
-     //  std::cout<<"Mean, sigma: "<< sigma_v[kk]<<", "<<mean_v[kk]<<std::endl ;
-     //}
-
       kk ++;
     }
 
-    if ( n_pi0 == 1 && n_mu == 1 && infv ){
-      _signal = true ;
-    }
-    else
-      _signal = false;
 
     _tree->Fill();
 
     _sel_evts_nominal ++ ;
-
-    //  kk = 0 ;
-    //  for ( auto const & m : wgt ) {
-    //    
-    //    _sel_evts_p1[kk] += ( (mean_v[kk] + sqrt(sigma_v[kk])) );
-    //    _sel_evts_m1[kk] += ( (mean_v[kk] - sqrt(sigma_v[kk])) );
-    //    _sel_evts_nom[kk] += ( mean_v[kk] );
-    //    kk ++;
-    //  }
 
     return true;
   }
