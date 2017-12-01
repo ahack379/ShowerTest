@@ -86,7 +86,7 @@ namespace larlite {
     double ynew = _hist_y->GetRandom();
     double znew = _hist_z->GetRandom();
 
-    std::cout<<"Vertex: "<<xnew<<", "<<ynew<<", "<<znew<<std::endl ;
+    std::cout<<xnew<<", "; //", "<<ynew<<", "<<znew<<", ";
     xyz[0] += xnew; 
     xyz[1] += ynew; 
     xyz[2] += znew; 
