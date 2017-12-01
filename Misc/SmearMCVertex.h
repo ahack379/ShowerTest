@@ -17,6 +17,7 @@
 
 #include "Analysis/ana_base.h"
 #include "LArUtil/SpaceChargeMicroBooNE.h"
+#include "TH1D.h"
 
 namespace larlite {
   /**
@@ -28,7 +29,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    SmearMCVertex(){ _name="SmearMCVertex"; _fout=0;}
+    SmearMCVertex(){ _name="SmearMCVertex"; _fout=0; _hist_x=0; _hist_y=0; _hist_z=0;}
 
     /// Default destructor
     virtual ~SmearMCVertex(){}
@@ -58,6 +59,10 @@ namespace larlite {
     double _time2cm;
 
     larutil::SpaceChargeMicroBooNE *_SCE;
+
+    TH1D * _hist_x ;
+    TH1D * _hist_y ;
+    TH1D * _hist_z ;
 
     
   };
