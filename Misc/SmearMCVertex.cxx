@@ -5,30 +5,33 @@
 #include "DataFormat/vertex.h"
 #include "DataFormat/mctruth.h"
 
+#include "LArUtil/GeometryHelper.h"
+
 #include <random>
 
 namespace larlite {
 
   bool SmearMCVertex::initialize() {
 
+    _SCE = new larutil::SpaceChargeMicroBooNE();
+    _time2cm = larutil::GeometryHelper::GetME()->TimeToCm();;
+
     return true;
   }
   
   bool SmearMCVertex::analyze(storage_manager* storage) {
-
 
     auto ev_mctruth= storage->get_data<event_mctruth>("generator");
     if(!ev_mctruth || !ev_mctruth->size() ) return false;
     
     auto nu = ev_mctruth->at(0).GetNeutrino();
     auto parts = ev_mctruth->at(0).GetParticles();
-    
+
     auto ev_vtx = storage->get_data<event_vertex>("mcvertex");
     storage->set_id(storage->run_id(), storage->subrun_id(), storage->event_id());
     
     ev_vtx->reserve(1);
     double xyz[3] = {0.};
-
     auto traj = nu.Nu().Trajectory();
     auto xvtx = traj.at(traj.size() - 1).X();
     auto yvtx = traj.at(traj.size() - 1).Y();
@@ -49,24 +52,28 @@ namespace larlite {
         return false;
     }
 
-    std::default_random_engine generator;
+    // Centering these distributions around 0. std below include 2sig outlier exclusion
+    //
+    //std::default_random_engine generator;
+    std::random_device rd;
+    std::mt19937 e2(rd());
 
-    // Centering these distributions around 0. std below include 3sig outlier exclusion
-    std::normal_distribution<double> x_vtx(0,2.77);
-    std::normal_distribution<double> y_vtx(0,2.38);
-    std::normal_distribution<double> z_vtx(0,9.40);
+    std::normal_distribution<double> x_vtx(0,3.75); //2.77); commented out are the pi0 resolutions
+    std::normal_distribution<double> y_vtx(0,3.77); //2.38); comm
+    std::normal_distribution<double> z_vtx(0,3.71); //1.97);
 
-    double xnew = x_vtx(generator);
-    double ynew = y_vtx(generator);
-    double znew = z_vtx(generator);
+    double xnew = x_vtx(e2); //generator);
+    double ynew = y_vtx(e2); //generator);
+    double znew = z_vtx(e2); //generator);
+
+    //std::cout<<"Vertex: "<<xnew<<", "<<ynew<<", "<<znew<<std::endl ;
     xyz[0] += xnew; 
     xyz[1] += ynew; 
     xyz[2] += znew; 
 
-    std::cout<<"Vertex: "<<xnew<<", "<<ynew<<", "<<znew<<std::endl ;
     
-   vertex new_vtx(xyz) ;
-   ev_vtx->push_back(new_vtx);
+    vertex new_vtx(xyz) ;
+    ev_vtx->push_back(new_vtx);
 
     return true;
   }
