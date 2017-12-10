@@ -88,7 +88,6 @@ std::cout<<"bins size: "<<bins.size()<<", "<< z_res.size()<<", "<<y_res.size()<<
     double ynew = _hist_y->GetRandom();
     double znew = _hist_z->GetRandom();
 
-    std::cout<<"Point: "<<xnew<<", "<<ynew<<", "<<znew<<", "<<std::endl ;
     xyz[0] += xnew; 
     xyz[1] += ynew; 
     xyz[2] += znew; 
