@@ -326,76 +326,12 @@ namespace larlite {
       auto vtxtick = (tvtx / 1000.) * 2.; // time in tick :
       //auto vtxtimecm = vtxtick * _time2cm; // time in cm :
 
-      auto ev_mcc = storage->get_data<event_cluster>("mccluster");
-
-      // Now get Mccluster info
-      auto ev_ass = storage->get_data<larlite::event_ass>("mccluster");
-      auto const& ass_keys = ev_ass->association_keys();
-
-      if ( ass_keys.size() == 0 ) return false; 
-
-      larlite::event_cluster *ev_mcclus = nullptr;
-      auto ass_hit_clus_v = storage->find_one_ass( ass_keys[0].first, ev_mcclus, ev_ass->name() );
-
-      larlite::event_hit *ev_mchit = nullptr;
-      auto ass_mcclus_v = storage->find_one_ass( ass_keys[0].second, ev_mchit, ev_ass->name() );
-
-      if (ass_hit_clus_v.size() == 0){
-        std::cout << "No hit ass! exit" << std::endl;
-        return false;
-      }    
-      if (ass_mcclus_v.size() == 0){
-        std::cout << "No mcclus ass! exit" << std::endl;
-        return false;
-      }    
-
       auto ev_hit = storage->get_data<larlite::event_hit>("gaushit");
 
       if (!ev_hit || ev_hit->size() == 0){
         std::cout << "No hits! exit" << std::endl;
         return false;
       }      
-
-      std::vector<int> pur_ctr_v ;
-      std::vector<float> cw_pur_ctr_v ;
-
-      // Keep track of the charge-weighted hit count
-      std::map<int,float> tot_mc_cw_hits_v ; 
-
-      _mc_hit_map.clear();
-
-      // Fill map with hits from mccluster : clusterID
-      for( int i = 0; i < ass_mcclus_v.size(); i ++ ){
-
-        auto cid = ev_mcc->at(i) ;
-        if ( cid.View() != 2 ) continue;
-
-
-        for ( int j = 0; j < ass_mcclus_v[i].size(); j++ ){
-
-          auto hid = ass_mcclus_v[i][j];
-          _mc_hit_map[hid] = i ;
-
-          auto h = ev_hit->at(hid);
-
-          if ( tot_mc_cw_hits_v.find(i) == tot_mc_cw_hits_v.end() )
-            tot_mc_cw_hits_v[i] = h.Integral() ;
-          else
-            tot_mc_cw_hits_v[i] += h.Integral() ;
-
-        }
-      }
-
-      // for each reco cluster, find the origin of all hits and calc purity/completeness 
-      // the "...size()+1" is to account for noise category
-      pur_ctr_v.resize(ass_mcclus_v.size()+1,0) ;
-      cw_pur_ctr_v.resize(ass_mcclus_v.size()+1,0) ;
-
-      int max_hits = -1;
-      int max_cw_hits = -1;
-      int max_cid = -1 ;
-      float tot_reco_cw_hits = 0;
-
 
      auto ev_mcshr = storage->get_data<event_mcshower>("mcreco");
 
@@ -405,41 +341,16 @@ namespace larlite {
     bool found_pi0 = false;
     int pi0_ctr = 0;
 
+    std::cout<<"mc shower size: "<<ev_mcshr->size()<<std::endl ;
+
     for ( int si = 0; si < ev_mcshr->size(); si++){
 
       auto s = ev_mcshr->at(si);
-      auto st = s.Start();
-      auto dist = sqrt( pow(st.X() - xyz[0],2) + pow(st.Y() - xyz[1],2) + pow(st.Z() - xyz[2],2) );
-
-      if ( s.DetProfile().E() > 0 && s.MotherPdgCode() == 111 && s.Origin() == 1 ){ found_pi0 = true; }
-
-      if (found_pi0 && dist < 0.00001 && nu.Nu().PdgCode() == 14 && nu.CCNC() == 0 ){
-        pi0_ctr ++ ;
-        shr_ids.emplace_back(si) ;
-        _event_type = 0;
-      }
+      shr_ids.emplace_back(si) ;
     }
     
     _found_pi0 = found_pi0 ;
-
-    if ( pi0_ctr > 2 && shr_ids.size() > 0 )  _event_type = 1;  
-
-    if ( found_pi0 && shr_ids.size() == 0 ){
-      for ( int si = 0; si < ev_mcshr->size(); si++){
-
-        auto s = ev_mcshr->at(si);
-        auto st = s.Start();
-        auto dist = sqrt( pow(st.X() - xyz[0],2) + pow(st.Y() - xyz[1],2) + pow(st.Z() - xyz[2],2) );
-
-        if ( s.DetProfile().E() > 0 && s.MotherPdgCode() == 111 ){
-          shr_ids.emplace_back(si) ;
-	      _event_type = 1;
-	    }
-	  }
-    }
       
-    if ( _event_type == -1 ) _event_type = 2;
-
     std::multimap<float,std::pair<int,int>> mc_reco_map ;    
 
     std::cout<<" shr ids: "<<shr_ids.size()<<std::endl;
@@ -465,11 +376,13 @@ namespace larlite {
     int mc_g1_id = -1, mc_g2_id = -1;
     float dot_g1 = -10, dot_g2 = -10;
 
+    std::cout<<"mc_g1_id: "<<mc_g1_id <<std::endl ;
+
     for ( auto const & m : mc_reco_map ){
 
       auto score = 1./m.first ;
        
-      //std::cout<<"Some scores are..." <<score<<std::endl;
+      std::cout<<"Some scores are..." <<score<<std::endl;
 
       if ( reco_g1_id == -1 ){
         mc_g1_id   = m.second.first ;
@@ -500,7 +413,6 @@ namespace larlite {
     // Get the association from shower -> cluster
     auto ev_ass_s = storage->get_data<larlite::event_ass>("showerreco");
     auto const& ass_showerreco_v = ev_ass_s->association(ev_s->id(), ev_clus->id());
-    std::cout<<"Background : "<<_event<<", "<<_bkgd_id <<std::endl ;
 
     for ( int s1 = 0; s1 < ev_s->size(); s1++ ){
 
@@ -521,114 +433,6 @@ namespace larlite {
        _gamma_diry = dir1.Y();
        _gamma_dirz = dir1.Z();
 
-       if ( s1 == reco_g1_id ){
-
-	     auto mcs = ev_mcshr->at(mc_g1_id);
-	     _res = dot_g1 ;
-         _mc_dirx = mcs.DetProfile().Px();  
-         _mc_diry = mcs.DetProfile().Py();  
-         _mc_dirz = mcs.DetProfile().Pz();  
-         //_mc_startx = mcs.DetProfile().X();
-         //_mc_starty = mcs.DetProfile().Y();
-         //_mc_startz = mcs.DetProfile().Z();
-
-         _gamma_startx = shr1.ShowerStart().X(); 
-         _gamma_starty = shr1.ShowerStart().Y(); 
-         _gamma_startz = shr1.ShowerStart().Z(); 
-
-         auto mcx = mcs.DetProfile().X() ;
-         auto mcy = mcs.DetProfile().Y() ;
-         auto mcz = mcs.DetProfile().Z() ;
-         auto mct = mcs.DetProfile().T() ;
-         auto vtxtick = (mct/ 1000.) * 2.; 
-         auto vtxtimecm = vtxtick * _time2cm; 
-         auto sce_corr = _SCE->GetPosOffsets(mcx,mcy,mcz);
-
-         _mc_startx = mcx + vtxtimecm + 0.7 - sce_corr.at(0);
-         _mc_starty = mcy + sce_corr.at(1);
-         _mc_startz = mcz + sce_corr.at(2);
-       }
-
-       if ( s1 == reco_g2_id ){
-	     auto mcs = ev_mcshr->at(mc_g2_id);
-	     _res = dot_g2 ;
-         _mc_dirx = mcs.DetProfile().Px();  
-         _mc_diry = mcs.DetProfile().Py();  
-         _mc_dirz = mcs.DetProfile().Pz();  
-         _gamma_startx = shr1.ShowerStart().X(); 
-         _gamma_starty = shr1.ShowerStart().Y(); 
-         _gamma_startz = shr1.ShowerStart().Z(); 
-
-         auto mcx = mcs.DetProfile().X() ;
-         auto mcy = mcs.DetProfile().Y() ;
-         auto mcz = mcs.DetProfile().Z() ;
-         auto mct = mcs.DetProfile().T() ;
-         auto vtxtick = (mct/ 1000.) * 2.; 
-         auto vtxtimecm = vtxtick * _time2cm; 
-         auto sce_corr = _SCE->GetPosOffsets(mcx,mcy,mcz);
-
-         _mc_startx = mcx + vtxtimecm + 0.7 - sce_corr.at(0);
-         _mc_starty = mcy + sce_corr.at(1);
-         _mc_startz = mcz + sce_corr.at(2);
-
-       }
-
-
-       float mc_clus_e = 0.;
-       int closest_mcs_id = -1 ;
-       float closest_e = 1e9 ;
-
-       for (size_t j = 0; j < ass_showerreco_v.at(s1).size(); j++ ){
-
-         auto clus_id = ass_showerreco_v.at(s1).at(j);
-         auto iclus = ev_clus->at(clus_id);
-
-         int plane = iclus.Plane().Plane ;
-         if ( plane != 2 ) continue;
-
-         pur_ctr_v.clear();
-         pur_ctr_v.resize(ass_mcclus_v.size()+1,0) ;
-
-         max_hits = -1;
-         max_cid = -1 ;
-
-         // Loop through all hits associared to the cluster 
-         for ( int k = 0; k < ass_imageclus_v.at(clus_id).size(); k++ ){
-
-           auto hid = ass_imageclus_v.at(clus_id).at(k) ;
-           auto h = ev_hit->at(hid);
-
-           if ( _mc_hit_map.find(hid) != _mc_hit_map.end() ){
-
-             auto mcclus_id = _mc_hit_map[hid] ;
-             pur_ctr_v[mcclus_id]++ ;
-
-             if( pur_ctr_v[ mcclus_id] > max_hits ){
-               max_hits = pur_ctr_v[mcclus_id];
-               max_cid = mcclus_id ;
-             }
-           }   
-           else {
-             auto mcclus_id = ass_mcclus_v.size() ;
-             pur_ctr_v[mcclus_id]++ ; 
-             if( pur_ctr_v[mcclus_id] > max_hits ){
-               max_hits = pur_ctr_v[mcclus_id];
-               max_cid = mcclus_id ; 
-             }
-           }
-         }
-
-          if ( max_cid != ass_mcclus_v.size() && max_cid != -1 ){
-
-            auto tot_mc_hits =  ass_mcclus_v[max_cid].size(); 
-            auto tot_reco_hits = ass_imageclus_v[clus_id].size();
-    
-            _gamma_purity   = float(max_hits) / tot_reco_hits ;
-            _gamma_complete = float(max_hits) / tot_mc_hits ;
-          }
-       }
-
-       _one_gamma_tree->Fill();
 
        for ( int s2 = 0; s2 < ev_s->size(); s2++ ){
 
@@ -706,8 +510,6 @@ namespace larlite {
             _gamma_IP = IP;
 
             bool shower1islow = shr1.Energy(2) < shr2.Energy(2) ? true : false ;
-
-
 
             if ( s1 == reco_g1_id ){
               if( shower1islow){
@@ -849,196 +651,8 @@ namespace larlite {
             auto st_low_res = sqrt ( pow(_mc_low_startx - _gamma_low_startx,2) +pow(_mc_low_starty - _gamma_low_starty,2)+ pow(_mc_low_startz - _gamma_low_startz,2) ) ;
             
 
-             //////////////////////////////////////
-             float mc_clus_e = 0.;
-             closest_mcs_id = -1 ;
-             float closest_e = 1e9 ;
-
-             for (size_t j = 0; j < ass_showerreco_v.at(s1).size(); j++ ){
-
-               auto clus_id = ass_showerreco_v.at(s1).at(j);
-               auto iclus = ev_clus->at(clus_id);
-
-               int plane = iclus.Plane().Plane ;
-               if ( plane != 2 ) continue;
-
-               pur_ctr_v.clear();
-               pur_ctr_v.resize(ass_mcclus_v.size()+1,0) ;
-
-               max_hits = -1;
-               max_cid = -1 ;
-
-               // Loop through all hits associared to the cluster 
-               for ( int k = 0; k < ass_imageclus_v.at(clus_id).size(); k++ ){
-
-                 auto hid = ass_imageclus_v.at(clus_id).at(k) ;
-                 auto h = ev_hit->at(hid);
-
-                 if ( _mc_hit_map.find(hid) != _mc_hit_map.end() ){
-
-                   auto mcclus_id = _mc_hit_map[hid] ;
-                   pur_ctr_v[mcclus_id]++ ;
-
-                   if( pur_ctr_v[ mcclus_id] > max_hits ){
-                     max_hits = pur_ctr_v[mcclus_id];
-                     max_cid = mcclus_id ;
-                   }
-                 }   
-                 else {
-                   auto mcclus_id = ass_mcclus_v.size() ;
-                   pur_ctr_v[mcclus_id]++ ; 
-                   if( pur_ctr_v[mcclus_id] > max_hits ){
-                     max_hits = pur_ctr_v[mcclus_id];
-                     max_cid = mcclus_id ; 
-                   }
-                 }
-               }
-
-                if ( max_cid != ass_mcclus_v.size() && max_cid != -1 ){
-
-                  auto clocktick = larutil::DetectorProperties::GetME()->SamplingRate() * 1.e-3; //time sample in usec
-    
-                  // Store true shower detprofile energy
-                  for ( auto const & mcc_hid : ass_mcclus_v[max_cid] ){
-                    auto mch = ev_hit->at(mcc_hid) ;
-                    float lifetime_corr = exp( mch.PeakTime() * clocktick / 1.e20);
-                    float electrons = mch.Integral() * 198.; //mcc8 value
-                    float dQ = electrons * lifetime_corr * 23.6 * 1e-6 ;
-                    float dE = dQ / 0.577 ; // 0.62 -> recomb factor
-                    mc_clus_e += dE ;
-                  }   
-
-                  // Find mcs this cluster belongs to in order to store the true shower energy
-                  for ( int i = 0; i < ev_mcshr->size(); i++ ) { 
-
-                    auto s = ev_mcshr->at(i) ;
-                    if(s.Origin() != 1 || s.MotherPdgCode() != 111 ) continue;
-    
-                    auto e = fabs(mc_clus_e - s.DetProfile().E()) ;
-
-                    if ( e < closest_e ){
-                      closest_e  = e;
-                      closest_mcs_id = i ; 
-                    }   
-                  }   
-
-
-                  auto tot_mc_hits =  ass_mcclus_v[max_cid].size(); 
-                  auto tot_reco_hits = ass_imageclus_v[clus_id].size();
-    
-                  if ( shower1islow ){ 
-                    _gamma_low_purity   = _gamma_purity ;
-                    _gamma_low_complete = _gamma_complete ;
-                    _gamma_high_purity = float(max_hits) / tot_reco_hits ;
-                    _gamma_high_complete = float(max_hits) / tot_mc_hits ;
-
-
-                  }
-                  else{
-                    _gamma_high_purity   = _gamma_purity ;
-                    _gamma_high_complete = _gamma_complete ;
-                    _gamma_low_purity   = float(max_hits) / tot_reco_hits ;
-                    _gamma_low_complete = float(max_hits) / tot_mc_hits ;
-
-
-                  }
-
-                //std::cout<<"res low and high : "<<_res_low<<", "<<_res_high<<std::endl ;
-                }
-             }
-             ////////////////////////////////////
-
-             mc_clus_e = 0.;
-             closest_mcs_id = -1 ;
-             closest_e = 1e9 ;
-
-             for (size_t j = 0; j < ass_showerreco_v.at(s2).size(); j++ ){
-
-               auto clus_id = ass_showerreco_v.at(s2).at(j);
-               auto iclus = ev_clus->at(clus_id);
-
-               int plane = iclus.Plane().Plane ;
-               if ( plane != 2 ) continue;
-
-               pur_ctr_v.clear();
-               pur_ctr_v.resize(ass_mcclus_v.size()+1,0) ;
-
-               max_hits = -1;
-               max_cid = -1 ;
-
-               // Loop through all hits associared to the cluster 
-               for ( int k = 0; k < ass_imageclus_v.at(clus_id).size(); k++ ){
-
-                 auto hid = ass_imageclus_v.at(clus_id).at(k) ;
-                 auto h = ev_hit->at(hid);
-
-                 if ( _mc_hit_map.find(hid) != _mc_hit_map.end() ){
-
-                   auto mcclus_id = _mc_hit_map[hid] ;
-                   pur_ctr_v[mcclus_id]++ ;
-
-                   if( pur_ctr_v[ mcclus_id] > max_hits ){
-                     max_hits = pur_ctr_v[mcclus_id];
-                     max_cid = mcclus_id ;
-                   }
-                 }   
-                 else {
-                   auto mcclus_id = ass_mcclus_v.size() ;
-                   pur_ctr_v[mcclus_id]++ ; 
-                   if( pur_ctr_v[mcclus_id] > max_hits ){
-                     max_hits = pur_ctr_v[mcclus_id];
-                     max_cid = mcclus_id ; 
-                   }
-                 }
-               }
-
-                if ( max_cid != ass_mcclus_v.size() && max_cid != -1 ){
-
-                  auto clocktick = larutil::DetectorProperties::GetME()->SamplingRate() * 1.e-3; //time sample in usec
-    
-                  // Store true shower detprofile energy
-                  for ( auto const & mcc_hid : ass_mcclus_v[max_cid] ){
-                    auto mch = ev_hit->at(mcc_hid) ;
-                    float lifetime_corr = exp( mch.PeakTime() * clocktick / 1.e20);
-                    float electrons = mch.Integral() * 198.; //mcc8 value
-                    float dQ = electrons * lifetime_corr * 23.6 * 1e-6 ;
-                    float dE = dQ / 0.577 ; // 0.62 -> recomb factor
-                    mc_clus_e += dE ;
-                  }   
-
-                  // Find mcs this cluster belongs to in order to store the true shower energy
-                  for ( int i = 0; i < ev_mcshr->size(); i++ ) { 
-
-                    auto s = ev_mcshr->at(i) ;
-                    if(s.Origin() != 1 || s.MotherPdgCode() != 111 ) continue;
-    
-                    auto e = fabs(mc_clus_e - s.DetProfile().E()) ;
-
-                    if ( e < closest_e ){
-                      closest_e  = e;
-                      closest_mcs_id = i ; 
-                    }   
-                  }   
-
-                  auto tot_mc_hits =  ass_mcclus_v[max_cid].size(); 
-                  auto tot_reco_hits = ass_imageclus_v[clus_id].size();
-                 if ( !shower1islow ){ 
-                    _gamma_low_purity   = float(max_hits) / tot_reco_hits ;
-                    _gamma_low_complete = float(max_hits) / tot_mc_hits ;
-                  }
-                  else{
-                    _gamma_high_purity   = float(max_hits) / tot_reco_hits ;
-                    _gamma_high_complete = float(max_hits) / tot_mc_hits ;
-                  }
-                }
-             }
-             ////////////////////////////////////
-
-
             _gamma_tree->Fill() ;
         }// shower ID 2 
-
- 
       }// shower ID 1 
 
       //std::cout<<"GREnergyRes - Found a candidate! "<<std::endl ;
@@ -1050,10 +664,7 @@ namespace larlite {
 
     if(_fout) { 
       _fout->cd(); 
-      _compare_tree->Write(); 
       _gamma_tree->Write(); 
-      _one_gamma_tree->Write(); 
-      _tree->Write();
     }
 
     std::cout<<"Signals: "<<std::endl ;
