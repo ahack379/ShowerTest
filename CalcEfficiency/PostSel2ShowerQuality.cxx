@@ -26,6 +26,10 @@ namespace larlite {
       _tree = new TTree("tree","");
       _tree->Branch("event",&_event,"event/I");
 
+      _tree->Branch("event_id",&_event_id,"event_id/I");
+      _tree->Branch("run_id",&_run_id,"run_id/I");
+      _tree->Branch("subrun_id",&_subrun_id,"subrun_id/I");
+
       _tree->Branch("purity",&_purity,"purity/F");
       _tree->Branch("complete",&_complete,"complete/F");
       _tree->Branch("cw_purity",&_cw_purity,"cw_purity/F");
@@ -108,6 +112,10 @@ namespace larlite {
   bool PostSel2ShowerQuality::analyze(storage_manager* storage) {
 
     _event++ ;
+
+    _run_id = storage->run_id() ;
+    _subrun_id = storage->subrun_id() ;
+    _event_id = storage->event_id() ;
     std::cout<<"\n\nEVENT IS: "<<_event<<std::endl;
     clear();
 
