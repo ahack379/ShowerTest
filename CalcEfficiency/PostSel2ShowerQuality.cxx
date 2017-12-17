@@ -187,6 +187,9 @@ namespace larlite {
       auto ev_mcs = storage->get_data<event_mcshower>("mcreco") ;
       if ( !ev_mcs || !ev_mcs->size() ) {std::cout<<"No MCShower!" <<std::endl ; return false; }
 
+      auto ev_mct = storage->get_data<event_mctrack>("mcreco") ;
+      if ( !ev_mct || !ev_mct->size() ) {std::cout<<"No MCTrack!" <<std::endl ; return false; }
+
       auto ev_s = storage->get_data<event_shower>("showerreco");
       if( !ev_s || !ev_s->size() ){ 
         std::cout<<"Not enough reco'd showers..." <<std::endl;
@@ -310,6 +313,14 @@ namespace larlite {
            _dir_z = ishr.Direction().Z();
 
 	   _mc_detProf_e = mc_clus_e;
+
+
+       auto mcst_id = max_cid - ev_mcs->size() - ev_mct->size();
+
+       if ( mcst_id < ev_mcs->size() ){
+         std::cout<<"In here "<<std::endl ;
+         closest_mcs_id = mcst_id ;
+       }
 
        if ( closest_mcs_id != -1){
 	       _mc_e = ev_mcs->at(closest_mcs_id).Start().E() ;
