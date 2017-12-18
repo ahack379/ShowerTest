@@ -69,7 +69,7 @@ namespace larlite {
 
 
     // Retrieve cluster data product (output)
-    auto ev_mccluster = storage->get_data<event_cluster>("mccluster");
+    auto ev_mccluster = storage->get_data<event_cluster>("mccluster_heavy_test");
     auto cluster_ass_v = storage->get_data<event_ass>(ev_mccluster->name());
 
     // since we are creating a new data product,
@@ -152,7 +152,7 @@ namespace larlite {
 	pi0_index_v.push_back(found_pi0);
 	track_shower_index_v.push_back(1); // 1 indicates shower
 	cosmic_neutrino_v.push_back(mcs.Origin()); // 1 indicate neutrino
-	pdg_v.push_back(mcs.PdgCode()); // 1 indicate neutrino
+	pdg_v.push_back(mc_index); // 1 indicate neutrino
 	mother_pdg_v.push_back(mcs.MotherPdgCode()); // 1 indicate neutrino
 	ancestor_pdg_v.push_back(mcs.AncestorPdgCode()); // 1 indicate neutrino
 	mcs_energy_v.push_back(mcs.Start().E()); // 
@@ -183,7 +183,8 @@ namespace larlite {
 	pi0_index_v.push_back(false);
 	track_shower_index_v.push_back(0); // 1 indicates shower
 	cosmic_neutrino_v.push_back(mct.Origin()); // 1 indicates shower
-	pdg_v.push_back(mct.PdgCode()); // 1 indicate neutrino
+	//pdg_v.push_back(mct.PdgCode()); // 1 indicate neutrino
+	pdg_v.push_back(mc_index); // 1 indicate neutrino
 	mother_pdg_v.push_back(mct.MotherPdgCode()); // 1 indicate neutrino
 	ancestor_pdg_v.push_back(mct.AncestorPdgCode()); // 1 indicate neutrino
 	mcs_energy_v.push_back(-999.); // 1 indicate neutrino
