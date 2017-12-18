@@ -145,9 +145,6 @@ namespace larlite {
                continue;
             }
 
-	    if( (radL_shr1 < 100 && radL_shr2 > 100 ) && (shr1.Energy(2) > 40 || shr2.Energy(2) > 40) ){
-	      continue;
-	    }
 
            // if( radL_shr1 > 62 || radL_shr2 > 62 ){
            //    //std::cout<<"Rad Length : "<<radL_shr1<<", "<<radL_shr2<<std::endl ;
@@ -165,6 +162,12 @@ namespace larlite {
             _pi0_high_shrE = shr1.Energy(2) < shr2.Energy(2) ? shr2.Energy(2) : shr1.Energy(2) ;
             _pi0_low_radL  = shr1.Energy(2) < shr2.Energy(2) ? radL_shr1 : radL_shr2 ;
             _pi0_high_radL = shr1.Energy(2) < shr2.Energy(2) ? radL_shr2 : radL_shr1 ;
+
+	    if( pi0_low_radL > 100 || _pi0_high_radL > 80 ) 
+	      continue;
+	    
+            if (_pi0_low_shrE < 40 && _pi0_high_shrE < 40)
+	      continue;
         }// shower ID 2 
       }// shower ID 1 
       if ( candidate_pairs.size() > 1 ) _more_than_one ++ ;
