@@ -8,6 +8,7 @@
 #include "DataFormat/cluster.h"
 #include "DataFormat/mcshower.h"
 #include "DataFormat/mctrack.h"
+#include "DataFormat/mctruth.h"
 
 namespace larlite {
 
@@ -25,18 +26,18 @@ namespace larlite {
   
   bool TestSlimmedMCPart::analyze(storage_manager* storage) {
 
-    std::cout<<"New event : "<<std::endl ;
+    std::cout<<"\n\nNew event : "<<std::endl ;
 
     auto ev_ass = storage->get_data<larlite::event_ass>("gaushitTruthMatch");
 
-    std::cout<<"Hit association tree size: "<<ev_ass->size()<<std::endl ;
+    //std::cout<<"Hit association tree size: "<<ev_ass->size()<<std::endl ;
      if ( !ev_ass || ev_ass->size() == 0 ) {
        std::cout << "No such association! " << std::endl;
        return false;
      }
 
-    auto const& ass_hit_v = ev_ass->association(0);
-    auto const& ass_mcpart_v = ev_ass->association(1);
+    //auto const& ass_hit_v = ev_ass->association(0);
+    //auto const& ass_mcpart_v = ev_ass->association(1);
 
     auto ev_mcshower = storage->get_data<event_mcshower>("mcreco");
     auto ev_mct = storage->get_data<event_mctrack>("mcreco");
@@ -49,7 +50,7 @@ namespace larlite {
     auto const& ass_hit_mcpart_v = ev_ass->association(ev_hit->id(),ev_mcpart->id());
 
     // Retrieve cluster data product (output)
-    auto ev_mccluster = storage->get_data<event_cluster>("mccluster_slim");
+    auto ev_mccluster = storage->get_data<event_cluster>("mccluster_slim_test");
     auto cluster_ass_v = storage->get_data<event_ass>(ev_mccluster->name());
 
     storage->set_id(ev_hit->run(),ev_hit->subrun(),ev_hit->event_id());
@@ -59,6 +60,8 @@ namespace larlite {
     cluster_hit_v.resize( 3 *( ev_mcshower->size() + ev_mct->size()) );
     std::vector<larlite::geo::View_t> cluster_plane_v(cluster_hit_v.size(), larlite::geo::View_t::kUnknown);
 
+    std::vector<float> cluster_mcst_id_v(cluster_hit_v.size(), 0);
+
     // mcparticle (TrackId) to mcshower map
     std::map<int,int> mcp_to_mcs ;
 
@@ -67,15 +70,31 @@ namespace larlite {
     for (int jj=0; jj < ev_mcshower->size(); jj++){
 
       auto mcs = ev_mcshower->at(jj); 
-      if (mcs.DetProfile().E() != 0 ){
+      //if (mcs.DetProfile().E() != 0 ){
+        
         for ( auto const & p : mcs.DaughterTrackID() ){
 
           //std::cout<<"Energy : "<<mcs.DetProfile().E() <<" trackid: "<<p<<std::endl ;
+	  //if ( p == 1031692 ) std::cout<<" OK...in here "<<std::endl ;
+          //std::cout<<"Other track ids: "<<ev_mcshower->at(jj).TrackID() <<std::endl ;
           mcp_to_mcst[p] = jj ;
         }
-      }
+      //}
 
     }
+
+    auto ev_truth = storage->get_data<event_mctruth>("generator");
+    auto t = ev_truth->at(0);
+
+    for (auto const & p : t.GetParticles()){
+      if ( p.TrackId() == 1031692 ) std::cout<<"particle : "<<p.PdgCode() <<std::endl ; //", "<<p.MotherPdgCode() <<std::endl ;
+      std::cout<<"Particle track IDs: "<<p.TrackId()<<std::endl;
+    
+    }
+
+
+
+ 
 
     // mcparticle to mctrack map
     std::map<int,int> mcp_to_mct ;
@@ -83,6 +102,7 @@ namespace larlite {
     for (int jj=0; jj < ev_mct->size(); jj++){
       
       auto mct = ev_mct->at(jj); 
+
       if ( mcp_to_mcst.find(mct.TrackID() ) != mcp_to_mcst.end() ){
          std::cout<<"So...we can have overlap in trackIDs? "<<mct.TrackID()<<std::endl ;
          continue;
@@ -92,6 +112,8 @@ namespace larlite {
       mcp_to_mcst[mct.TrackID()] = (jj + ev_mcshower->size() ) ;
     }
 
+    std::vector<float> cluster_ts_v(cluster_hit_v.size(), 0);
+    std::vector<float> cluster_idx_v(cluster_hit_v.size(), 0);
 
     // loop over hits
     for (size_t kk=0; kk < ass_hit_mcpart_v.size(); kk++) {
@@ -103,36 +125,41 @@ namespace larlite {
 
       if ( mcpart_id.size() == 0 ) continue; 
       int mcp_trackid = mcpart_id.at(0);
-     
+
       if ( mcp_to_mcst.find(mcp_trackid) != mcp_to_mcst.end() ){
+
         int idx = mcp_to_mcst[mcp_trackid] ;
         cluster_hit_v[ pl * (ev_mcshower->size() + ev_mct->size() ) + idx  ].push_back( hit_idx );
         cluster_plane_v[ pl *(ev_mcshower->size() + ev_mct->size() ) + idx ] = pl;
-	//std::cout<<"MC shower trackID: "<<mcp.TrackId()<<", "<<ev_mcshower->at(mcp_to_mcs[mcp.TrackId()]).TrackID()<<std::endl ;
+	if ( idx >= ev_mcshower->size() ){
+	  cluster_ts_v[ pl * (ev_mcshower->size() + ev_mct->size() ) + idx ] = 0 ; // track
+	  cluster_idx_v[ pl * (ev_mcshower->size() + ev_mct->size() ) + idx ] = idx - ev_mcshower->size() ; 
+	}
+	else{
+	  cluster_ts_v[ pl * (ev_mcshower->size() + ev_mct->size() ) + idx ] = 1 ; // shower
+	  cluster_idx_v[ pl * (ev_mcshower->size() + ev_mct->size() ) + idx ] = idx ; 
+	}
+
       }
-      //else if ( mcp_to_mct.find(mcp_trackid) != mcp_to_mct.end() ){
-      //  int idx = mcp_to_mct[mcp_trackid] ;
-      //  cluster_hit_v[ pl * ( ev_mcshower->size()) + ev_mcshower->size() + idx  ].push_back( hit_idx );
-      //  cluster_plane_v[ pl *( ev_mcshower->size()) + ev_mcshower->size() + idx ] = pl;
-      //}
       else continue;
-      //std::cout<<"Hit info : "<<ev_hit->at(kk).WireID().Plane <<std::endl ;
-      //std::cout<<"Particle : "<<mcp.PdgCode()<<", "<<mcp.TrackId()<<", "<<std::endl;
     }
 
     std::cout<<" CLusters: "<<cluster_hit_v.size() <<std::endl;
 
     std::vector<std::vector<unsigned int> > cluster_hit_ass_v;
-    for (size_t idx=0; idx < cluster_hit_v.size(); idx++){
-      if (cluster_hit_v[idx].size() < 4) 
+    for (size_t it=0; it < cluster_hit_v.size(); it++){
+      if (cluster_hit_v[it].size() < 4) 
         continue;
 
       // create a new cluster
       cluster clus;
-      clus.set_n_hits(cluster_hit_v[idx].size());
-      clus.set_view(cluster_plane_v[idx]);
+      clus.set_n_hits(cluster_hit_v[it].size());
+      clus.set_view(cluster_plane_v[it]);
+      // Indicate whether this index came from mctrack or mcshower
+      clus.set_start_opening(cluster_ts_v[it]);
+      clus.set_width(cluster_idx_v[it]);
       ev_mccluster->push_back(clus);
-      cluster_hit_ass_v.push_back(cluster_hit_v[idx]);
+      cluster_hit_ass_v.push_back(cluster_hit_v[it]);
 
     }// for all clusters created
 

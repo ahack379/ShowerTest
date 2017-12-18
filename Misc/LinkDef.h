@@ -14,8 +14,14 @@
 #pragma link C++ class larlite::LeadingPhoton+;
 #pragma link C++ class larlite::MCClusterCheck+;
 #pragma link C++ class larlite::SmearMCVertex+;
+#pragma link C++ class larlite::TestMCPart+;
+#pragma link C++ class larlite::TestSlimmedMCPart+;
+#pragma link C++ class larlite::SlimmedBT+;
+#pragma link C++ class larlite::Overlap+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
+
+
 
 
 
