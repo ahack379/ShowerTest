@@ -151,9 +151,7 @@ namespace larlite {
            //    continue;
            //     }
 
-            candidate_pairs.push_back(std::make_pair(s1,s2));
-            cand_ids.emplace_back(s1);
-            cand_ids.emplace_back(s2);
+
 
             _pi0_mass      = sqrt(2 * shr1.Energy(2) * shr2.Energy(2) *(1.-cos(oangle))); 
             _pi0_mom       = tot_pi0_mom;
@@ -166,8 +164,12 @@ namespace larlite {
 	    if( _pi0_low_radL > 100 || _pi0_high_radL > 80 ) 
 	      continue;
 	    
-            if (_pi0_low_shrE < 40 && _pi0_high_shrE < 40)
+         if (_pi0_low_shrE < 40 && _pi0_high_shrE < 40)
 	      continue;
+
+         candidate_pairs.push_back(std::make_pair(s1,s2));
+         cand_ids.emplace_back(s1);
+         cand_ids.emplace_back(s2);
         }// shower ID 2 
       }// shower ID 1 
       if ( candidate_pairs.size() > 1 ) _more_than_one ++ ;
