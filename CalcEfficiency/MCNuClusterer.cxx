@@ -225,8 +225,8 @@ namespace larlite {
 	
 	auto const& ch     = hit.Channel();
 
-	auto const& tstart = hit.PeakTime() - 2*hit.RMS() ;//+ 7298; //2255;//3050;
-	auto const& tend   = hit.PeakTime() + 2*hit.RMS() ;//+ 7298; //2255;//3050;
+	auto const& tstart = hit.PeakTime() - 1*hit.RMS() ; // was 2; changing briefly for test 
+	auto const& tend   = hit.PeakTime() + 1*hit.RMS() ; 
 	auto const& pl     = hit.View();
 
         if ( hit.PeakTime() > _max_time ) { _max_time = hit.PeakTime() ; max_pl = hit.View(); }
