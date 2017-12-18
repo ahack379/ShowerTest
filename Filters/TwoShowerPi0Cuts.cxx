@@ -163,7 +163,7 @@ namespace larlite {
             _pi0_low_radL  = shr1.Energy(2) < shr2.Energy(2) ? radL_shr1 : radL_shr2 ;
             _pi0_high_radL = shr1.Energy(2) < shr2.Energy(2) ? radL_shr2 : radL_shr1 ;
 
-	    if( pi0_low_radL > 100 || _pi0_high_radL > 80 ) 
+	    if( _pi0_low_radL > 100 || _pi0_high_radL > 80 ) 
 	      continue;
 	    
             if (_pi0_low_shrE < 40 && _pi0_high_shrE < 40)
