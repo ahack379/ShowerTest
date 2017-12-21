@@ -30,7 +30,7 @@ namespace larlite {
   public:
 
     /// Default constructor
-    BackgroundBT(){ _name="BackgroundBT"; _fout=0; _tree=0; _shower_tree = 0; _get_genie_info=false; _eventweight_producer = "";}
+    BackgroundBT(){ _name="BackgroundBT"; _fout=0; _tree=0; _shower_tree = 0; _univ=0; _get_genie_info=false; _eventweight_producer = "";}
 
     /// Default destructor
     virtual ~BackgroundBT(){}
@@ -56,11 +56,18 @@ namespace larlite {
 
     void GetSingleShowerInfo  ( bool getit=false ) { _get_single_shower_info = getit; }
 
-    void GetGenieInfo  ( bool getit=false ) { _get_genie_info = getit; }
+    void clear() ;
 
+    // The rest is for uncertainty re-weighting
+    // Tell the module to calculate uncertainties 
+    void GetUncertaintyInfo  ( bool getit=false ) { _get_genie_info = getit; }
+
+    // Pick the uncertainty to vary (genie or flux)
     void SetEWProducer( std::string producer ) { _eventweight_producer = producer ; }
 
-    void clear() ;
+    // This is for the flux uncertainty portion of the analysis
+    void SetNominal ( float nom ) { _N = nom ; }
+    void SetNominalXsec ( float nom ) { _N_xsec = nom ; }
 
   protected:
 
@@ -154,6 +161,9 @@ namespace larlite {
   float _pi0_high_origin ; // is this mccluster due to nu(1), cosmic(2), noise(3)
   float _pi0_high_type ;   // is this mccluster due to track(0) or shower(1)
   bool _pi0_high_from_pi0;   // is this mccluster from a pi0? yes(1) no(0)
+  
+  float _pi0_low_dist_to_nearest_trk ;
+  float _pi0_high_dist_to_nearest_trk ;
 
   float _pi0_low_st_x ;
   float _pi0_low_st_y ;
@@ -243,13 +253,33 @@ namespace larlite {
   float _shr_ip ;
   float _shr_rl;
 
+  // Check osc group question
+  int _1gamma ;
+
   // genie addition
   std::vector<float> _sel_evts_m1;
   std::vector<float> _sel_evts_p1;
 
   std::vector<std::string> _genie_label_v ;
-
   std::string _eventweight_producer ;
+
+  // FLUX variables
+  std::vector<std::string> _unisim_label_v ;
+  bool _signal ;
+
+  std::vector<std::vector<float>>  _s_weights_by_universe ;
+  std::vector<std::vector<float>>  _b_weights_by_universe ;
+  std::vector<std::vector<float>>  _t_weights_by_universe ;
+  std::vector<std::vector<float>>  _flux_by_universe ; 
+
+  TTree * _univ;
+  std::vector<std::vector<float>> _xsec_v ;
+  std::vector<std::vector<float>> _perc_v;
+
+  std::map<std::string,int> _label_map ;
+
+  float _N ;
+  float _N_xsec ;
 
   };
 }
