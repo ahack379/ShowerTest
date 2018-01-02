@@ -27,6 +27,9 @@ namespace larlite {
     _n_nc1pi0 = 0;   // 4 
     _n_nc0pi0 = 0;   // 5
 
+    _n_nc_1gamma = 0;
+    _n_cc_1gamma = 0;
+
     _tot_pot = 0;
 
     return true;
@@ -115,10 +118,10 @@ namespace larlite {
     
 
     // Now calculate the total POT + total numu neutrinos 
-    auto ev_pot = storage->get_subrundata<potsummary>("generator"); 
+    //auto ev_pot = storage->get_subrundata<potsummary>("generator"); 
 
-    if( storage->subrun_id() != storage->last_subrun_id() )
-      _tot_pot += ev_pot->totgoodpot ;
+    //if( storage->subrun_id() != storage->last_subrun_id() )
+    //  _tot_pot += ev_pot->totgoodpot ;
 
     return true;
   }
