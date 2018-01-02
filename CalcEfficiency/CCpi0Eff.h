@@ -64,6 +64,9 @@ namespace larlite {
 
   float _tot_pot ;
 
+  int _n_nc_1gamma ;
+  int _n_cc_1gamma ;
+
   };
 }
 #endif

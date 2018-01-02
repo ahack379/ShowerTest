@@ -82,6 +82,7 @@ namespace larlite {
     auto parts = ev_mctruth->at(0).GetParticles();
     int n_pi0 = 0;
     int n_mu = 0;
+    int n_gamma = 0;
     
     for ( auto const & p : parts ){
      
@@ -89,7 +90,15 @@ namespace larlite {
           n_pi0 ++;
         if( p.StatusCode() == 1 && p.PdgCode() == 13 )
           n_mu ++;
+
+        if( p.StatusCode() == 1 && p.PdgCode() == 22 )
+          n_gamma ++;
      }
+
+     if( n_gamma == 1 && nu.CCNC() == 0 && nu.Nu().PdgCode() == 14 )
+       _n_cc_1gamma++;
+     if( n_gamma == 1 && nu.CCNC() == 1 )
+       _n_nc_1gamma++;
 
      if( nu.Nu().PdgCode() == 14 && n_pi0 == 1 && nu.CCNC() == 0 && infv){ 
        _event_list.emplace_back(_event-1);
@@ -135,6 +144,9 @@ namespace larlite {
 
     std::cout<<"Total accounted backgrounds: "<< _n_other + _n_cosmic + _n_nc1pi0 + _n_nc0pi0 + _n_cc0pi0 <<std::endl ;
     std::cout<<"Total POT: "<<_tot_pot <<std::endl ;
+
+    std::cout<<"CC single gamma: "<<_n_cc_1gamma<<std::endl;
+    std::cout<<"NC single gamma: "<<_n_nc_1gamma<<std::endl;
 
 
 
