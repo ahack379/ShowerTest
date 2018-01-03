@@ -1,5 +1,5 @@
-#ifndef LARLITE_JUSTIFYPI0CUTS_CXX
-#define LARLITE_JUSTIFYPI0CUTS_CXX
+#ifndef LARLITE_JUSTIFYCUTS_CXX
+#define LARLITE_JUSTIFYCUTS_CXX
 
 #include "JustifyPi0Cuts.h"
 #include "DataFormat/shower.h"

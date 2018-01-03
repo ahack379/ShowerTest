@@ -125,6 +125,16 @@ namespace larlite {
 
  larutil::SpaceChargeMicroBooNE *_SCE;
  double _time2cm;
+
+ float _n_recod_true_showers ;
+ float _n_true_showers ;
+
+ float _low_shr_e ;
+ float _high_shr_e ;
+
+ int _out_of_av ;
+ int _tot_shr ;
+
     
   };
 }

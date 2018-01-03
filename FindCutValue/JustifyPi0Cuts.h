@@ -12,8 +12,8 @@
 
     @{*/
 
-#ifndef LARLITE_JUSTIFYPI0CUTS_H
-#define LARLITE_JUSTIFYPI0CUTS_H
+#ifndef LARLITE_JUSTIFYCUTS_H
+#define LARLITE_JUSTIFYCUTS_H
 
 #include "Analysis/ana_base.h"
 #include "GeoAlgo/GeoAlgo.h"
