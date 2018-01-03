@@ -61,7 +61,14 @@ namespace larlite {
       _tree->Branch("mc_detProf_sce_corr_y",&_mc_detProf_sce_corr_y,"mc_detProf_sce_corr_y/F");
       _tree->Branch("mc_detProf_sce_corr_z",&_mc_detProf_sce_corr_z,"mc_detProf_sce_corr_z/F");
 
+      _tree->Branch("n_true_showers",&_n_true_showers,"n_true_showers/F");
+      _tree->Branch("n_recod_true_showers",&_n_recod_true_showers,"n_recod_true_showers/F");
+      _tree->Branch("low_shr_e",&_low_shr_e,"low_shr_e/F");
+      _tree->Branch("high_shr_e",&_high_shr_e,"high_shr_e/F");
+
    }
+   _out_of_av = 0;
+   _tot_shr = 0;
 
     return true;
   }
@@ -101,7 +108,12 @@ namespace larlite {
     _mc_detProf_sce_corr_x = -999;
     _mc_detProf_sce_corr_y = -999;
     _mc_detProf_sce_corr_z = -999;
+    
+    _n_true_showers = 0;
+    _n_recod_true_showers = 0;
 
+    _low_shr_e = 1e9; 
+    _high_shr_e = -999;
 
   }
   
@@ -179,30 +191,60 @@ namespace larlite {
     int max_cid = -1 ;
     float tot_reco_cw_hits = 0;
 
-      // Get the association from cluster -> hit
-      auto const & ev_clus = storage->get_data<event_cluster>("ImageClusterHit");
-      auto const & ev_ass_c = storage->get_data<larlite::event_ass>("ImageClusterHit");
-      auto const & ass_imageclus_v = ev_ass_c->association(ev_clus->id(), ev_hit->id());
+    // Get the association from cluster -> hit
+    auto const & ev_clus = storage->get_data<event_cluster>("ImageClusterHit");
+    auto const & ev_ass_c = storage->get_data<larlite::event_ass>("ImageClusterHit");
+    auto const & ass_imageclus_v = ev_ass_c->association(ev_clus->id(), ev_hit->id());
 
-      auto ev_mcs = storage->get_data<event_mcshower>("mcreco") ;
-      if ( !ev_mcs || !ev_mcs->size() ) {std::cout<<"No MCShower!" <<std::endl ; return false; }
+    auto ev_mcs = storage->get_data<event_mcshower>("mcreco") ;
+    if ( !ev_mcs || !ev_mcs->size() ) {std::cout<<"No MCShower!" <<std::endl ; return false; }
 
-      auto ev_s = storage->get_data<event_shower>("showerreco");
-      if( !ev_s || !ev_s->size() ){ 
-        std::cout<<"Not enough reco'd showers..." <<std::endl;
-        return false;
-       }   
+    auto ev_s = storage->get_data<event_shower>("showerreco");
+    //if( !ev_s || !ev_s->size() ){ 
+    //  std::cout<<"Not enough reco'd showers..." <<std::endl;
+    //  return false;
+    //}   
+
+    auto temp_n_true_showers = 0;
+    auto temp_n_recod_true_showers = 0;
+    std::vector<int> all_mcs_v ;  
+    std::vector<int> used_mcs_v ;  
+
+    for ( int i = 0; i < ev_mcs->size(); i++){
+
+      auto s = ev_mcs->at(i);
+    
+      if ( s.Origin() != 1 || s.MotherPdgCode() != 111 || s.AncestorPdgCode() != 111) continue;
+
+      all_mcs_v.emplace_back(i);
+      
+      if ( s.DetProfile().E() < _low_shr_e )
+        _low_shr_e = s.DetProfile().E() ;
+      if ( s.DetProfile().E() > _high_shr_e )
+        _high_shr_e = s.DetProfile().E() ;
+
+      //std::cout<<"Mother: "<<s.AncestorPdgCode()<<std::endl ;
+
+      temp_n_true_showers++;
+      auto end = s.End() ;
+      _tot_shr ++; 
+
+      if( end.X() < 0 || end.X() > 256.35 || end.Y() > 116.5 || end.Y() < -116.5 || end.Z() < 0 || end.Z() > 1036.8 )
+        _out_of_av ++;
+    
+    }
+
+    if ( ev_s->size() ){   
 
       // Get the association from shower -> cluster
       auto ev_ass_s = storage->get_data<larlite::event_ass>("showerreco");
       auto const& ass_showerreco_v = ev_ass_s->association(ev_s->id(), ev_clus->id());
-      
       // Loop over showers
       for (size_t i = 0; i < ass_showerreco_v.size(); i++ ){
 
         float mc_clus_e = 0.;
-	    int closest_mcs_id = -1 ;
-	    float closest_e = 1e9 ;
+            int closest_mcs_id = -1 ;
+            float closest_e = 1e9 ;
 
         // Loop over clusters associated to this shower
         for (size_t j = 0; j < ass_showerreco_v.at(i).size(); j++ ){
@@ -243,8 +285,8 @@ namespace larlite {
                     max_cw_hits = cw_pur_ctr_v[mcclus_id] ;
                   }
                 }
-	            else {
-	              auto mcclus_id = ass_mcclus_v.size() ;
+                    else {
+                      auto mcclus_id = ass_mcclus_v.size() ;
                   pur_ctr_v[mcclus_id]++ ; 
                   cw_pur_ctr_v[mcclus_id] += h.Integral() ; 
                   if( pur_ctr_v[mcclus_id] > max_hits ){
@@ -252,13 +294,28 @@ namespace larlite {
                     max_cid = mcclus_id ; 
                     max_cw_hits = cw_pur_ctr_v[mcclus_id] ;
                   }
-	            }
+                    }
               }
 
               if ( max_cid != ass_mcclus_v.size() && max_cid != -1 ){
 
+                auto mcclus = ev_mcc->at(max_cid) ;
+                //auto geo = larutil::GeometryHelper::GetME(); //time sample in usec
+
+                //for ( int i = 0; i < ev_mcs->size(); i++ ) { 
+        	      //  auto s = ev_mcs->at(i) ;
+        	      //  if(s.Origin() != 1 || s.MotherPdgCode() != 111 ) continue;
+        	      //  std::vector<float> vtx = { s.DetProfile().X(), s.DetProfile().Y(), s.DetProfile().Z() } ;
+        	      //  auto vtx_2d = geo->Point_3Dto2D(vtx,2) ;
+                      //  auto e = fabs(mc_clus_e - s.DetProfile().E()) ;
+        	      //  if ( e < closest_e ){
+        	      //    closest_e  = e;
+        	      //    closest_mcs_id = i ;
+        	      //  }
+                //}
+
                 auto clocktick = larutil::DetectorProperties::GetME()->SamplingRate() * 1.e-3; //time sample in usec
-		
+        	
                 // Store true shower detprofile energy
                 for ( auto const & mcc_hid : ass_mcclus_v[max_cid] ){
                   auto mch = ev_hit->at(mcc_hid) ;
@@ -272,16 +329,18 @@ namespace larlite {
                 // Find mcs this cluster belongs to in order to store the true shower energy
                 for ( int i = 0; i < ev_mcs->size(); i++ ) { 
 
-		          auto s = ev_mcs->at(i) ;
-		          if(s.Origin() != 1 || s.MotherPdgCode() != 111 ) continue;
-                          
-                          auto e = fabs(mc_clus_e - s.DetProfile().E()) ;
+        	        auto s = ev_mcs->at(i) ;
+        	        if(s.Origin() != 1 || s.MotherPdgCode() != 111 ) continue;
+                        
+                         auto e = fabs(mc_clus_e - s.DetProfile().E()) ;
 
-		          if ( e < closest_e ){
-		            closest_e  = e;
-		            closest_mcs_id = i ;
-		          }
-	          	}
+        	        if ( e < closest_e ){
+        	          closest_e  = e;
+        	          closest_mcs_id = i ;
+        	        }
+                }
+
+                used_mcs_v.emplace_back(closest_mcs_id);
 
                 auto tot_mc_hits =  ass_mcclus_v[max_cid].size(); 
                 auto tot_reco_hits = ass_imageclus_v[clus_id].size();
@@ -292,7 +351,7 @@ namespace larlite {
                 _cw_purity   = float(max_cw_hits) / tot_reco_cw_hits ;
                 _cw_complete = float(max_cw_hits) / tot_mc_cw_hits_v[max_cid]; 
 
-                auto mcclus = ev_mcc->at(max_cid) ;
+                //auto mcclus = ev_mcc->at(max_cid) ;
                 _origin = mcclus.Width() ; 
                 _type   = mcclus.StartOpeningAngle() ; // Recall I've set this to track (0) or shower(1) in mccluster builder
                 _from_pi0 = mcclus.IsMergedCluster() ; 
@@ -301,117 +360,61 @@ namespace larlite {
 
            auto ishr = ev_s->at(i);
 
-	   _reco_e = ishr.Energy(2);
-	   _st_x = ishr.ShowerStart().X();
-	   _st_y = ishr.ShowerStart().Y();
-	   _st_z = ishr.ShowerStart().Z();
+           _reco_e = ishr.Energy(2);
+           _st_x = ishr.ShowerStart().X();
+           _st_y = ishr.ShowerStart().Y();
+           _st_z = ishr.ShowerStart().Z();
            _dir_x = ishr.Direction().X();
            _dir_y = ishr.Direction().Y();
            _dir_z = ishr.Direction().Z();
 
-	   _mc_detProf_e = mc_clus_e;
+           _mc_detProf_e = mc_clus_e;
 
-       if ( closest_mcs_id != -1){
-	       _mc_e = ev_mcs->at(closest_mcs_id).Start().E() ;
+	   //if ( _mc_detProf_e > _high_shr_e ){
+	   //  _low_shr_e = _high_shr_e ;
+	   //  _high_shr_e = 
+	   //}
 
-           // 00) Start - calculate SC-corrected start Point
-           auto mcx = ev_mcs->at(closest_mcs_id).Start().X() ;
-           auto mcy = ev_mcs->at(closest_mcs_id).Start().Y() ;
-           auto mcz = ev_mcs->at(closest_mcs_id).Start().Z() ;
-           auto mct = ev_mcs->at(closest_mcs_id).Start().T() ;
-           auto vtxtick = (mct/ 1000.) * 2.;
-           auto vtxtimecm = vtxtick * _time2cm;
-           auto sce_corr = _SCE->GetPosOffsets(mcx,mcy,mcz);
+           if ( _origin == 1 && _type == 1 && _from_pi0 ){
+	     //std::cout<<"Filling RECO"<<std::endl ;
+             
+             _n_recod_true_showers = 1;
+             _n_true_showers = 1 ;
+             temp_n_recod_true_showers ++; 
 
-           auto mc_st_corr_x = mcx + vtxtimecm + 0.7 - sce_corr.at(0);
-           auto mc_st_corr_y = mcy + sce_corr.at(1);
-           auto mc_st_corr_z = mcz + sce_corr.at(2);
-
-           // 0) Start Dir - calculate normalized directions
-           auto mc_dir_x = ev_mcs->at(closest_mcs_id).Start().Px() ;
-           auto mc_dir_y = ev_mcs->at(closest_mcs_id).Start().Py() ;
-           auto mc_dir_z = ev_mcs->at(closest_mcs_id).Start().Pz() ;
-           auto momNorm = sqrt( pow(mc_dir_x,2) + pow(mc_dir_y,2) + pow(mc_dir_z,2) );
-           _mc_dir_x = mc_dir_x / momNorm ;
-           _mc_dir_y = mc_dir_y / momNorm ;
-           _mc_dir_z = mc_dir_z / momNorm ;
-
-           // 1) Calculate next traj point using detProf directions 
-           auto next_dir_x = ev_mcs->at(closest_mcs_id).Start().X() + _mc_dir_x ;
-           auto next_dir_y = ev_mcs->at(closest_mcs_id).Start().Y() + _mc_dir_y ;
-           auto next_dir_z = ev_mcs->at(closest_mcs_id).Start().Z() + _mc_dir_z ;
-
-           // 2) Calculate SC corrections for the second detProf traj point
-           sce_corr = _SCE->GetPosOffsets(next_dir_x,next_dir_y,next_dir_z);
-           auto next_dir_sce_corr_x = next_dir_x + vtxtimecm + 0.7 - sce_corr.at(0);
-           auto next_dir_sce_corr_y = next_dir_y + sce_corr.at(1);
-           auto next_dir_sce_corr_z = next_dir_z + sce_corr.at(2);
-
-           // 3) Calculate corrected direction
-           _mc_dir_sce_corr_x = next_dir_sce_corr_x - mc_st_corr_x ;
-           _mc_dir_sce_corr_y = next_dir_sce_corr_y - mc_st_corr_y ;
-           _mc_dir_sce_corr_z = next_dir_sce_corr_z - mc_st_corr_z ;
-
-           // 00) DetProfile - calculate SC-corrected start point
-           mcx = ev_mcs->at(closest_mcs_id).DetProfile().X() ;
-           mcy = ev_mcs->at(closest_mcs_id).DetProfile().Y() ;
-           mcz = ev_mcs->at(closest_mcs_id).DetProfile().Z() ;
-           mct = ev_mcs->at(closest_mcs_id).DetProfile().T() ;
-           vtxtick = (mct/ 1000.) * 2.;
-           vtxtimecm = vtxtick * _time2cm;
-           sce_corr = _SCE->GetPosOffsets(mcx,mcy,mcz);
-
-           _mc_st_x = mcx + vtxtimecm + 0.7 - sce_corr.at(0);
-           _mc_st_y = mcy + sce_corr.at(1);
-           _mc_st_z = mcz + sce_corr.at(2);
-
-           // 0) DetProfile - calculate normalized detprof directions 
-           auto mc_detProf_x = ev_mcs->at(closest_mcs_id).DetProfile().Px() ;
-           auto mc_detProf_y = ev_mcs->at(closest_mcs_id).DetProfile().Py() ;
-           auto mc_detProf_z = ev_mcs->at(closest_mcs_id).DetProfile().Pz() ;
-           momNorm = sqrt( pow(mc_detProf_x,2) + pow(mc_detProf_y,2) + pow(mc_detProf_z,2) );
-           _mc_detProf_x = mc_detProf_x / momNorm ;
-           _mc_detProf_y = mc_detProf_y / momNorm ;
-           _mc_detProf_z = mc_detProf_z / momNorm ;
-
-           // 1) Calculate next traj point using detProf directions 
-           auto next_detProf_x = ev_mcs->at(closest_mcs_id).DetProfile().X() + _mc_detProf_x ;
-           auto next_detProf_y = ev_mcs->at(closest_mcs_id).DetProfile().Y() + _mc_detProf_y ;
-           auto next_detProf_z = ev_mcs->at(closest_mcs_id).DetProfile().Z() + _mc_detProf_z ;
-
-           // 2) Calculate SC corrections for the second detProf traj point
-           sce_corr = _SCE->GetPosOffsets(next_detProf_x,next_detProf_y,next_detProf_z);
-           auto next_detProf_sce_corr_x = next_detProf_x + vtxtimecm + 0.7 - sce_corr.at(0);
-           auto next_detProf_sce_corr_y = next_detProf_y + sce_corr.at(1);
-           auto next_detProf_sce_corr_z = next_detProf_z + sce_corr.at(2);
-
-           // 3) Calculate corrected direction
-           _mc_detProf_sce_corr_x = next_detProf_sce_corr_x - _mc_st_x ;
-           _mc_detProf_sce_corr_y = next_detProf_sce_corr_y - _mc_st_y ;
-           _mc_detProf_sce_corr_z = next_detProf_sce_corr_z - _mc_st_z ;
-
-
-	   //auto mcx = ev_mcs->at(closest_mcs_id).DetProfile().X() ;
-	   //auto mcy = ev_mcs->at(closest_mcs_id).DetProfile().Y() ;
-	   //auto mcz = ev_mcs->at(closest_mcs_id).DetProfile().Z() ;
-	   //auto mct = ev_mcs->at(closest_mcs_id).DetProfile().T() ;
-	   //auto sce_corr = _SCE->GetPosOffsets(mcx,mcy,mcz);
-
-           //auto vtxtick = (mct/ 1000.) * 2.;
-           //auto vtxtimecm = vtxtick * _time2cm; 
-	   //          
-	   //_mc_st_x = mcx + vtxtimecm + 0.7 - sce_corr.at(0);
-	   //_mc_st_y = mcy + sce_corr.at(1);
-	   //_mc_st_z = mcz + sce_corr.at(2);
-	  }
-    
-           _tree->Fill();    
+             _tree->Fill();    
+           }
+        }
      }
 
+     if ( temp_n_recod_true_showers < temp_n_true_showers ){
+
+    
+
+       for ( int i = 0 ; i < all_mcs_v.size() ; i++ ){
+
+         int id = all_mcs_v.at(i);
+	 if( std::find(used_mcs_v.begin(),used_mcs_v.end(),id) != used_mcs_v.end() )
+	   continue;
+	 else{
+	   _n_recod_true_showers = 0;
+	   _n_true_showers = 1;
+	   _mc_detProf_e = ev_mcs->at(id).DetProfile().E() ;
+
+	   //std::cout<<"Filling MCCC "<<std::endl ;
+	   _tree->Fill();
+	 
+	 }
+       
+       }
+     }
+    
     return true;
   }
 
   bool ShowerRecoEff::finalize() {
+
+    std::cout<<"Out of AV: "<<_out_of_av<<", "<<_tot_shr<<std::endl ;
 
     if ( _fout ){
       _fout->cd();
