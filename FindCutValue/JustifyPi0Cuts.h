@@ -12,8 +12,8 @@
 
     @{*/
 
-#ifndef LARLITE_JUSTIFYPI0CUTS_H
-#define LARLITE_JUSTIFYPI0CUTS_H
+#ifndef LARLITE_JUSTIFYCUTS_H
+#define LARLITE_JUSTIFYCUTS_H
 
 #include "Analysis/ana_base.h"
 #include "GeoAlgo/GeoAlgo.h"
@@ -73,16 +73,76 @@ namespace larlite {
     float _gamma1_vtx_IP ;
     float _gamma2_vtx_IP ;
 
+    float _gamma_startx ;
+    float _gamma_starty ;
+    float _gamma_startz ;
+
+
     int _nu_pdg ;
     bool _isCC ;
     bool _found_pi0 ; 
     int _n_nu_origin_pi0 ; 
+
+    float _gamma_low_purity ;
+    float _gamma_low_complete ;
+    float _gamma_high_purity ;
+    float _gamma_high_complete ;
+
+    float _mc_low_dirx ;
+    float _mc_low_diry ;
+    float _mc_low_dirz ;
+    float _mc_high_dirx ;
+    float _mc_high_diry ;
+    float _mc_high_dirz ;
+    float _gamma_low_dirx ;
+    float _gamma_low_diry ;
+    float _gamma_low_dirz ;
+    float _gamma_high_dirx ;
+    float _gamma_high_diry ;
+    float _gamma_high_dirz ;
+
+
+    float _mc_low_startx ;
+    float _mc_low_starty ;
+    float _mc_low_startz ;
+    float _mc_high_startx ;
+    float _mc_high_starty ;
+    float _mc_high_startz ;
+    float _gamma_low_startx ;
+    float _gamma_low_starty ;
+    float _gamma_low_startz ;
+    float _gamma_high_startx ;
+    float _gamma_high_starty ;
+    float _gamma_high_startz ;
+
+    float _res_high ;
+    float _res_low ;
+
+    bool _pi0_origin ;
+    bool _pi0_type;
 
     TTree * _one_gamma_tree ;
     float _gamma_E;
     float _gamma_RL;
     float _gamma_vtx_IP ;
     bool _gamma_matched ;
+
+    float _gamma_purity ;
+    float _gamma_complete;
+    float _mc_dirx ;
+    float _mc_diry ;
+    float _mc_dirz ;
+
+    float _mc_startx ;
+    float _mc_starty ;
+    float _mc_startz ;
+    float _gamma_dirx ;
+    float _gamma_diry ;
+    float _gamma_dirz ;
+    float _res ;
+
+    int _gamma_origin ;
+    int _gamma_type;
 
 
     TTree * _tree ;
@@ -112,12 +172,12 @@ namespace larlite {
     float _reco_dirz ;
 
     float _mc_E ;
-    float _mc_startx ;
-    float _mc_starty ;
-    float _mc_startz ;
-    float _mc_dirx ;
-    float _mc_diry ;
-    float _mc_dirz ;
+    //float _mc_startx ;
+    //float _mc_starty ;
+    //float _mc_startz ;
+    //float _mc_dirx ;
+    //float _mc_diry ;
+    //float _mc_dirz ;
 
 
     int _n_other ;

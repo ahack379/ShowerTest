@@ -1,5 +1,5 @@
-#ifndef LARLITE_JUSTIFYPI0CUTS_CXX
-#define LARLITE_JUSTIFYPI0CUTS_CXX
+#ifndef LARLITE_JUSTIFYCUTS_CXX
+#define LARLITE_JUSTIFYCUTS_CXX
 
 #include "JustifyPi0Cuts.h"
 #include "DataFormat/shower.h"
@@ -43,7 +43,52 @@ namespace larlite {
       _gamma_tree->Branch("_nu_pdg",&_nu_pdg,"nu_pdg/I");
       _gamma_tree->Branch("_isCC",&_isCC,"isCC/B");
       _gamma_tree->Branch("_found_pi0",&_found_pi0,"found_pi0/B");
+
+      _gamma_tree->Branch("_pi0_origin",&_pi0_origin,"pi0_origin/B");
+      _gamma_tree->Branch("_pi0_type",&_pi0_type,"pi0_type/B");
+
       _gamma_tree->Branch("_n_nu_origin_pi0",&_n_nu_origin_pi0,"n_nu_origin_pi0/I");
+      _gamma_tree->Branch("_gamma_low_purity",&_gamma_low_purity,"gamma_low_purity/F");
+      _gamma_tree->Branch("_gamma_low_complete",&_gamma_low_complete,"gamma_low_complete/F");
+      _gamma_tree->Branch("_gamma_high_complete",&_gamma_high_complete,"gamma_high_complete/F");
+      _gamma_tree->Branch("_gamma_high_purity",&_gamma_high_purity,"gamma_high_purity/F");
+
+      _gamma_tree->Branch("_mc_startx",&_mc_startx,"mc_startx/F");
+      _gamma_tree->Branch("_mc_starty",&_mc_starty,"mc_starty/F");
+      _gamma_tree->Branch("_mc_startz",&_mc_startz,"mc_startz/F");
+      _gamma_tree->Branch("_gamma_startx",&_gamma_startx,"gamma_startx/F");
+      _gamma_tree->Branch("_gamma_starty",&_gamma_starty,"gamma_starty/F");
+      _gamma_tree->Branch("_gamma_startz",&_gamma_startz,"gamma_startz/F");
+
+      _gamma_tree->Branch("_mc_low_dirx",&_mc_low_dirx,"mc_low_dirx/F");
+      _gamma_tree->Branch("_mc_low_diry",&_mc_low_diry,"mc_low_diry/F");
+      _gamma_tree->Branch("_mc_low_dirz",&_mc_low_dirz,"mc_low_dirz/F");
+      _gamma_tree->Branch("_mc_high_dirx",&_mc_high_dirx,"mc_high_dirx/F");
+      _gamma_tree->Branch("_mc_high_diry",&_mc_high_diry,"mc_high_diry/F");
+      _gamma_tree->Branch("_mc_high_dirz",&_mc_high_dirz,"mc_high_dirz/F");
+      _gamma_tree->Branch("_gamma_low_dirx",&_gamma_low_dirx,"gamma_low_dirx/F");
+      _gamma_tree->Branch("_gamma_low_diry",&_gamma_low_diry,"gamma_low_diry/F");
+      _gamma_tree->Branch("_gamma_low_dirz",&_gamma_low_dirz,"gamma_low_dirz/F");
+      _gamma_tree->Branch("_gamma_high_dirx",&_gamma_high_dirx,"gamma_high_dirx/F");
+      _gamma_tree->Branch("_gamma_high_diry",&_gamma_high_diry,"gamma_high_diry/F");
+      _gamma_tree->Branch("_gamma_high_dirz",&_gamma_high_dirz,"gamma_high_dirz/F");
+      _gamma_tree->Branch("_res_high",&_res_high,"res_high/F");
+      _gamma_tree->Branch("_res_low",&_res_low,"res_low/F");
+
+      _gamma_tree->Branch("_mc_low_startx",&_mc_low_startx,"mc_low_startx/F");
+      _gamma_tree->Branch("_mc_low_starty",&_mc_low_starty,"mc_low_starty/F");
+      _gamma_tree->Branch("_mc_low_startz",&_mc_low_startz,"mc_low_startz/F");
+      _gamma_tree->Branch("_gamma_low_startx",&_gamma_low_startx,"gamma_low_startx/F");
+      _gamma_tree->Branch("_gamma_low_starty",&_gamma_low_starty,"gamma_low_starty/F");
+      _gamma_tree->Branch("_gamma_low_startz",&_gamma_low_startz,"gamma_low_startz/F");
+      _gamma_tree->Branch("_mc_high_startx",&_mc_high_startx,"mc_high_startx/F");
+      _gamma_tree->Branch("_mc_high_starty",&_mc_high_starty,"mc_high_starty/F");
+      _gamma_tree->Branch("_mc_high_startz",&_mc_high_startz,"mc_high_startz/F");
+      _gamma_tree->Branch("_gamma_high_startx",&_gamma_high_startx,"gamma_high_startx/F");
+      _gamma_tree->Branch("_gamma_high_starty",&_gamma_high_starty,"gamma_high_starty/F");
+      _gamma_tree->Branch("_gamma_high_startz",&_gamma_high_startz,"gamma_high_startz/F");
+
+
     }
 
     if( !_one_gamma_tree ){
@@ -59,6 +104,19 @@ namespace larlite {
       _one_gamma_tree->Branch("_isCC",&_isCC,"isCC/B");
       _one_gamma_tree->Branch("_found_pi0",&_found_pi0,"found_pi0/B");
       _one_gamma_tree->Branch("_n_nu_origin_pi0",&_n_nu_origin_pi0,"n_nu_origin_pi0/I");
+      _one_gamma_tree->Branch("_gamma_purity",&_gamma_purity,"gamma_purity/F");
+      _one_gamma_tree->Branch("_gamma_complete",&_gamma_complete,"gamma_complete/F");
+
+      _one_gamma_tree->Branch("_mc_dirx",&_mc_dirx,"mc_dirx/F");
+      _one_gamma_tree->Branch("_mc_diry",&_mc_diry,"mc_diry/F");
+      _one_gamma_tree->Branch("_mc_dirz",&_mc_dirz,"mc_dirz/F");
+      _one_gamma_tree->Branch("_gamma_dirx",&_gamma_dirx,"gamma_dirx/F");
+      _one_gamma_tree->Branch("_gamma_diry",&_gamma_diry,"gamma_diry/F");
+      _one_gamma_tree->Branch("_gamma_dirz",&_gamma_dirz,"gamma_dirz/F");
+
+      _one_gamma_tree->Branch("_res",&_res,"res/F");
+      _one_gamma_tree->Branch("_gamma_origin",&_gamma_origin,"gamma_origin/I");
+      _one_gamma_tree->Branch("_gamma_type",&_gamma_type,"gamma_type/I");
     }
 
     if(!_tree){
@@ -130,6 +188,67 @@ namespace larlite {
     _gamma_vtx_IP = -10;
     _gamma_matched =false;
 
+    _gamma_low_purity = -999;
+    _gamma_low_complete = -999;
+    _gamma_high_purity = -999;
+    _gamma_high_complete = -999;
+
+    _gamma_low_dirx = -999 ;
+    _gamma_low_diry = -999 ;
+    _gamma_low_dirz = -999 ;
+    _gamma_high_dirx = -999 ;
+    _gamma_high_diry = -999 ;
+    _gamma_high_dirz = -999 ;
+    _mc_low_dirx = -999 ;
+    _mc_low_diry = -999 ;
+    _mc_low_dirz = -999 ;
+    _mc_high_dirx = -999 ;
+    _mc_high_diry = -999 ;
+    _mc_high_dirz = -999 ;
+
+    _mc_startx = -999;
+    _mc_starty = -999;
+    _mc_startz = -999;
+    _gamma_startx = -999;
+    _gamma_starty = -999;
+    _gamma_startz = -999;
+
+    _mc_low_startx = -999;
+    _mc_low_starty = -999;
+    _mc_low_startz = -999;
+    _mc_high_startx = -999;
+    _mc_high_starty = -999;
+    _mc_high_startz = -999;
+    _gamma_low_startx = -999;
+    _gamma_low_starty = -999;
+    _gamma_low_startz = -999;
+    _gamma_high_startx = -999;
+    _gamma_high_starty = -999;
+    _gamma_high_startz = -999;
+
+    _res_low = -999;
+    _res_high = -999;
+    _res = -999;
+
+    _pi0_origin = false;
+    _pi0_type = false;
+
+    _event_type = -1;
+
+    _event_type = -1;
+
+    _gamma_purity = -999;
+    _gamma_complete = -999;
+    _gamma_origin = -999;
+    _gamma_type = -999;
+
+    _mc_dirx = -999;
+    _mc_diry = -999;
+    _mc_dirz = -999;
+    _gamma_dirx = -999 ;
+    _gamma_diry = -999 ;
+    _gamma_dirz = -999 ;
+
     _event_type = -1;
 
     _mu_startx     = -1000;
@@ -179,7 +298,7 @@ namespace larlite {
     if( !ev_s || !ev_s->size() || ev_s->size() < 1 )
       return false;
 
-    //std::cout<<"\nEvent : "<<_event <<std::endl;
+    std::cout<<"\n\nEvent : "<<_event <<std::endl;
 
       auto ev_t = storage->get_data<event_track>("numuCC_track");
 
@@ -262,7 +381,7 @@ namespace larlite {
       // Correct for space charge effect
       auto tvtx = traj.at(traj.size() - 1).T(); // ns
       auto vtxtick = (tvtx / 1000.) * 2.; // time in tick :
-      auto vtxtimecm = vtxtick * _time2cm; // time in cm :
+      //auto vtxtimecm = vtxtick * _time2cm; // time in cm :
 
       auto ev_mcc = storage->get_data<event_cluster>("mccluster");
 
@@ -594,54 +713,79 @@ namespace larlite {
       
     if ( _event_type == -1 ) _event_type = 2;
 
-    //std::multimap<float,std::pair<int,int>> mc_reco_map ;    
+    std::multimap<float,std::pair<int,int>> mc_reco_map ;    
 
-    //// Match showers
-    //for( auto const & mc_id : shr_ids ){
-    //  auto mcs_i = ev_mcshr->at(mc_id);
-    //  auto mag_mcs = sqrt( pow(mcs_i.DetProfile().Px(),2) + pow(mcs_i.DetProfile().Py(),2) + pow(mcs_i.DetProfile().Pz(),2) );
+    std::cout<<" shr ids: "<<shr_ids.size()<<std::endl;
+    // Match showers
+    for( auto const & mc_id : shr_ids ){
+      auto mcs_i = ev_mcshr->at(mc_id);
+      auto mag_mcs = sqrt( pow(mcs_i.DetProfile().Px(),2) + pow(mcs_i.DetProfile().Py(),2) + pow(mcs_i.DetProfile().Pz(),2) );
 
-    //  for( int reco_id = 0; reco_id < ev_s->size(); reco_id++ ){
+      for( int reco_id = 0; reco_id < ev_s->size(); reco_id++ ){
 
-    //    auto recos_i = ev_s->at(reco_id) ;
+        auto recos_i = ev_s->at(reco_id) ;
 
-    //    auto mag_reco = sqrt( pow(recos_i.Direction().Px(),2) + pow(recos_i.Direction().Py(),2) + pow(recos_i.Direction().Pz(),2) );
-    //    auto dot = mcs_i.DetProfile().Px() * recos_i.Direction().Px() +
-    //               mcs_i.DetProfile().Py() * recos_i.Direction().Py() +
-    //               mcs_i.DetProfile().Pz() * recos_i.Direction().Pz() ;
-    //    dot /= ( mag_mcs * mag_reco );
+        auto mag_reco = sqrt( pow(recos_i.Direction().Px(),2) + pow(recos_i.Direction().Py(),2) + pow(recos_i.Direction().Pz(),2) );
+        auto dot = mcs_i.DetProfile().Px() * recos_i.Direction().Px() +
+                   mcs_i.DetProfile().Py() * recos_i.Direction().Py() +
+                   mcs_i.DetProfile().Pz() * recos_i.Direction().Pz() ;
+        dot /= ( mag_mcs * mag_reco );
+        //std::cout<<" dots and things: "<<dot<<std::endl ;
 
-    //    if ( fabs(dot) > 1 ) std::cout<<"DOT ! " <<dot <<std::endl ;
+        //if ( fabs(dot) > 1 ) std::cout<<"DOT ! " <<dot <<std::endl ;
 
-    //    mc_reco_map.emplace(1./dot,std::make_pair(mc_id,reco_id)) ;
-    //  }
-    //} 
+        mc_reco_map.emplace(fabs(1./dot),std::make_pair(mc_id,reco_id)) ;
+        //std::cout<<"mc and reco ids: "<<mc_id<<", "<<reco_id <<", "<<ev_s->size()<<std::endl ;
+      }
+    } 
 
-    //int reco_g1_id = -1, reco_g2_id = -1;
-    //int mc_g1_id = -1, mc_g2_id = -1;
-    //float dot_g1 = -10, dot_g2 = -10;
+    int reco_g1_id = -1, reco_g2_id = -1;
+    int mc_g1_id = -1, mc_g2_id = -1;
+    float dot_g1 = -10, dot_g2 = -10;
 
-    //for ( auto const & m : mc_reco_map ){
+    for ( auto const & m : mc_reco_map ){
 
-    //  auto score = 1./m.first ;
-    //  //std::cout<<"Some scores are..." <<score<<std::endl;
-    //
-    //  if ( score < 0.9 ) break; 
+      auto score = 1./m.first ;
+       
+      //std::cout<<"Some scores are..." <<score<<std::endl;
+    
+      //if ( score < 0.9 ) break; 
 
-    //  if ( reco_g1_id == -1 ){
-    //    mc_g1_id   = m.second.first ;
-    //    reco_g1_id = m.second.second ;
-    //    dot_g1 = score ;
-    //  }
-    //  else{
-    //    if ( m.second.first == mc_g1_id || m.second.second == reco_g1_id ) continue;
-    //    
-    //    mc_g2_id = m.second.first;       
-    //    reco_g2_id = m.second.second ;       
-    //    dot_g2 = score ;
-    //    break;
-    //  }
-    //}
+      if ( reco_g1_id == -1 ){
+        mc_g1_id   = m.second.first ;
+        reco_g1_id = m.second.second ;
+        dot_g1 = score ;
+        if ( ev_s->size() == 1 ) break;
+      }
+      else{
+        //if ( m.second.first == mc_g1_id || m.second.second == reco_g1_id ) continue;
+        
+        mc_g2_id = m.second.first;       
+        reco_g2_id = m.second.second ;       
+        dot_g2 = score ;
+        break;
+      }
+    }
+    if ( mc_g2_id != -1 ) {
+
+    std::cout<<"Mc and reco ids : "<<mc_g1_id<<", "<<reco_g1_id<<", "<<dot_g1<<", energy: "<<ev_s->at(reco_g1_id).Energy(2)<<", "<<ev_mcshr->at(mc_g1_id).DetProfile().E()<<std::endl;
+    std::cout<<"Mc and reco ids : "<<mc_g2_id<<", "<<reco_g2_id<<", "<<dot_g2<<", energy: "<<ev_s->at(reco_g2_id).Energy(2)<<", "<<ev_mcshr->at(mc_g2_id).DetProfile().E()<<std::endl;
+
+   }
+
+    // Get the association from cluster -> hit
+    auto const & ev_clus = storage->get_data<event_cluster>("ImageClusterHit");
+    auto const & ev_ass_c = storage->get_data<larlite::event_ass>("ImageClusterHit");
+    auto const & ass_imageclus_v = ev_ass_c->association(ev_clus->id(), ev_hit->id());
+
+    //auto ev_mcs = storage->get_data<event_mcshower>("mcreco") ;
+    //if ( !ev_mcs || !ev_mcs->size() ) {std::cout<<"No MCShower!" <<std::endl ; return false; }
+    //ev_mcshr
+
+    // Get the association from shower -> cluster
+    auto ev_ass_s = storage->get_data<larlite::event_ass>("showerreco");
+    auto const& ass_showerreco_v = ev_ass_s->association(ev_s->id(), ev_clus->id());
+    std::cout<<"Background : "<<_event<<", "<<_bkgd_id <<std::endl ;
 
     for ( int s1 = 0; s1 < ev_s->size(); s1++ ){
 
@@ -657,63 +801,128 @@ namespace larlite {
        auto shr_bkwrd_hl = ::geoalgo::HalfLine_t(shr1.ShowerStart(),rev_shr);
        _gamma_vtx_IP = _geoAlgo.SqDist(vertex_reco, shr_bkwrd_hl) ;
 
-       //_reco_E = _gamma_E ;
-       //_reco_startx = shr1.ShowerStart().X();  
-       //_reco_starty = shr1.ShowerStart().Y();  
-       //_reco_startz = shr1.ShowerStart().Z();  
-       //_reco_dirx = shr1.Direction().Px();  
-       //_reco_diry = shr1.Direction().Py();  
-       //_reco_dirz = shr1.Direction().Pz();  
+       auto dir1 = shr1.Direction();
+       _gamma_dirx = dir1.X();
+       _gamma_diry = dir1.Y();
+       _gamma_dirz = dir1.Z();
 
-       //if ( s1 == reco_g1_id ){
-       //   _gamma_high_matched = true ;
-       //   _gamma_matched = true; 
+       if ( s1 == reco_g1_id ){
 
-	   //  auto mcs = ev_mcshr->at(mc_g1_id);
+	     auto mcs = ev_mcshr->at(mc_g1_id);
+	     _res = dot_g1 ;
+         _mc_dirx = mcs.DetProfile().Px();  
+         _mc_diry = mcs.DetProfile().Py();  
+         _mc_dirz = mcs.DetProfile().Pz();  
+         //_mc_startx = mcs.DetProfile().X();
+         //_mc_starty = mcs.DetProfile().Y();
+         //_mc_startz = mcs.DetProfile().Z();
 
-       //  auto st_x = mcs.DetProfile().X();
-       //  auto st_y = mcs.DetProfile().Y();
-       //  auto st_z = mcs.DetProfile().Z();
+         _gamma_startx = shr1.ShowerStart().X(); 
+         _gamma_starty = shr1.ShowerStart().Y(); 
+         _gamma_startz = shr1.ShowerStart().Z(); 
 
-       //  auto sce_corr = _SCE->GetPosOffsets(st_x,st_y,st_z);
-       //  _mc_startx = st_x + vtxtimecm - sce_corr.at(0); 
-       //  _mc_starty = st_y + sce_corr.at(1); 
-       //  _mc_startz = st_z + sce_corr.at(2);
+         auto mcx = mcs.DetProfile().X() ;
+         auto mcy = mcs.DetProfile().Y() ;
+         auto mcz = mcs.DetProfile().Z() ;
+         auto mct = mcs.DetProfile().T() ;
+         auto vtxtick = (mct/ 1000.) * 2.; 
+         auto vtxtimecm = vtxtick * _time2cm; 
+         auto sce_corr = _SCE->GetPosOffsets(mcx,mcy,mcz);
 
-       //  _mc_E = mcs.DetProfile().E();  
-       //  _mc_dirx = mcs.DetProfile().Px();  
-       //  _mc_diry = mcs.DetProfile().Py();  
-       //  _mc_dirz = mcs.DetProfile().Pz();  
+         _mc_startx = mcx + vtxtimecm + 0.7 - sce_corr.at(0);
+         _mc_starty = mcy + sce_corr.at(1);
+         _mc_startz = mcz + sce_corr.at(2);
+       }
 
-	   //  _reco_dot = dot_g1 ;
-	   //  _reco_start3D = sqrt( pow(_mc_startx - _reco_startx,2) + pow(_mc_starty - _reco_starty,2) + pow(_mc_startz - _reco_startz,2)); 
+       if ( s1 == reco_g2_id ){
+	     auto mcs = ev_mcshr->at(mc_g2_id);
+	     _res = dot_g2 ;
+         _mc_dirx = mcs.DetProfile().Px();  
+         _mc_diry = mcs.DetProfile().Py();  
+         _mc_dirz = mcs.DetProfile().Pz();  
+         _gamma_startx = shr1.ShowerStart().X(); 
+         _gamma_starty = shr1.ShowerStart().Y(); 
+         _gamma_startz = shr1.ShowerStart().Z(); 
 
-       //  _compare_tree->Fill();
-       //}
-       //else if ( s1 == reco_g2_id ){
+         auto mcx = mcs.DetProfile().X() ;
+         auto mcy = mcs.DetProfile().Y() ;
+         auto mcz = mcs.DetProfile().Z() ;
+         auto mct = mcs.DetProfile().T() ;
+         auto vtxtick = (mct/ 1000.) * 2.; 
+         auto vtxtimecm = vtxtick * _time2cm; 
+         auto sce_corr = _SCE->GetPosOffsets(mcx,mcy,mcz);
 
-	   //  auto mcs = ev_mcshr->at(mc_g2_id);
+         _mc_startx = mcx + vtxtimecm + 0.7 - sce_corr.at(0);
+         _mc_starty = mcy + sce_corr.at(1);
+         _mc_startz = mcz + sce_corr.at(2);
 
-       //  auto st_x = mcs.DetProfile().X();
-       //  auto st_y = mcs.DetProfile().Y();
-       //  auto st_z = mcs.DetProfile().Z();
+       }
 
-       //  auto sce_corr = _SCE->GetPosOffsets(st_x,st_y,st_z);
-       //  _mc_startx = st_x + vtxtimecm - sce_corr.at(0); 
-       //  _mc_starty = st_y + sce_corr.at(1); 
-       //  _mc_startz = st_z + sce_corr.at(2);
 
-       //  _mc_E = mcs.DetProfile().E();  
-       //  _mc_dirx = mcs.DetProfile().Px();  
-       //  _mc_diry = mcs.DetProfile().Py();  
-       //  _mc_dirz = mcs.DetProfile().Pz();  
-	 
-	   // _reco_dot = dot_g2 ;
-	   // _reco_start3D = sqrt( pow(_mc_startx - _reco_startx,2) + pow(_mc_starty - _reco_starty,2) + pow(_mc_startz - _reco_startx,2)); 
+       float mc_clus_e = 0.;
+       int closest_mcs_id = -1 ;
+       float closest_e = 1e9 ;
 
-       //  _compare_tree->Fill();
-       //}
+       int shr1_origin = -1;
+       int shr1_type = -1;
 
+       for (size_t j = 0; j < ass_showerreco_v.at(s1).size(); j++ ){
+
+         auto clus_id = ass_showerreco_v.at(s1).at(j);
+         auto iclus = ev_clus->at(clus_id);
+
+         int plane = iclus.Plane().Plane ;
+         if ( plane != 2 ) continue;
+
+         pur_ctr_v.clear();
+         pur_ctr_v.resize(ass_mcclus_v.size()+1,0) ;
+
+         max_hits = -1;
+         max_cid = -1 ;
+
+         // Loop through all hits associared to the cluster 
+         for ( int k = 0; k < ass_imageclus_v.at(clus_id).size(); k++ ){
+
+           auto hid = ass_imageclus_v.at(clus_id).at(k) ;
+           auto h = ev_hit->at(hid);
+
+           if ( _mc_hit_map.find(hid) != _mc_hit_map.end() ){
+
+             auto mcclus_id = _mc_hit_map[hid] ;
+             pur_ctr_v[mcclus_id]++ ;
+
+             if( pur_ctr_v[ mcclus_id] > max_hits ){
+               max_hits = pur_ctr_v[mcclus_id];
+               max_cid = mcclus_id ;
+             }
+           }   
+           else {
+             auto mcclus_id = ass_mcclus_v.size() ;
+             pur_ctr_v[mcclus_id]++ ; 
+             if( pur_ctr_v[mcclus_id] > max_hits ){
+               max_hits = pur_ctr_v[mcclus_id];
+               max_cid = mcclus_id ; 
+             }
+           }
+         }
+
+
+          if ( max_cid != ass_mcclus_v.size() && max_cid != -1 ){
+
+            auto tot_mc_hits =  ass_mcclus_v[max_cid].size(); 
+            auto tot_reco_hits = ass_imageclus_v[clus_id].size();
+
+            auto mcclus1 = ev_mcc->at(max_cid) ;
+            shr1_origin = mcclus1.Width() ;
+            shr1_type = mcclus1.StartOpeningAngle() ;
+
+			_gamma_origin = shr1_origin;
+            _gamma_type = shr1_type;
+    
+            _gamma_purity   = float(max_hits) / tot_reco_hits ;
+            _gamma_complete = float(max_hits) / tot_mc_hits ;
+          }
+       }
 
        _one_gamma_tree->Fill();
 
@@ -760,8 +969,11 @@ namespace larlite {
             auto dist_temp = sqrt( pow(v.X() - vertex.at(0),2) + pow(v.Y() - vertex.at(1),2) +pow(v.Z() - vertex.at(2),2));
 
             // Make the backwards projection for the showers
-            _gamma1_vtx_IP = _geoAlgo.SqDist(vertex_reco, shr1_bkwrd_hl) ;
-            _gamma2_vtx_IP = _geoAlgo.SqDist(vertex_reco, shr2_bkwrd_hl) ;
+            auto gamm1_IP = _geoAlgo.SqDist(vertex_reco, shr1_bkwrd_hl) ;
+            auto gamm2_IP = _geoAlgo.SqDist(vertex_reco, shr2_bkwrd_hl) ;
+
+            _gamma1_vtx_IP = shr1.Energy(2) < shr2.Energy(2) ? gamm1_IP : gamm2_IP ;
+            _gamma2_vtx_IP = shr1.Energy(2) < shr2.Energy(2) ? gamm2_IP : gamm1_IP ;
 
             //std::cout<<"DISTANCE: "<<dist_temp<<", "<<_gamma1_vtx_IP <<std::endl ;
 
@@ -772,9 +984,395 @@ namespace larlite {
             _gamma_high_E = shr1.Energy(2) < shr2.Energy(2) ? shr2.Energy(2) : shr1.Energy(2) ;
             _gamma_low_RL  = shr1.Energy(2) < shr2.Energy(2) ? radL_shr1 : radL_shr2 ;
             _gamma_high_RL = shr1.Energy(2) < shr2.Energy(2) ? radL_shr2 : radL_shr1 ;
+
+            _gamma_low_dirx = shr1.Energy(2) < shr2.Energy(2) ? dir1.X() : dir2.X() ;
+            _gamma_low_diry = shr1.Energy(2) < shr2.Energy(2) ? dir1.Y() : dir2.Y() ;
+            _gamma_low_dirz = shr1.Energy(2) < shr2.Energy(2) ? dir1.Z() : dir2.Z() ;
+            _gamma_high_dirx = shr1.Energy(2) < shr2.Energy(2) ? dir2.X() : dir1.X() ;
+            _gamma_high_diry = shr1.Energy(2) < shr2.Energy(2) ? dir2.Y() : dir1.Y() ;
+            _gamma_high_dirz = shr1.Energy(2) < shr2.Energy(2) ? dir2.Z() : dir1.Z() ;
+
+            _gamma_low_startx = shr1.Energy(2) < shr2.Energy(2) ? st1.X() : st2.X() ;
+            _gamma_low_starty = shr1.Energy(2) < shr2.Energy(2) ? st1.Y() : st2.Y() ;
+            _gamma_low_startz = shr1.Energy(2) < shr2.Energy(2) ? st1.Z() : st2.Z() ;
+            _gamma_high_startx = shr1.Energy(2) < shr2.Energy(2) ? st2.X() : st1.X() ;
+            _gamma_high_starty = shr1.Energy(2) < shr2.Energy(2) ? st2.Y() : st1.Y() ;
+            _gamma_high_startz = shr1.Energy(2) < shr2.Energy(2) ? st2.Z() : st1.Z() ;
+
             _gamma_IP = IP;
-            _gamma1_vtx_IP = sqrt( pow( v.X() - st1.X(),2) + pow( v.Y() - st1.Y(),2) + pow( v.Z() - st1.Z(),2)); 
-            _gamma2_vtx_IP = sqrt( pow( v.X() - st2.X(),2) + pow( v.Y() - st2.Y(),2) + pow( v.Z() - st2.Z(),2)); 
+            //_gamma1_vtx_IP = sqrt( pow( v.X() - st1.X(),2) + pow( v.Y() - st1.Y(),2) + pow( v.Z() - st1.Z(),2)); 
+            //_gamma2_vtx_IP = sqrt( pow( v.X() - st2.X(),2) + pow( v.Y() - st2.Y(),2) + pow( v.Z() - st2.Z(),2)); 
+
+            bool shower1islow = shr1.Energy(2) < shr2.Energy(2) ? true : false ;
+
+
+
+            if ( s1 == reco_g1_id ){
+              if( shower1islow){
+                   auto mcs = ev_mcshr->at(mc_g1_id);
+                   _mc_low_dirx = mcs.DetProfile().Px();  
+                   _mc_low_diry = mcs.DetProfile().Py();  
+                   _mc_low_dirz = mcs.DetProfile().Pz();  
+
+                   //_mc_low_e = mcs.DetProfile().E() ;
+
+                   auto mcx = mcs.DetProfile().X() ;
+                   auto mcy = mcs.DetProfile().Y() ;
+                   auto mcz = mcs.DetProfile().Z() ;
+                   auto mct = mcs.DetProfile().T() ;
+                   auto vtxtick = (mct/ 1000.) * 2.; 
+                   auto vtxtimecm = vtxtick * _time2cm; 
+                   auto sce_corr = _SCE->GetPosOffsets(mcx,mcy,mcz);
+
+                   _mc_low_startx = mcx + vtxtimecm + 0.7 - sce_corr.at(0);
+                   _mc_low_starty = mcy + sce_corr.at(1);
+                   _mc_low_startz = mcz + sce_corr.at(2);
+
+                  _res_low = dot_g1 ;
+               }
+               else{
+                   auto mcs = ev_mcshr->at(mc_g1_id);
+                   _mc_high_dirx = mcs.DetProfile().Px();  
+                   _mc_high_diry = mcs.DetProfile().Py();  
+                   _mc_high_dirz = mcs.DetProfile().Pz();  
+
+                   //_mc_high_startx = mcs.DetProfile().X();  
+                   //_mc_high_starty = mcs.DetProfile().Y();  
+                   //_mc_high_startz = mcs.DetProfile().Z();  
+
+                   auto mcx = mcs.DetProfile().X() ;
+                   auto mcy = mcs.DetProfile().Y() ;
+                   auto mcz = mcs.DetProfile().Z() ;
+                   auto mct = mcs.DetProfile().T() ;
+                   auto vtxtick = (mct/ 1000.) * 2.; 
+                   auto vtxtimecm = vtxtick * _time2cm; 
+                   auto sce_corr = _SCE->GetPosOffsets(mcx,mcy,mcz);
+
+                   _mc_high_startx = mcx + vtxtimecm + 0.7 - sce_corr.at(0);
+                   _mc_high_starty = mcy + sce_corr.at(1);
+                   _mc_high_startz = mcz + sce_corr.at(2);
+
+                  _res_high = dot_g1 ;
+               }
+             }
+            
+             if ( s1 == reco_g2_id ){
+              if( shower1islow){
+                   auto mcs = ev_mcshr->at(mc_g2_id);
+                   _mc_low_dirx = mcs.DetProfile().Px();  
+                   _mc_low_diry = mcs.DetProfile().Py();  
+                   _mc_low_dirz = mcs.DetProfile().Pz();  
+
+                   _mc_low_startx = mcs.DetProfile().X();  
+                   _mc_low_starty = mcs.DetProfile().Y();  
+                   _mc_low_startz = mcs.DetProfile().Z();  
+
+                  _res_low = dot_g2 ;
+               }
+               else{
+                   auto mcs = ev_mcshr->at(mc_g2_id);
+                   _mc_high_dirx = mcs.DetProfile().Px();  
+                   _mc_high_diry = mcs.DetProfile().Py();  
+                   _mc_high_dirz = mcs.DetProfile().Pz();  
+
+                   _mc_high_startx = mcs.DetProfile().X();  
+                   _mc_high_starty = mcs.DetProfile().Y();  
+                   _mc_high_startz = mcs.DetProfile().Z();  
+                  _res_high = dot_g2 ;
+               }
+             }
+
+           if ( s2 == reco_g1_id ){
+              if( !shower1islow ){
+                   auto mcs = ev_mcshr->at(mc_g1_id);
+                   _mc_low_dirx = mcs.DetProfile().Px();  
+                   _mc_low_diry = mcs.DetProfile().Py();  
+                   _mc_low_dirz = mcs.DetProfile().Pz();  
+
+                   _mc_low_startx = mcs.DetProfile().X();  
+                   _mc_low_starty = mcs.DetProfile().Y();  
+                   _mc_low_startz = mcs.DetProfile().Z();  
+                  _res_low = dot_g1 ;
+               }
+               else{
+                   auto mcs = ev_mcshr->at(mc_g1_id);
+                   _mc_high_dirx = mcs.DetProfile().Px();  
+                   _mc_high_diry = mcs.DetProfile().Py();  
+                   _mc_high_dirz = mcs.DetProfile().Pz();  
+
+                   _mc_high_startx = mcs.DetProfile().X();  
+                   _mc_high_starty = mcs.DetProfile().Y();  
+                   _mc_high_startz = mcs.DetProfile().Z();  
+                  _res_high = dot_g1 ;
+               }
+             }
+            
+             if ( s2 == reco_g2_id ){
+              if( !shower1islow){
+                   auto mcs = ev_mcshr->at(mc_g2_id);
+                   _mc_low_dirx = mcs.DetProfile().Px();  
+                   _mc_low_diry = mcs.DetProfile().Py();  
+                   _mc_low_dirz = mcs.DetProfile().Pz();  
+
+                   _mc_low_startx = mcs.DetProfile().X();  
+                   _mc_low_starty = mcs.DetProfile().Y();  
+                   _mc_low_startz = mcs.DetProfile().Z();  
+                  _res_low = dot_g2 ;
+               }
+               else{
+                   auto mcs = ev_mcshr->at(mc_g2_id);
+                   _mc_high_dirx = mcs.DetProfile().Px();  
+                   _mc_high_diry = mcs.DetProfile().Py();  
+                   _mc_high_dirz = mcs.DetProfile().Pz();  
+
+                   _mc_high_startx = mcs.DetProfile().X();  
+                   _mc_high_starty = mcs.DetProfile().Y();  
+                   _mc_high_startz = mcs.DetProfile().Z();  
+                  _res_high = dot_g2 ;
+               }
+             }
+
+            auto st_high_res = sqrt ( pow(_mc_high_startx - _gamma_high_startx,2) +pow(_mc_high_starty - _gamma_high_starty,2)+ pow(_mc_high_startz - _gamma_high_startz,2) ) ;
+            auto st_low_res = sqrt ( pow(_mc_low_startx - _gamma_low_startx,2) +pow(_mc_low_starty - _gamma_low_starty,2)+ pow(_mc_low_startz - _gamma_low_startz,2) ) ;
+            
+
+            if ( _gamma_IP  > 4 ){
+              std::cout<<"EVENT !! "<<_event<<", IP: "<<_gamma_IP<<", "<<_gamma1_vtx_IP<<", "<<_gamma2_vtx_IP<<std::endl ;
+              std::cout<<"Res: "<<_res_low<<", "<<_res_high<<", start low high : "<<st_low_res<<", "<<st_high_res<<std::endl ;
+
+              //auto geomH = ::larutil::GeometryHelper::GetME();
+              //auto high_mc_v = { _mc_high_startx, _mc_high_starty, _mc_high_startz };
+              //auto low_mc_v = { _mc_low_startx, _mc_low_starty, _mc_low_startz };
+              //auto high_gamma_v = { _gamma_high_startx, _gamma_high_starty, _gamma_high_startz };
+              //auto low_gamma_v = { _gamma_low_startx, _gamma_low_starty, _gamma_low_startz };
+
+              //auto high_2d_mc = geomH->Point_3Dto2D(high_mc_v,2);
+              //auto low_2d_mc = geomH->Point_3Dto2D(low_mc_v,2);
+              //auto high_2d_gamma = geomH->Point_3Dto2D(high_gamma_v,2);
+              //auto low_2d_gamma = geomH->Point_3Dto2D(low_gamma_v,2);
+
+              //auto w = geomH->WireToCm() ;
+              //auto t = geomH->TimeToCm() ;
+
+              //std::cout<<" High MC (w,t): "<< high_2d_mc.w/w <<", "<<high_2d_mc.t/t+800<<", Low MC : "<<low_2d_mc.w/w<<", "<<low_2d_mc.t/t +800 <<std::endl;
+              //std::cout<<" High Reco (w,t): "<< high_2d_gamma.w/w <<", "<<high_2d_gamma.t/t+800<<", Low Reco: "<<low_2d_gamma.w/w<<", "<<low_2d_gamma.t/t+800 <<std::endl;
+
+
+             }
+            else
+              std::cout<<"Normal EVENT !! "<<_event<<", IP: "<<_gamma_IP<<", "<<_gamma1_vtx_IP<<", "<<_gamma2_vtx_IP<<std::endl ;
+
+             //////////////////////////////////////
+             float mc_clus_e = 0.;
+             closest_mcs_id = -1 ;
+             float closest_e = 1e9 ;
+
+             for (size_t j = 0; j < ass_showerreco_v.at(s1).size(); j++ ){
+
+               auto clus_id = ass_showerreco_v.at(s1).at(j);
+               auto iclus = ev_clus->at(clus_id);
+
+               int plane = iclus.Plane().Plane ;
+               if ( plane != 2 ) continue;
+
+               pur_ctr_v.clear();
+               pur_ctr_v.resize(ass_mcclus_v.size()+1,0) ;
+
+               max_hits = -1;
+               max_cid = -1 ;
+
+               // Loop through all hits associared to the cluster 
+               for ( int k = 0; k < ass_imageclus_v.at(clus_id).size(); k++ ){
+
+                 auto hid = ass_imageclus_v.at(clus_id).at(k) ;
+                 auto h = ev_hit->at(hid);
+
+                 if ( _mc_hit_map.find(hid) != _mc_hit_map.end() ){
+
+                   auto mcclus_id = _mc_hit_map[hid] ;
+                   pur_ctr_v[mcclus_id]++ ;
+
+                   if( pur_ctr_v[ mcclus_id] > max_hits ){
+                     max_hits = pur_ctr_v[mcclus_id];
+                     max_cid = mcclus_id ;
+                   }
+                 }   
+                 else {
+                   auto mcclus_id = ass_mcclus_v.size() ;
+                   pur_ctr_v[mcclus_id]++ ; 
+                   if( pur_ctr_v[mcclus_id] > max_hits ){
+                     max_hits = pur_ctr_v[mcclus_id];
+                     max_cid = mcclus_id ; 
+                   }
+                 }
+               }
+
+                if ( max_cid != ass_mcclus_v.size() && max_cid != -1 ){
+
+                  auto clocktick = larutil::DetectorProperties::GetME()->SamplingRate() * 1.e-3; //time sample in usec
+    
+                  // Store true shower detprofile energy
+                  for ( auto const & mcc_hid : ass_mcclus_v[max_cid] ){
+                    auto mch = ev_hit->at(mcc_hid) ;
+                    float lifetime_corr = exp( mch.PeakTime() * clocktick / 1.e20);
+                    float electrons = mch.Integral() * 198.; //mcc8 value
+                    float dQ = electrons * lifetime_corr * 23.6 * 1e-6 ;
+                    float dE = dQ / 0.577 ; // 0.62 -> recomb factor
+                    mc_clus_e += dE ;
+                  }   
+
+                  // Find mcs this cluster belongs to in order to store the true shower energy
+                  for ( int i = 0; i < ev_mcshr->size(); i++ ) { 
+
+                    auto s = ev_mcshr->at(i) ;
+                    if(s.Origin() != 1 || s.MotherPdgCode() != 111 ) continue;
+    
+                    auto e = fabs(mc_clus_e - s.DetProfile().E()) ;
+
+                    if ( e < closest_e ){
+                      closest_e  = e;
+                      closest_mcs_id = i ; 
+                    }   
+                  }   
+
+
+                  auto tot_mc_hits =  ass_mcclus_v[max_cid].size(); 
+                  auto tot_reco_hits = ass_imageclus_v[clus_id].size();
+
+                  auto mcclus2 = ev_mcc->at(max_cid) ;
+                  auto shr2_origin = mcclus2.Width() ;
+                  auto shr2_type = mcclus2.StartOpeningAngle() ;
+
+                  if ( shr2_origin != 2 && shr1_origin != 2 )
+                    _pi0_origin = true;
+                  if ( shr2_type == 1 || shr1_type == 1 )
+                    _pi0_type = true;
+    
+                  if ( shower1islow ){ 
+                    _gamma_low_purity   = _gamma_purity ;
+                    _gamma_low_complete = _gamma_complete ;
+                    _gamma_high_purity = float(max_hits) / tot_reco_hits ;
+                    _gamma_high_complete = float(max_hits) / tot_mc_hits ;
+
+                    //if ( closest_mcs_id != -1 ){
+
+                    //  _mc_low_dirx = _mc_dirx ;
+                    //  _mc_low_diry = _mc_diry ;
+                    //  _mc_low_dirz = _mc_dirz ;
+                    //  _mc_high_dirx = ev_mcshr->at(closest_mcs_id).DetProfile().Px() ;
+                    //  _mc_high_diry = ev_mcshr->at(closest_mcs_id).DetProfile().Py() ;
+                    //  _mc_high_dirz = ev_mcshr->at(closest_mcs_id).DetProfile().Pz() ;
+                    //}
+
+                  }
+                  else{
+                    _gamma_high_purity   = _gamma_purity ;
+                    _gamma_high_complete = _gamma_complete ;
+                    _gamma_low_purity   = float(max_hits) / tot_reco_hits ;
+                    _gamma_low_complete = float(max_hits) / tot_mc_hits ;
+
+                    //if ( closest_mcs_id != -1 ){
+                    //  _mc_high_dirx = _mc_dirx ;
+                    //  _mc_high_diry = _mc_diry ;
+                    //  _mc_high_dirz = _mc_dirz ;
+                    //  _mc_low_dirx = ev_mcshr->at(closest_mcs_id).DetProfile().Px() ;
+                    //  _mc_low_diry = ev_mcshr->at(closest_mcs_id).DetProfile().Py() ;
+                    //  _mc_low_dirz = ev_mcshr->at(closest_mcs_id).DetProfile().Pz() ;
+                    //}
+
+                  }
+
+                //std::cout<<"res low and high : "<<_res_low<<", "<<_res_high<<std::endl ;
+                }
+             }
+             ////////////////////////////////////
+
+             mc_clus_e = 0.;
+             closest_mcs_id = -1 ;
+             closest_e = 1e9 ;
+
+             for (size_t j = 0; j < ass_showerreco_v.at(s2).size(); j++ ){
+
+               auto clus_id = ass_showerreco_v.at(s2).at(j);
+               auto iclus = ev_clus->at(clus_id);
+
+               int plane = iclus.Plane().Plane ;
+               if ( plane != 2 ) continue;
+
+               pur_ctr_v.clear();
+               pur_ctr_v.resize(ass_mcclus_v.size()+1,0) ;
+
+               max_hits = -1;
+               max_cid = -1 ;
+
+               // Loop through all hits associared to the cluster 
+               for ( int k = 0; k < ass_imageclus_v.at(clus_id).size(); k++ ){
+
+                 auto hid = ass_imageclus_v.at(clus_id).at(k) ;
+                 auto h = ev_hit->at(hid);
+
+                 if ( _mc_hit_map.find(hid) != _mc_hit_map.end() ){
+
+                   auto mcclus_id = _mc_hit_map[hid] ;
+                   pur_ctr_v[mcclus_id]++ ;
+
+                   if( pur_ctr_v[ mcclus_id] > max_hits ){
+                     max_hits = pur_ctr_v[mcclus_id];
+                     max_cid = mcclus_id ;
+                   }
+                 }   
+                 else {
+                   auto mcclus_id = ass_mcclus_v.size() ;
+                   pur_ctr_v[mcclus_id]++ ; 
+                   if( pur_ctr_v[mcclus_id] > max_hits ){
+                     max_hits = pur_ctr_v[mcclus_id];
+                     max_cid = mcclus_id ; 
+                   }
+                 }
+               }
+
+                if ( max_cid != ass_mcclus_v.size() && max_cid != -1 ){
+
+                  auto clocktick = larutil::DetectorProperties::GetME()->SamplingRate() * 1.e-3; //time sample in usec
+    
+                  // Store true shower detprofile energy
+                  for ( auto const & mcc_hid : ass_mcclus_v[max_cid] ){
+                    auto mch = ev_hit->at(mcc_hid) ;
+                    float lifetime_corr = exp( mch.PeakTime() * clocktick / 1.e20);
+                    float electrons = mch.Integral() * 198.; //mcc8 value
+                    float dQ = electrons * lifetime_corr * 23.6 * 1e-6 ;
+                    float dE = dQ / 0.577 ; // 0.62 -> recomb factor
+                    mc_clus_e += dE ;
+                  }   
+
+                  // Find mcs this cluster belongs to in order to store the true shower energy
+                  for ( int i = 0; i < ev_mcshr->size(); i++ ) { 
+
+                    auto s = ev_mcshr->at(i) ;
+                    if(s.Origin() != 1 || s.MotherPdgCode() != 111 ) continue;
+    
+                    auto e = fabs(mc_clus_e - s.DetProfile().E()) ;
+
+                    if ( e < closest_e ){
+                      closest_e  = e;
+                      closest_mcs_id = i ; 
+                    }   
+                  }   
+
+                  auto tot_mc_hits =  ass_mcclus_v[max_cid].size(); 
+                  auto tot_reco_hits = ass_imageclus_v[clus_id].size();
+                 if ( !shower1islow ){ 
+                    _gamma_low_purity   = float(max_hits) / tot_reco_hits ;
+                    _gamma_low_complete = float(max_hits) / tot_mc_hits ;
+                  }
+                  else{
+                    _gamma_high_purity   = float(max_hits) / tot_reco_hits ;
+                    _gamma_high_complete = float(max_hits) / tot_mc_hits ;
+                  }
+                }
+             }
+             ////////////////////////////////////
+
 
             _gamma_tree->Fill() ;
         }// shower ID 2 
