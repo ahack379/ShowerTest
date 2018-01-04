@@ -21,6 +21,7 @@
 #pragma link C++ class larlite::NuMode+;
 #pragma link C++ class larlite::MCNuClusterer+;
 #pragma link C++ class larlite::BackgroundBT+;
+#pragma link C++ class larlite::BackgroundTruthMatchBT+;
 #pragma link C++ class larlite::AngleBackgroundBT+;
 #pragma link C++ class larlite::PostSel2ShowerQuality+;
 #pragma link C++ class larlite::ShowerRecoEff++;
