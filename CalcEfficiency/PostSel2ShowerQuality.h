@@ -118,6 +118,11 @@ namespace larlite {
   float _dir_y ;
   float _dir_z ;
 
+  // Other useful things
+  int _run_id ;
+  int _subrun_id ;
+  int _event_id ;
+
 
   ::geoalgo::GeoAlgo _geoAlgo ;
 

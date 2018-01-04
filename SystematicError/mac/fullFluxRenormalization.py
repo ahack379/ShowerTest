@@ -20,9 +20,9 @@ for x in xrange(len(sys.argv)-1):
 my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 
 # Specify output root file name
-my_proc.set_ana_output_file("writeWeights_reproc.root");
+my_proc.set_ana_output_file("flux_renorm_info_test.root");
 
-ana = fmwk.WriteWeights()
+ana = fmwk.FluxXSecErrorsFull()
 my_proc.add_process(ana)
 
 print
@@ -30,7 +30,7 @@ print  "Finished configuring ana_processor. Start event loop!"
 print
 
 # Let's run it.
-my_proc.run(0,1);
+my_proc.run();
 
 # done!
 print

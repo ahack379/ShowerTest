@@ -19,7 +19,7 @@ namespace larlite {
   bool WriteWeights::analyze(storage_manager* storage) {
   
 
-    std::cout<<"*****************************************Event: "<<_event <<std::endl; 
+    //std::cout<<"*****************************************Event: "<<_event <<std::endl; 
     _event ++ ;
     // Run this module on the final sample of pi0 info.  
     auto run = storage->run_id();
@@ -34,9 +34,7 @@ namespace larlite {
       return false;
      }
 
-    //std::cout<<"\n\n\nNEW EVENTS: "<<std::endl ;
-
-    event_file << run << " " << subrun << " " << event <<" "; //<< " "
+    //event_file << run << " " << subrun << " " << event <<" "; //<< " "
     std::cout<<run<<" "<<subrun<<" "<<event<<" " ; //<<std::endl ;
 
     auto wgt  = ev_wgt->at(0).GetWeights();
@@ -49,7 +47,7 @@ namespace larlite {
     for ( auto const & m : wgt ) { 
        std::cout<<"Parameter: "<<m.first<<", "<<m.second.size() <<std::endl;
        for ( auto const & w : m.second){
-         event_file<<w<<" " ;
+         //event_file<<w<<" " ;
          std::cout<<w<<" "; //<<std::endl ;
         }   
        }   

@@ -173,6 +173,9 @@ namespace larlite {
        auto const& shr1 = ev_s->at(s1);
 
        _gamma_E  = shr1.Energy(2)  ;
+
+       if ( _gamma_E < 1e-30 ) continue;
+ 
        ::geoalgo::Point_t vertex_reco(v.X(),v.Y(),v.Z());
         _gamma_RL = vertex_reco.Dist(shr1.ShowerStart());
 

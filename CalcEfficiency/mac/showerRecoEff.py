@@ -18,19 +18,15 @@ for x in xrange(len(sys.argv)-1):
     my_proc.add_input_file(fname)
     
 # Specify IO mode
-my_proc.set_io_mode(fmwk.storage_manager.kBOTH)
+my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 
 # Specify analysis output root file name
-my_proc.set_ana_output_file("");
+my_proc.set_ana_output_file("ShowerRecoEff_single_pi0_v2.root");
 
 # Specify data output root file name
-my_proc.set_output_file("BTbackground.root")
+#my_proc.set_output_file("qual.root")
 
-clusterer = fmwk.BackgroundBT()
-clusterer.UseMCSample(True)
-clusterer.GetPi0Info(True)
-clusterer.GetSingleShowerInfo(False)
-clusterer.GetGenieInfo(True)
+clusterer = fmwk.ShowerRecoEff()
 my_proc.add_process(clusterer)
 
 #my_proc.set_data_to_write(fmwk.data.kCluster,clusterproducer)

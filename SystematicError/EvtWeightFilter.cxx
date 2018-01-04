@@ -29,7 +29,7 @@ namespace larlite {
   
   bool EvtWeightFilter::analyze(storage_manager* storage) {
 
-    //std::cout<<"GO Subrun and event : "<<storage->subrun_id()<<", "<<storage->event_id() <<std::endl ;
+    std::cout<<"GO Subrun and event : "<<storage->subrun_id()<<", "<<storage->event_id() <<std::endl ;
 
     bool foundit = false;
     auto it = _pi0_map.find(storage->subrun_id());

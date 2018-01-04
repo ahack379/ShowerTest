@@ -52,12 +52,12 @@ namespace larlite {
     _true_angle = -9;
     _true_asym = -9;
     _reco_pi0_e = -999;
-    _true_gamma_e_max = 0 ;
-    _true_gamma_e_min = 0 ;
+    _true_gamma_e_max = -999 ;
+    _true_gamma_e_min = -999 ;
     _true_pi0_mom = -999;
     _true_nu_e = -999;
-    _true_RL_maxE = 0;
-    _true_RL_minE = 0;
+    _true_RL_maxE = -999;
+    _true_RL_minE = -999;
 
     _true_mu_mom = -999;
     _true_mu_len = -999;
@@ -78,7 +78,7 @@ namespace larlite {
     _event ++; 
     Clear() ;
 
-    std::cout<<"\nEvent is : "<<_event <<std::endl ;
+    //std::cout<<"\nEvent is : "<<_event <<std::endl ;
 
     auto ev_mctruth= storage->get_data<event_mctruth>("generator"); 
     if(!ev_mctruth || !ev_mctruth->size() ){
@@ -98,9 +98,6 @@ namespace larlite {
       return false ;
 
     auto parts = ev_mctruth->at(0).GetParticles();
-
-    int n_mes = 0;
-    int n_lep = 0;
     int n_mu = 0;
     
     std::vector<float> start(3,0) ;
@@ -112,23 +109,14 @@ namespace larlite {
         start[0] = p.Trajectory().at(0).X();
         start[1] = p.Trajectory().at(0).Y();
         start[2] = p.Trajectory().at(0).Z();
-	_true_pi0_mom = sqrt( pow(p.Trajectory().at(0).Px(),2) + pow(p.Trajectory().at(0).Py(),2) + pow(p.Trajectory().at(0).Pz(),2) )*1000; 
+	    _true_pi0_mom = sqrt( pow(p.Trajectory().at(0).Px(),2) + pow(p.Trajectory().at(0).Py(),2) + pow(p.Trajectory().at(0).Pz(),2) )*1000; 
       }
 
       if( p.StatusCode() == 1 && p.PdgCode() == 13 )
         n_mu ++; 
-
-      if( p.StatusCode() == 1 && (abs(p.PdgCode()) == 211 || abs(p.PdgCode()) == 321 ||  p.PdgCode() == 130 
-                                   || p.PdgCode() == 310 || abs(p.PdgCode()) == 311 ) ){
-        n_mes ++; 
-      }   
-
-      if( p.StatusCode() == 1 && (abs(p.PdgCode()) == 11 || p.PdgCode() == -13))
-        n_lep ++; 
-
     }
 
-    if( n_mu != 1 || _n_true_pi0 != 1) return false ; // || n_lep != 0 || n_mes != 0) return false;
+    if( n_mu != 1 || _n_true_pi0 != 1) return false ; 
 
     _true_nu_e = ev_mctruth->at(0).GetNeutrino().Nu().Trajectory().at(0).E() ;
       
@@ -140,29 +128,46 @@ namespace larlite {
     }
 
     std::vector<int> shr_ids;
+    std::map<float,int> shr_map ;
      
     for ( int si = 0; si < ev_mcs->size(); si++){ 
 
       auto s = ev_mcs->at(si);
 
-      if( s.PdgCode() != 22 ) continue; //|| abs(s.MotherPdgCode()) == 13 ) continue;
+      if( s.PdgCode() != 22 || s.MotherPdgCode() != 111 || s.Origin() != 1 ) continue; //|| abs(s.MotherPdgCode()) == 13 ) continue;
       
       auto st = s.Start();
       auto dist = sqrt( pow(st.X() - start[0],2) + pow(st.Y() - start[1],2) + pow(st.Z() - start[2],2) );
       
-      if ( dist < 0.001 ){
+      if ( dist < 0.0001 ){
         shr_ids.emplace_back(si) ;
+        shr_map.emplace(1./st.E(), si);
         //std::cout<<"Dist: "<<dist<<", energies shr: "<<ev_mcs->at(si).Start().E()<<std::endl;
-	}
+	  }
     }
     
-    if( shr_ids.size() == 2 ){
+    if( shr_ids.size() > 1 ){ // == 2){
 
-      auto s1 = ev_mcs->at(shr_ids[0]).Start();
-      auto s2 = ev_mcs->at(shr_ids[1]).Start();
+      int leading_shower_id = -1;
+      int subleading_shower_id = -1;
 
-      auto d1 = ev_mcs->at(shr_ids[0]).DetProfile();
-      auto d2 = ev_mcs->at(shr_ids[1]).DetProfile();
+      int ii = 0;
+      for ( auto const & map_element : shr_map ){
+        if( ii == 0 ){
+          leading_shower_id = map_element.second;
+          ii++;
+        }
+        if( ii == 1 ){
+          subleading_shower_id = map_element.second;
+          break;
+        }
+      }
+
+      auto s1 = ev_mcs->at(leading_shower_id).Start();
+      auto s2 = ev_mcs->at(subleading_shower_id).Start();
+
+      auto d1 = ev_mcs->at(leading_shower_id).DetProfile();
+      auto d2 = ev_mcs->at(subleading_shower_id).DetProfile();
 
       auto mag1 = sqrt( s1.Px()*s1.Px()+s1.Py()*s1.Py()+s1.Pz()*s1.Pz() );
       auto mag2 = sqrt( s2.Px()*s2.Px()+s2.Py()*s2.Py()+s2.Pz()*s2.Pz() );
@@ -183,6 +188,27 @@ namespace larlite {
       _true_asym = e1 > e2 ? e2/e1 : e1/e2 ;
       _true_angle = acos( dot / mag1 / mag2 ); 
     }
+    //if ( shr_ids.size() == 1 ){
+    //   auto id = shr_ids[0];
+
+    //   auto s1 = ev_mcs->at(id).Start();
+    //   auto d1 = ev_mcs->at(id).DetProfile();
+    //   auto mag1 = sqrt( s1.Px()*s1.Px()+s1.Py()*s1.Py()+s1.Pz()*s1.Pz() );
+    //   auto radL1 = sqrt( pow(d1.X() - xyz[0],2) + pow(d1.Y() - xyz[1],2) + pow(d1.Z() - xyz[2],2) ); 
+
+    //   _true_gamma_e_min = 0;
+    //   _true_gamma_e_max = s1.E();
+
+    //   _true_RL_minE = 0;
+    //   _true_RL_maxE = radL1;
+
+    //   _true_asym = 0;
+    //   _true_angle = acos( dot / mag1 / mag2 ); 
+
+    //}
+
+    if ( shr_ids.size() == 3 ) std::cout<<"energy: "<<_true_gamma_e_max <<std::endl ;
+    if ( _true_gamma_e_max == -999 ) std::cout<<"shr_ids size: "<<shr_ids.size()<<std::endl ;
 
     // Also, get muon unfo
     auto ev_mctrk = storage->get_data<event_mctrack>("mcreco");

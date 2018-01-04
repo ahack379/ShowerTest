@@ -9,6 +9,7 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
+#pragma link C++ class larlite::JustifyPi0Cuts+;
 #pragma link C++ class larlite::NoMuonVtxDensity+;
 #pragma link C++ class larlite::VtxDensity+;
 #pragma link C++ class larlite::HitDistDensity+;
@@ -17,7 +18,6 @@
 #pragma link C++ class larlite::TrackStitcher+;
 #pragma link C++ class larlite::RLEnergyCutStudy+;
 #pragma link C++ class larlite::RecoRLEnergyCutStudy+;
-#pragma link C++ class larlite::JustifyPi0Cuts+;
 #pragma link C++ class larlite::DataJustifyPi0Cuts+;
 #pragma link C++ class larlite::GREnergyRes+;
 

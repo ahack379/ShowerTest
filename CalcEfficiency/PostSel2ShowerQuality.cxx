@@ -307,6 +307,7 @@ namespace larlite {
                 _origin = mcclus.Width() ; 
                 _type   = mcclus.StartOpeningAngle() ; // Recall I've set this to track (0) or shower(1) in mccluster builder
                 _from_pi0 = mcclus.IsMergedCluster() ; 
+                _mc_e = mcclus.EndAngle() ;
              }
            }
 
@@ -331,7 +332,7 @@ namespace larlite {
        }
 
        if ( closest_mcs_id != -1){
-	       _mc_e = ev_mcs->at(closest_mcs_id).Start().E() ;
+	       //_mc_e = ev_mcs->at(closest_mcs_id).Start().E() ;
 
            // 00) Start - calculate SC-corrected start Point
            auto mcx = ev_mcs->at(closest_mcs_id).Start().X() ;

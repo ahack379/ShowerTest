@@ -18,6 +18,9 @@
 #pragma link C++ class larlite::EvtWeightFilter+;
 #pragma link C++ class larlite::SaveWeights+;
 #pragma link C++ class larlite::WriteWeights+;
+
+#pragma link C++ class larlite::FluxXSecMultWeights+;
+#pragma link C++ class larlite::FluxXSecMultWeightsFull+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
 

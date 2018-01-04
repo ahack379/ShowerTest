@@ -69,7 +69,7 @@ namespace larlite {
 
 
     // Retrieve cluster data product (output)
-    auto ev_mccluster = storage->get_data<event_cluster>("mccluster_heavy_test");
+    auto ev_mccluster = storage->get_data<event_cluster>("mccluster");
     auto cluster_ass_v = storage->get_data<event_ass>(ev_mccluster->name());
 
     // since we are creating a new data product,

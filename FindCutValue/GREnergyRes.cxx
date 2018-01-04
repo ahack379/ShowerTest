@@ -346,7 +346,10 @@ namespace larlite {
     for ( int si = 0; si < ev_mcshr->size(); si++){
 
       auto s = ev_mcshr->at(si);
-      shr_ids.emplace_back(si) ;
+      if ( s.Origin() == 0 && s.MotherPdgCode() == 111 && s.PdgCode() == 22 ){
+        shr_ids.emplace_back(si) ;
+      }
+      //else std::cout<<"origin: "<<s.Origin()<<", mother: "<<s.MotherPdgCode()<<", "<<s.PdgCode() <<std::endl ;
     }
     
     _found_pi0 = found_pi0 ;

@@ -12,6 +12,8 @@ namespace larlite {
 
     _func_v = {"AGKYpT_Genie","AGKYxF_Genie","DISAth_Genie","DISBth_Genie","DISCv1u_Genie","DISCv2u_Genie","FermiGasModelKf_Genie", "FermiGasModelSf_Genie","FormZone_Genie", "IntraNukeNabs_Genie", "IntraNukeNcex_Genie", "IntraNukeNel_Genie", "IntraNukeNinel_Genie", "IntraNukeNmfp_Genie", "IntraNukeNpi_Genie", "IntraNukePIabs_Genie", "IntraNukePIcex_Genie", "IntraNukePIel_Genie", "IntraNukePIinel_Genie", "IntraNukePImfp_Genie", "IntraNukePIpi_Genie", "NC_Genie", "NonResRvbarp1pi_Genie", "NonResRvbarppi_Genie", "NonResRvp1pi_Genie", "NonResRvppi_Genie", "ResDecayEta_Genie", "ResDecayGamma_Genie", "ResDecayTheta_Genie", "ccresAxial_Genie", "ccresVector_Genie", "cohMA_Genie", "cohR0_Genie", "ncelAxial_Genie", "ncelEta_Genie", "ncresAxial_Genie", "ncresVector_Genie", "qema_Genie", "qevec_Genie"}; 
 
+    if ( _event_producer == "fluxeventweight" )
+      _func_v = {"SkinEffect", "HornCurrent", "K-", "K+", "K0", "NucleonInXsec", "NucleonQEXsec", "NucleonTotXsec", "pi-", "piInelasticXsec",  "piQEXsec",  "piTotalXsec",  "pi+"} ;
 
     //_file.open("mcc8_pi0cuts.txt",std::ios_base::in);
     _file.open("weights_all.txt",std::ios_base::in);
@@ -61,8 +63,7 @@ namespace larlite {
     evinfo = std::make_pair(subrun,event);
 
     // loop through all entries in map
-    for (auto const& element : _wgtmap)
-      {
+    for (auto const& element : _wgtmap) {
 
 	if ( element.first != evinfo) continue;
 	
@@ -71,22 +72,44 @@ namespace larlite {
 	auto const& wgt_v = element.second;
 	std::map<std::string,std::vector<double>> w_map; 
 
-	for( int i = 0; i < _func_v.size() ; i++ ){
-	  std::vector<double> temp_wgt_v = {wgt_v[2*i], wgt_v[2*i + 1] };
-	  std::cout<<"FUNCTION: "<<_func_v[i]<<", "<<temp_wgt_v[0]<<", "<<temp_wgt_v[1]<<std::endl ;
+    if ( _event_producer == "genieeventweight"){
 
-	  w_map[_func_v[i]] = temp_wgt_v ; 
-	}
+	  for( int i = 0; i < _func_v.size() ; i++ ){
+	    std::vector<double> temp_wgt_v = {wgt_v[2*i], wgt_v[2*i + 1] };
+	    //std::cout<<"FUNCTION: "<<_func_v[i]<<", "<<temp_wgt_v[0]<<", "<<temp_wgt_v[1]<<std::endl ;
 
-     larlite::mceventweight thisweight(w_map);
-     ev_wgt->emplace_back( thisweight);
+	    w_map[_func_v[i]] = temp_wgt_v ; 
+	  }
 
-     if (ev_wgt->size() == 0 )
-       std::cout<<"WHAT IS HAPPENING\n\n\n\n\n\n\n\n "<<std::endl ;
+       larlite::mceventweight thisweight(w_map);
+       ev_wgt->emplace_back( thisweight);
 
-	return true;
+       if (ev_wgt->size() == 0 )
+         std::cout<<"WHAT IS HAPPENING\n\n\n\n\n\n\n\n "<<std::endl ;
+
+	  return true;
+	
+     }
+     else{
+
+	  for( int i = 0; i < _func_v.size() ; i++ ){
+	    std::vector<double> temp_wgt_v; 
+        for ( int j = 0; j < 1000; j++ )
+          temp_wgt_v.emplace_back(wgt_v[1000*i + j]);
+
+	    w_map[_func_v[i]] = temp_wgt_v ; 
+	  }
+
+       larlite::mceventweight thisweight(w_map);
+       ev_wgt->emplace_back( thisweight);
+
+       if (ev_wgt->size() == 0 )
+         std::cout<<"WHAT IS HAPPENING\n\n\n\n\n\n\n\n "<<std::endl ;
+
+	  return true;
 	
       }
+    }
 
     return true;
   }

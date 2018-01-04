@@ -483,8 +483,7 @@ namespace larlite {
     _mu_endx = tagged_trk.End().X(); 
     _mu_endy = tagged_trk.End().Y(); 
     _mu_endz = tagged_trk.End().Z(); 
-
-    _mu_mom  = tagged_trk.VertexMomentum() ;
+    //_mu_mom  = tagged_trk.VertexMomentum() ;
 
     // Adjust for pandora bug
     std::vector<double> dir = { (_mu_endx - _mu_startx) / _mu_len,
@@ -1527,17 +1526,18 @@ namespace larlite {
     float mcbnbcos_POT = 4.23214; 
     float mc_to_onbeam = dataPOT/mcbnbcos_POT;
 
-
-    for( int i = 0; i < funcs; i++){
-      std::cout<<"FLUX! "<<_flux_by_universe[i][0]<<std::endl ;
-      for( int j= 0; j < 1000; j++){
-        float eff = _s_weights_by_universe[i][j] / _t_weights_by_universe[i][j] ;
-        _xsec_v[i][j] = float( _N -  mc_to_onbeam*_b_weights_by_universe[i][j])/eff/ _flux_by_universe[i][j]/(8.855e+29);
-        _perc_v[i][j] = ( _xsec_v[i][j] - _N_xsec )/ _N_xsec *100;
+    if ( _get_genie_info ){
+      for( int i = 0; i < funcs; i++){
+        std::cout<<"FLUX! "<<_flux_by_universe[i][0]<<std::endl ;
+        for( int j= 0; j < 1000; j++){
+          float eff = _s_weights_by_universe[i][j] / _t_weights_by_universe[i][j] ;
+          _xsec_v[i][j] = float( _N -  mc_to_onbeam*_b_weights_by_universe[i][j])/eff/ _flux_by_universe[i][j]/(8.855e+29);
+          _perc_v[i][j] = ( _xsec_v[i][j] - _N_xsec )/ _N_xsec *100;
+        }
       }
-    }
 
-   _univ->Fill();
+      _univ->Fill();
+    }
 
     if ( _fout ){
       _fout->cd();

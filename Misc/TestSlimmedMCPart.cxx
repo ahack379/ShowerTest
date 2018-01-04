@@ -50,7 +50,7 @@ namespace larlite {
     auto const& ass_hit_mcpart_v = ev_ass->association(ev_hit->id(),ev_mcpart->id());
 
     // Retrieve cluster data product (output)
-    auto ev_mccluster = storage->get_data<event_cluster>("mccluster_slim_test");
+    auto ev_mccluster = storage->get_data<event_cluster>("mccluster");
     auto cluster_ass_v = storage->get_data<event_ass>(ev_mccluster->name());
 
     storage->set_id(ev_hit->run(),ev_hit->subrun(),ev_hit->event_id());
@@ -87,8 +87,8 @@ namespace larlite {
     auto t = ev_truth->at(0);
 
     for (auto const & p : t.GetParticles()){
-      if ( p.TrackId() == 1031692 ) std::cout<<"particle : "<<p.PdgCode() <<std::endl ; //", "<<p.MotherPdgCode() <<std::endl ;
-      std::cout<<"Particle track IDs: "<<p.TrackId()<<std::endl;
+      //if ( p.TrackId() == 1031692 ) std::cout<<"particle : "<<p.PdgCode() <<std::endl ; //", "<<p.MotherPdgCode() <<std::endl ;
+      //std::cout<<"Particle track IDs: "<<p.TrackId()<<std::endl;
     
     }
 
@@ -104,7 +104,7 @@ namespace larlite {
       auto mct = ev_mct->at(jj); 
 
       if ( mcp_to_mcst.find(mct.TrackID() ) != mcp_to_mcst.end() ){
-         std::cout<<"So...we can have overlap in trackIDs? "<<mct.TrackID()<<std::endl ;
+         //std::cout<<"So...we can have overlap in trackIDs? "<<mct.TrackID()<<std::endl ;
          continue;
       }
       if (mct.size() < 2 or (mct.Origin() != 1 and mct.Origin() != 2) ){ continue; }
@@ -144,7 +144,7 @@ namespace larlite {
       else continue;
     }
 
-    std::cout<<" CLusters: "<<cluster_hit_v.size() <<std::endl;
+    //std::cout<<" CLusters: "<<cluster_hit_v.size() <<std::endl;
 
     std::vector<std::vector<unsigned int> > cluster_hit_ass_v;
     for (size_t it=0; it < cluster_hit_v.size(); it++){
@@ -162,6 +162,9 @@ namespace larlite {
       cluster_hit_ass_v.push_back(cluster_hit_v[it]);
 
     }// for all clusters created
+
+    std::cout<<"Setting association !" <<std::endl ;
+
 
     // now save the associations for the cluster
     cluster_ass_v->set_association(ev_mccluster->id(),product_id(data::kHit,ev_hit->name()),
