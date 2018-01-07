@@ -1017,9 +1017,11 @@ namespace larlite {
 	           _pi0_low_origin = pi0_origin;
 	           _pi0_low_type = pi0_type;
 
-               _pi0_low_mother_pdg = pi0_type == 1 ? ev_mcs->at(ts_index).MotherPdgCode() : ev_mct->at(ts_index).MotherPdgCode() ; 
-               _pi0_low_pdg = pi0_type == 1 ? ev_mcs->at(ts_index).PdgCode() : ev_mct->at(ts_index).PdgCode() ; 
-	           _pi0_low_from_pi0 = _pi0_low_mother_pdg == 111 ? 1 : 0 ;
+                if ( ts_index != -1 ){
+                  _pi0_low_mother_pdg = pi0_type == 1 ? ev_mcs->at(ts_index).MotherPdgCode() : ev_mct->at(ts_index).MotherPdgCode() ; 
+                  _pi0_low_pdg = pi0_type == 1 ? ev_mcs->at(ts_index).PdgCode() : ev_mct->at(ts_index).PdgCode() ; 
+	          _pi0_low_from_pi0 = _pi0_low_mother_pdg == 111 ? 1 : 0 ;
+		}
 
 	           if ( _pi0_low_type == 1 ){
                  auto mcs = ev_mcs->at(ts_index) ;
@@ -1039,9 +1041,11 @@ namespace larlite {
 	           _pi0_high_origin = pi0_origin;
 	           _pi0_high_type = pi0_type;
 
-               _pi0_high_mother_pdg = pi0_type == 1 ? ev_mcs->at(ts_index).MotherPdgCode() : ev_mct->at(ts_index).MotherPdgCode() ; 
-               _pi0_high_pdg = pi0_type == 1 ? ev_mcs->at(ts_index).PdgCode() : ev_mct->at(ts_index).PdgCode() ; 
-	           _pi0_high_from_pi0 = _pi0_high_mother_pdg == 111 ? 1 : 0 ;
+                if ( ts_index != -1 ){
+                  _pi0_high_mother_pdg = pi0_type == 1 ? ev_mcs->at(ts_index).MotherPdgCode() : ev_mct->at(ts_index).MotherPdgCode() ; 
+                  _pi0_high_pdg = pi0_type == 1 ? ev_mcs->at(ts_index).PdgCode() : ev_mct->at(ts_index).PdgCode() ; 
+	          _pi0_high_from_pi0 = _pi0_high_mother_pdg == 111 ? 1 : 0 ;
+	        }
 
 	           if ( _pi0_high_type == 1){
                  auto mcs = ev_mcs->at(ts_index) ;
@@ -1064,9 +1068,12 @@ namespace larlite {
 	           _pi0_low_origin = pi0_origin;
 	           _pi0_low_type = pi0_type;
 
-               _pi0_low_mother_pdg = pi0_type == 1 ? ev_mcs->at(ts_index).MotherPdgCode() : ev_mct->at(ts_index).MotherPdgCode() ; 
-               _pi0_low_pdg = pi0_type == 1 ? ev_mcs->at(ts_index).PdgCode() : ev_mct->at(ts_index).PdgCode() ; 
-	           _pi0_low_from_pi0 = _pi0_low_mother_pdg == 111 ? 1 : 0 ;
+                   if ( ts_index != -1 ){
+                     //std::cout<<"ts_index: "<<ts_index<<", "<<ev_mcs->size()<<", "<<ev_mct->size()<<std::endl;
+                     _pi0_low_mother_pdg = pi0_type == 1 ? ev_mcs->at(ts_index).MotherPdgCode() : ev_mct->at(ts_index).MotherPdgCode() ; 
+                     _pi0_low_pdg = pi0_type == 1 ? ev_mcs->at(ts_index).PdgCode() : ev_mct->at(ts_index).PdgCode() ; 
+	             _pi0_low_from_pi0 = _pi0_low_mother_pdg == 111 ? 1 : 0 ;
+		   }
 
 	           if ( _pi0_low_type == 1 ){
                  auto mcs = ev_mcs->at(ts_index) ;
@@ -1087,9 +1094,12 @@ namespace larlite {
 	           _pi0_high_origin = pi0_origin;
 	           _pi0_high_type = pi0_type;
 
-               _pi0_high_mother_pdg = pi0_type == 1 ? ev_mcs->at(ts_index).MotherPdgCode() : ev_mct->at(ts_index).MotherPdgCode() ; 
-               _pi0_high_pdg = pi0_type == 1 ? ev_mcs->at(ts_index).PdgCode() : ev_mct->at(ts_index).PdgCode() ; 
-	           _pi0_high_from_pi0 = _pi0_high_mother_pdg == 111 ? 1 : 0 ;
+
+                if ( ts_index != -1 ){
+                  _pi0_high_mother_pdg = pi0_type == 1 ? ev_mcs->at(ts_index).MotherPdgCode() : ev_mct->at(ts_index).MotherPdgCode() ; 
+                  _pi0_high_pdg = pi0_type == 1 ? ev_mcs->at(ts_index).PdgCode() : ev_mct->at(ts_index).PdgCode() ; 
+	          _pi0_high_from_pi0 = _pi0_high_mother_pdg == 111 ? 1 : 0 ;
+	        }
 
 	           if ( _pi0_high_type == 1){
                  auto mcs = ev_mcs->at(ts_index) ;
