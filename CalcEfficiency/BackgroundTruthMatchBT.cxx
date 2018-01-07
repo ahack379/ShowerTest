@@ -1034,7 +1034,7 @@ namespace larlite {
                _pi0_high_pdg = pi0_type == 1 ? ev_mcs->at(ts_index).PdgCode() : ev_mct->at(ts_index).PdgCode() ; 
 	           _pi0_high_from_pi0 = _pi0_high_mother_pdg == 111 ? 1 : 0 ;
 
-	           if ( _pi0_high_origin == 1){
+	           if ( _pi0_high_type == 1){
                  auto mcs = ev_mcs->at(ts_index) ;
 	             _pi0_high_true_st_x = mcs.DetProfile().X() ;
 	             _pi0_high_true_st_y = mcs.DetProfile().Y() ;
@@ -1082,7 +1082,7 @@ namespace larlite {
                _pi0_high_pdg = pi0_type == 1 ? ev_mcs->at(ts_index).PdgCode() : ev_mct->at(ts_index).PdgCode() ; 
 	           _pi0_high_from_pi0 = _pi0_high_mother_pdg == 111 ? 1 : 0 ;
 
-	           if ( _pi0_high_origin == 1){
+	           if ( _pi0_high_type == 1){
                  auto mcs = ev_mcs->at(ts_index) ;
 	             _pi0_high_true_st_x = mcs.DetProfile().X() ;
 	             _pi0_high_true_st_y = mcs.DetProfile().Y() ;
@@ -1499,7 +1499,7 @@ namespace larlite {
 
   bool BackgroundTruthMatchBT::finalize() {
 
-    std::cout<<"Signals: "<<std::endl ;
+    std::cout<<"Signals: "<<_signal<<std::endl ;
     std::cout<<"Total CCpi0 : "<<_n_cc1pi0<<std::endl; 
 
     // Note that cc other includes secondary pi0s.
