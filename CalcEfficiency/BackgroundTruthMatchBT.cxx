@@ -172,6 +172,8 @@ namespace larlite {
       _tree->Branch("mu_cw_complete",&_mu_cw_complete,"mu_cw_complete/F");
       _tree->Branch("mu_origin",&_mu_origin,"mu_origin/F");
       _tree->Branch("mu_type",&_mu_type,"mu_type/F");
+      _tree->Branch("mu_pdg",&_mu_pdg,"mu_pdg/I");
+      _tree->Branch("mu_mother_pdg",&_mu_mother_pdg,"mu_mother_pdg/I");
       // Candidate pi0 showers
       _tree->Branch("pi0_mass",&_pi0_mass,"pi0_mass/F");
       _tree->Branch("pi0_oangle",&_pi0_oangle,"pi0_oangle/F");
@@ -337,41 +339,44 @@ namespace larlite {
     _mu_cw_purity  = 0.;
     _mu_origin = -1;  // 1 is nu, 2 cosmic, -1 is noise
     _mu_type   = -1 ; // 0 is track
+    _mu_pdg = -1;  
+    _mu_mother_pdg = -1;  
 
     _pi0_mass = -999;
     _pi0_oangle = -999;
     _pi0_IP = -999;
     _pi0_mom = -999;
     _pi0_low_shrE = -999;
-    _pi0_high_shrE = -999;
     _pi0_low_radL = -999;
-    _pi0_high_radL = -999;
     _pi0_low_IP_w_vtx = -999;
-    _pi0_high_IP_w_vtx = -999;
-
-    _pi0_high_purity = 0.;
-    _pi0_high_complete = 0.;
     _pi0_low_purity = 0.;
     _pi0_low_complete = 0.;
-    _pi0_high_cw_purity = 0.;
-    _pi0_high_cw_complete = 0.;
     _pi0_low_cw_purity = 0.;
     _pi0_low_cw_complete = 0.;
-
     _pi0_low_true_gammaE = -999;
-    _pi0_high_true_gammaE = -999;
     _pi0_low_true_detProf_gammaE = -999;
-    _pi0_high_true_detProf_gammaE = -999;
     _pi0_low_origin = -1;
     _pi0_low_type = -1 ; // 1 is shower, 0 is track
     _pi0_low_from_pi0= false ; 
-    _pi0_high_origin = -1 ;
-    _pi0_high_type = -1  ; // true is shower
-    _pi0_high_from_pi0 = false ; 
-
     _pi0_low_st_x  = -999;
     _pi0_low_st_y  = -999;
     _pi0_low_st_z  = -999;
+    _pi0_low_dist_to_nearest_trk = -999 ;
+    _pi0_low_mother_pdg = -1;
+    _pi0_low_pdg = -1;
+
+    _pi0_high_shrE = -999;
+    _pi0_high_radL = -999;
+    _pi0_high_IP_w_vtx = -999;
+    _pi0_high_purity = 0.;
+    _pi0_high_complete = 0.;
+    _pi0_high_cw_purity = 0.;
+    _pi0_high_cw_complete = 0.;
+    _pi0_high_true_gammaE = -999;
+    _pi0_high_true_detProf_gammaE = -999;
+    _pi0_high_origin = -1 ;
+    _pi0_high_type = -1  ; // true is shower
+    _pi0_high_from_pi0 = false ; 
     _pi0_high_st_x = -999 ;
     _pi0_high_st_y = -999 ;
     _pi0_high_st_z = -999 ;
@@ -381,9 +386,9 @@ namespace larlite {
     _pi0_high_true_st_x= -999 ;
     _pi0_high_true_st_y= -999 ;
     _pi0_high_true_st_z= -999 ;
-   
-    _pi0_low_dist_to_nearest_trk = -999 ;
     _pi0_high_dist_to_nearest_trk = -999 ;
+    _pi0_high_mother_pdg = -1;
+    _pi0_high_pdg = -1;
 
     _gamma_E = -999;
     _gamma_RL = -999;
@@ -397,6 +402,8 @@ namespace larlite {
     _gamma_origin = -1;
     _gamma_type = -1 ;
     _gamma_from_pi0 = false;
+    _gamma_pdg = -1;
+    _gamma_mother_pdg = -1;
 
     _shr_startx = -999;
     _shr_starty = -999;
@@ -412,6 +419,8 @@ namespace larlite {
     _shr_vtx_dist = -999;
     _shr_trk_delta_theta = -999;
     _shr_trk_delta_phi = -999;
+    _shr_pdg = -1;
+    _shr_mother_pdg = -1;
 
     // additions post technote version v0.9
     _n_track_hits_0 = 0;
