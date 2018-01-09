@@ -19,8 +19,9 @@ namespace larlite {
   
   bool ExtraDumbFilter::analyze(storage_manager* storage) {
  
-    if ( storage->subrun_id() == _subrun && storage->event_id() == _event)
+    if ( storage->subrun_id() == _subrun && storage->event_id() == _event){
       return true;
+    }
   
     return false;
   }
