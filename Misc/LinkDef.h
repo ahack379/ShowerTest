@@ -18,8 +18,10 @@
 #pragma link C++ class larlite::TestSlimmedMCPart+;
 #pragma link C++ class larlite::SlimmedBT+;
 #pragma link C++ class larlite::Overlap+;
+#pragma link C++ class larlite::SysFindRoughEvents+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
+
 
 
 
