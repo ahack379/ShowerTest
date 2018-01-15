@@ -98,7 +98,7 @@ namespace larlite {
           n_gamma ++;
      }
 
-     if( n_gamma == 1 && nu.CCNC() == 0 && nu.Nu().PdgCode() == 14 )
+     if(n_pi0 == 0 && n_gamma == 1 && nu.CCNC() == 0 && nu.Nu().PdgCode() == 14 )
        _n_cc_1gamma++;
      if( n_gamma == 1 && nu.CCNC() == 1 )
        _n_nc_1gamma++;
