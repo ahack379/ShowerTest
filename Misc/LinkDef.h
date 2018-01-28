@@ -19,8 +19,12 @@
 #pragma link C++ class larlite::SlimmedBT+;
 #pragma link C++ class larlite::Overlap+;
 #pragma link C++ class larlite::SysFindRoughEvents+;
+#pragma link C++ class larlite::MisAlign+;
+#pragma link C++ class larlite::SplitDataXYZ+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
+
+
 
 
 
