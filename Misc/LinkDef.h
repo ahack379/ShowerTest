@@ -21,6 +21,7 @@
 #pragma link C++ class larlite::SysFindRoughEvents+;
 #pragma link C++ class larlite::MisAlign+;
 #pragma link C++ class larlite::SplitDataXYZ+;
+#pragma link C++ class larlite::SplitDataOddEven+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
 
