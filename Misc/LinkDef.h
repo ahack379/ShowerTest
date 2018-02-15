@@ -22,8 +22,10 @@
 #pragma link C++ class larlite::MisAlign+;
 #pragma link C++ class larlite::SplitDataXYZ+;
 #pragma link C++ class larlite::SplitDataOddEven+;
+#pragma link C++ class larlite::LifetimeStudy+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
+
 
 
 
