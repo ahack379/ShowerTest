@@ -99,6 +99,8 @@ namespace larlite {
 
     // Check osc group question
     int _1gamma ;
+ 
+    int _n_signals;
 
     // MCCluster hit stuff
     std::map<int,int> _mc_hit_map ;
@@ -123,6 +125,10 @@ namespace larlite {
 
     TTree * _tree ;
     int _event ;
+
+    int _event_id ;
+    int _subrun_id ;
+    int _run_id ;
     int _bkgd_id ;
     int _nu_mode ;
     int _nshrs;

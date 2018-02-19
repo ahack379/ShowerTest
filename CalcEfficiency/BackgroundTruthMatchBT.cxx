@@ -26,6 +26,7 @@ namespace larlite {
 
     //_N    = 0 ;
     //_N_xsec    = 0 ;
+    _n_signals =0 ;
 
     _n_noise = 0;    // 0
     _n_cosmic = 0;   // 1         
@@ -136,6 +137,9 @@ namespace larlite {
 
     if ( !_tree ){
       _tree = new TTree("tree","");
+      _tree->Branch("event_id",&_event_id,"event_id/I");
+      _tree->Branch("subrun_id",&_subrun_id,"subrun_id/I");
+      _tree->Branch("run_id",&_run_id,"run_id/I");
       _tree->Branch("event",&_event,"event/I");
       _tree->Branch("bkgd_id",&_bkgd_id,"bkgd_id/I");
       _tree->Branch("nu_mode",&_nu_mode,"nu_mode/I");
@@ -305,6 +309,10 @@ namespace larlite {
 
   void BackgroundTruthMatchBT::clear(){
 
+    _event_id = -1;
+    _subrun_id = -1;
+    _run_id = -1;
+     
     _bkgd_id = -1 ;
     _nu_mode = -1 ;
     _nshrs = -1 ;
@@ -472,6 +480,10 @@ namespace larlite {
       return false;
     }
 
+    _event_id = storage->event_id() ;
+    _subrun_id = storage->subrun_id() ;
+    _run_id = storage->run_id() ;
+
     auto vtx = ev_vtx->at(0); 
     _vtx_x = vtx.X();
     _vtx_y = vtx.Y();
@@ -539,8 +551,11 @@ namespace larlite {
       
       int max_it = -1;
       int max_pe = -1;
+
+      //std::cout<<"Flash size: "<<ev_flash->size()<<std::endl ;
       for( int ff = 0; ff < ev_flash->size(); ff++){
         auto f = ev_flash->at(ff);
+        //std::cout<<"Flash PE: "<< f.TotalPE()<<std::endl ;
         if ( f.TotalPE() > max_pe ) {
 	  max_pe = f.TotalPE();
 	  max_it = ff;
@@ -1127,6 +1142,9 @@ namespace larlite {
          if ( _bkgd_id == 2 && _pi0_low_origin != 2 && _pi0_high_origin != 2 )
            _signal = true;
          }
+         if ( _bkgd_id == 2 && _pi0_low_origin != 2 && _pi0_high_origin != 2 ){
+           _n_signals++;
+         }
        }
 
        if ( _get_single_shower_info ){
@@ -1219,8 +1237,10 @@ namespace larlite {
                _gamma_trueE = mcs.Start().E() ;
               }
 
-             if ( _bkgd_id == 2 && _gamma_origin != 2 )
+             if ( _bkgd_id == 2 && _gamma_origin != 2 ){
+               _n_signals++;
                _signal = true;
+             }
            }
          }
        }
@@ -1518,7 +1538,7 @@ namespace larlite {
 
   bool BackgroundTruthMatchBT::finalize() {
 
-    std::cout<<"Signals: "<<_signal<<std::endl ;
+    std::cout<<"Signals: "<<_n_signals<<std::endl ;
     std::cout<<"Total CCpi0 : "<<_n_cc1pi0<<std::endl; 
 
     // Note that cc other includes secondary pi0s.
