@@ -181,6 +181,7 @@ namespace larlite {
       // Candidate pi0 showers
       _tree->Branch("pi0_mass",&_pi0_mass,"pi0_mass/F");
       _tree->Branch("pi0_oangle",&_pi0_oangle,"pi0_oangle/F");
+      _tree->Branch("pi0_true_oangle",&_pi0_true_oangle,"pi0_true_oangle/F");
       _tree->Branch("pi0_IP",&_pi0_IP,"pi0_IP/F");
       _tree->Branch("pi0_mom",&_pi0_mom,"pi0_mom/F");
       _tree->Branch("pi0_low_shrE",&_pi0_low_shrE,"pi0_low_shrE/F");
@@ -352,6 +353,7 @@ namespace larlite {
 
     _pi0_mass = -999;
     _pi0_oangle = -999;
+    _pi0_true_oangle = -999;
     _pi0_IP = -999;
     _pi0_mom = -999;
     _pi0_low_shrE = -999;
@@ -821,6 +823,19 @@ namespace larlite {
             n_gamma++;
         }   
 
+ 
+        int n_shr_111 = 0;
+	std::vector<int> shr_it_v ;
+        for ( int si = 0; si < ev_mcs->size(); si++ ){
+	  auto s = ev_mcs->at(si) ;
+	  if ( s.MotherPdgCode() == 111 ){
+	    n_shr_111++ ;
+	    shr_it_v.emplace_back(si);
+          }
+	}
+        if ( n_shr_111 == 2 )
+          _pi0_true_oangle = acos( ev_mcs->at(shr_it_v.at(0)).StartDir().Dot(ev_mcs->at(shr_it_v.at(1)).StartDir()) )  ;
+
        auto mcclus = ev_mcc->at(max_cid) ;
        _mu_type   = mcclus.StartOpeningAngle() ; // opening angle set to track (0) or shower(1) in mccluster builder
        auto ts_index = mcclus.Width() ;           // width set to carry mct/s index
@@ -1019,6 +1034,7 @@ namespace larlite {
                 pi0_origin = mcs.Origin(); 
               }
             }
+
 
             auto ishr = ev_s->at(i);
 

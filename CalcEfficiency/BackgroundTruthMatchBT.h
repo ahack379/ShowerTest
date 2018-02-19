@@ -170,6 +170,7 @@ namespace larlite {
     float _pi0_mass ;
     float _pi0_mom ;
     float _pi0_oangle ;
+    float _pi0_true_oangle ;
     float _pi0_IP;
     float _pi0_low_shrE;
     float _pi0_low_radL;
