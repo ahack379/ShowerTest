@@ -26,6 +26,7 @@
 #pragma link C++ class larlite::PostSel2ShowerQuality+;
 #pragma link C++ class larlite::ShowerRecoEff++;
 #pragma link C++ class larlite::SinglePi0Clusterer++;
+#pragma link C++ class larlite::TruthMatchShowerRecoEff++;
 
 //#pragma link C++ class larlite::MCTrackClusterer+;
 
