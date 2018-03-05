@@ -237,6 +237,7 @@ namespace larlite {
     float _gamma_cw_complete; 
     float _gamma_trueE;
     float _gamma_trueE_detProf;
+    float _gamma_perfect_clustering_E;
     float _gamma_origin ; 
     float _gamma_type ;  
     bool _gamma_from_pi0;   
@@ -281,6 +282,7 @@ namespace larlite {
     bool _shr_from_pi0 ;
     float _shr_trueE_detProf ;
     float _shr_trueE ;
+    float _shr_perfect_clustering_E ;
     float _shr_ip ;
     float _shr_rl;
     int _shr_mother_pdg ;

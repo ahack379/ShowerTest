@@ -249,6 +249,7 @@ namespace larlite {
       _tree->Branch("gamma_cw_complete",&_gamma_cw_complete,"gamma_cw_complete/F");
       _tree->Branch("gamma_trueE",&_gamma_trueE,"gamma_trueE/F");
       _tree->Branch("gamma_trueE_detProf",&_gamma_trueE_detProf,"gamma_trueE_detProf/F");
+      _tree->Branch("gamma_perfect_clustering_E",&_gamma_perfect_clustering_E,"gamma_perfect_clustering_E/F");
       _tree->Branch("gamma_origin",&_gamma_origin,"gamma_origin/F");
       _tree->Branch("gamma_type",&_gamma_type,"gamma_type/F");
       _tree->Branch("gamma_from_pi0",&_gamma_from_pi0,"gamma_from_pi0/B");
@@ -286,6 +287,9 @@ namespace larlite {
       _shower_tree->Branch("shr_diry",&_shr_diry,"shr_diry/F");
       _shower_tree->Branch("shr_dirz",&_shr_dirz,"shr_dirz/F");
       _shower_tree->Branch("shr_energy",&_shr_energy,"shr_energy/F");
+      _shower_tree->Branch("shr_trueE",&_shr_trueE,"shr_trueE/F");
+      _shower_tree->Branch("shr_trueE_detProf",&_shr_trueE_detProf,"shr_trueE_detProf/F");
+      _shower_tree->Branch("shr_perfect_clustering_E",&_shr_perfect_clustering_E,"shr_perfect_clustering_E/F");
       _shower_tree->Branch("shr_oangle",&_shr_oangle,"shr_oangle/F");
       _shower_tree->Branch("shr_dedx",&_shr_dedx,"shr_dedx/F");
       _shower_tree->Branch("shr_vtx_dist",&_shr_vtx_dist,"shr_vtx_dist/F");
@@ -418,6 +422,7 @@ namespace larlite {
     _gamma_cw_complete = 0.;
     _gamma_trueE = -999;
     _gamma_trueE_detProf = -999;
+    _gamma_perfect_clustering_E = -999;
     _gamma_origin = -1;
     _gamma_type = -1 ;
     _gamma_from_pi0 = false;
@@ -433,6 +438,9 @@ namespace larlite {
     _shr_diry = -999;
     _shr_dirz = -999;
     _shr_energy = -999;
+    _shr_trueE= -999;
+    _shr_trueE_detProf= -999;
+    _shr_perfect_clustering_E = -999;
     _shr_oangle = -999;
     _shr_dedx = -999;
     _shr_vtx_dist = -999;
@@ -1262,6 +1270,9 @@ namespace larlite {
            }
          }
 
+         auto clocktick = larutil::DetectorProperties::GetME()->SamplingRate() * 1.e-3; //time sample in us
+         float mc_clus_e = -999.;
+
          if ( max_cid != ass_mcclus_v.size() && max_cid != -1){
 
            auto tot_mc_hits =  ass_mcclus_v[max_cid].size(); 
@@ -1296,6 +1307,20 @@ namespace larlite {
              _n_signals++;
              _signal = true;
            }
+
+           mc_clus_e = 0;
+
+	   // Fill perfect clustering info for the mccluster corresponding to true
+           for ( auto const & mcc_hid : ass_mcclus_v[max_cid] ){
+             auto mch = ev_hit->at(mcc_hid) ;
+             float lifetime_corr = exp( mch.PeakTime() * clocktick / 1.e20);
+             float electrons = mch.Integral() * 198.; //mcc8 value
+             float dQ = electrons * lifetime_corr * 23.6 * 1e-6 ;
+             float dE = dQ / 0.577 ; // 0.62 -> recomb factor
+             mc_clus_e += dE ;
+           }   
+
+           _gamma_perfect_clustering_E = mc_clus_e ;
          }
        }
      } // if we're filling single shower info
@@ -1489,6 +1514,9 @@ namespace larlite {
              }
            }
 
+           auto clocktick = larutil::DetectorProperties::GetME()->SamplingRate() * 1.e-3; //time sample in us
+           float mc_clus_e = -999.;
+
            if ( max_cid != ass_mcclus_v.size() && max_cid != -1 ){
 
              auto tot_mc_hits =  ass_mcclus_v[max_cid].size(); 
@@ -1516,6 +1544,18 @@ namespace larlite {
                _shr_trueE = mcs.Start().E() ;
                _shr_trueE_detProf = mcs.DetProfile().E();
               }
+             mc_clus_e = 0;
+
+	     // Fill perfect clustering info for the mccluster corresponding to true
+             for ( auto const & mcc_hid : ass_mcclus_v[max_cid] ){
+               auto mch = ev_hit->at(mcc_hid) ;
+               float lifetime_corr = exp( mch.PeakTime() * clocktick / 1.e20);
+               float electrons = mch.Integral() * 198.; //mcc8 value
+               float dQ = electrons * lifetime_corr * 23.6 * 1e-6 ;
+               float dE = dQ / 0.577 ; // 0.62 -> recomb factor
+               mc_clus_e += dE ;
+             }   
+             _shr_perfect_clustering_E = mc_clus_e ;
            }
 
            if( _shr_type == -999 ) _n_shr_noise++;
