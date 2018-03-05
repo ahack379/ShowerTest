@@ -228,6 +228,12 @@ namespace larlite {
     float _pi0_high_true_st_z ;
     float _pi0_high_dist_to_nearest_trk ;
     // Variables related to single shower selection
+    float _gamma_startx;
+    float _gamma_starty;
+    float _gamma_startz;
+    float _gamma_true_startx;
+    float _gamma_true_starty;
+    float _gamma_true_startz;
     float _gamma_E;
     float _gamma_RL ;
     float _gamma_IP_w_vtx;
@@ -264,6 +270,9 @@ namespace larlite {
     float _shr_startx;
     float _shr_starty;
     float _shr_startz;
+    float _shr_true_startx;
+    float _shr_true_starty;
+    float _shr_true_startz;
     float _shr_startw;
     float _shr_startt;
     float _shr_dirx;

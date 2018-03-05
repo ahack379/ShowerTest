@@ -243,6 +243,12 @@ namespace larlite {
       _tree->Branch("gamma_E",&_gamma_E,"gamma_E/F");
       _tree->Branch("gamma_RL",&_gamma_RL,"gamma_RL/F");
       _tree->Branch("gamma_IP_w_vtx",&_gamma_IP_w_vtx,"gamma_IP_w_vtx/F");
+      _tree->Branch("gamma_startx",&_gamma_startx,"gamma_startx/F");
+      _tree->Branch("gamma_starty",&_gamma_starty,"gamma_starty/F");
+      _tree->Branch("gamma_startz",&_gamma_startz,"gamma_startz/F");
+      _tree->Branch("gamma_true_startx",&_gamma_true_startx,"gamma_true_startx/F");
+      _tree->Branch("gamma_true_starty",&_gamma_true_starty,"gamma_true_starty/F");
+      _tree->Branch("gamma_true_startz",&_gamma_true_startz,"gamma_true_startz/F");
       _tree->Branch("gamma_purity",&_gamma_purity,"gamma_purity/F");
       _tree->Branch("gamma_complete",&_gamma_complete,"gamma_complete/F");
       _tree->Branch("gamma_cw_purity",&_gamma_cw_purity,"gamma_cw_purity/F");
@@ -287,6 +293,9 @@ namespace larlite {
       _shower_tree->Branch("shr_diry",&_shr_diry,"shr_diry/F");
       _shower_tree->Branch("shr_dirz",&_shr_dirz,"shr_dirz/F");
       _shower_tree->Branch("shr_energy",&_shr_energy,"shr_energy/F");
+      _shower_tree->Branch("shr_true_startx",&_shr_true_startx,"shr_true_startx/F");
+      _shower_tree->Branch("shr_true_starty",&_shr_true_starty,"shr_true_starty/F");
+      _shower_tree->Branch("shr_true_startz",&_shr_true_startz,"shr_true_startz/F");
       _shower_tree->Branch("shr_trueE",&_shr_trueE,"shr_trueE/F");
       _shower_tree->Branch("shr_trueE_detProf",&_shr_trueE_detProf,"shr_trueE_detProf/F");
       _shower_tree->Branch("shr_perfect_clustering_E",&_shr_perfect_clustering_E,"shr_perfect_clustering_E/F");
@@ -413,6 +422,12 @@ namespace larlite {
     _pi0_high_mother_pdg = -1;
     _pi0_high_pdg = -1;
 
+    _gamma_startx = -999 ;
+    _gamma_starty = -999 ;
+    _gamma_startz = -999 ;
+    _gamma_true_startx = -999 ;
+    _gamma_true_starty = -999 ;
+    _gamma_true_startz = -999 ;
     _gamma_E = -999;
     _gamma_RL = -999;
     _gamma_IP_w_vtx = -999;
@@ -429,6 +444,9 @@ namespace larlite {
     _gamma_pdg = -1;
     _gamma_mother_pdg = -1;
 
+    _shr_true_startx = -999;
+    _shr_true_starty = -999;
+    _shr_true_startz = -999;
     _shr_startx = -999;
     _shr_starty = -999;
     _shr_startz = -999;
@@ -1301,6 +1319,9 @@ namespace larlite {
              _gamma_from_pi0 = _gamma_mother_pdg == 111 ? 1 : 0 ;
              _gamma_trueE_detProf = mcs.DetProfile().E();
              _gamma_trueE = mcs.Start().E() ;
+	     _gamma_true_x = mcs.DetProfile().X() ;
+	     _gamma_true_y = mcs.DetProfile().Y() ;
+	     _gamma_true_z = mcs.DetProfile().Z() ;
            }
 
            if ( _bkgd_id == 2 && _gamma_origin != 2 ){
@@ -1388,8 +1409,13 @@ namespace larlite {
    }
  
    if ( _get_single_shower_info ){
+
      auto ev_s = storage->get_data<event_shower>("pi0_1gamma_candidate_showers");
      if ( !ev_s ) return false;
+
+     _gamma_startx = ev_s->at(0).ShowerStart().X();
+     _gamma_starty = ev_s->at(0).ShowerStart().Y();
+     _gamma_startz = ev_s->at(0).ShowerStart().Z();
 
      geoalgo::Point_t vertex(3);
      vertex[0] = vtx.X();
@@ -1543,6 +1569,9 @@ namespace larlite {
                _shr_from_pi0 = _shr_mother_pdg == 111 ? 1 : 0 ;
                _shr_trueE = mcs.Start().E() ;
                _shr_trueE_detProf = mcs.DetProfile().E();
+	       _shr_true_startx = mcs.DetProfile().X();
+	       _shr_true_starty = mcs.DetProfile().X();
+	       _shr_true_startz = mcs.DetProfile().X();
               }
              mc_clus_e = 0;
 
