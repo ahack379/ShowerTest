@@ -17,6 +17,7 @@
 #include "DataFormat/mceventweight.h"
 
 #include "LArUtil/GeometryHelper.h"
+#include "LArUtil/DetectorProperties.h"
 
 namespace larlite {
 
@@ -179,6 +180,8 @@ namespace larlite {
       _tree->Branch("mu_pdg",&_mu_pdg,"mu_pdg/I");
       _tree->Branch("mu_mother_pdg",&_mu_mother_pdg,"mu_mother_pdg/I");
       // Candidate pi0 showers
+      _tree->Branch("mc_clus_e_0",&_mc_clus_e_0,"mc_clus_e_0/F");
+      _tree->Branch("mc_clus_e_1",&_mc_clus_e_1,"mc_clus_e_1/F");
       _tree->Branch("pi0_mass",&_pi0_mass,"pi0_mass/F");
       _tree->Branch("pi0_oangle",&_pi0_oangle,"pi0_oangle/F");
       _tree->Branch("pi0_true_oangle",&_pi0_true_oangle,"pi0_true_oangle/F");
@@ -351,6 +354,8 @@ namespace larlite {
     _mu_pdg = -1;  
     _mu_mother_pdg = -1;  
 
+    _mc_clus_e_0 = -999;
+    _mc_clus_e_1 = -999;
     _pi0_mass = -999;
     _pi0_oangle = -999;
     _pi0_true_oangle = -999;
@@ -823,18 +828,33 @@ namespace larlite {
             n_gamma++;
         }   
 
- 
-        int n_shr_111 = 0;
-	std::vector<int> shr_it_v ;
+       int n_shr_111 = 0; 
+        std::vector<int> shr_it_v ;
         for ( int si = 0; si < ev_mcs->size(); si++ ){
-	  auto s = ev_mcs->at(si) ;
-	  if ( s.MotherPdgCode() == 111 ){
-	    n_shr_111++ ;
-	    shr_it_v.emplace_back(si);
-          }
-	}
-        if ( n_shr_111 == 2 )
-          _pi0_true_oangle = acos( ev_mcs->at(shr_it_v.at(0)).StartDir().Dot(ev_mcs->at(shr_it_v.at(1)).StartDir()) )  ;
+          auto s = ev_mcs->at(si) ; 
+          if ( n_pi0 == 1 && s.MotherPdgCode() == 111 && s.AncestorPdgCode() == 111 && s.Origin() == 1 && s.PdgCode() == 22){
+            n_shr_111++ ;
+            shr_it_v.emplace_back(si);
+          }     
+        }     
+        if ( n_shr_111 == 2 ){ 
+          auto s0 = ev_mcs->at(shr_it_v.at(0));
+          auto s1 = ev_mcs->at(shr_it_v.at(1));
+
+          auto m0 = s0.Start().Momentum() ;
+          auto m1 = s1.Start().Momentum() ;
+     
+          //std::cout << sqrt(2*E[0]*E[1]*(1-TMath::Cos(T[0].Angle(T[1].Vect())))) << std::endl;
+          //auto dot = s0.StartDir().Dot(s1.StartDir()) / s0.StartDir().Mag() / s1.StartDir().Mag()  ; 
+          auto dot = TMath::Cos(m0.Angle(m1.Vect())); 
+          _pi0_true_oangle = acos(dot)  ;
+          
+          _pi0_low_true_gammaE = s0.Start().Momentum().E() ;
+          _pi0_high_true_gammaE = s1.Start().Momentum().E() ;
+          //auto mass_t = sqrt(2 * s0.Start().Momentum().E() * s1.Start().Momentum().E() *(1- cos(_pi0_true_oangle))) ;
+          //std::cout<<"MASSSSSSSSS! "<<mass_t<<std::endl ;
+
+  	   }
 
        auto mcclus = ev_mcc->at(max_cid) ;
        _mu_type   = mcclus.StartOpeningAngle() ; // opening angle set to track (0) or shower(1) in mccluster builder
@@ -1033,8 +1053,26 @@ namespace larlite {
                 auto mcs = ev_mcs->at(ts_index) ;
                 pi0_origin = mcs.Origin(); 
               }
-            }
+   
+               auto clocktick = larutil::DetectorProperties::GetME()->SamplingRate() * 1.e-3; //time sample in us
+               float mc_clus_e = 0.;
 
+              // Store true perfect clustering energy
+              for ( auto const & mcc_hid : ass_mcclus_v[max_cid] ){
+                auto mch = ev_hit->at(mcc_hid) ;
+                float lifetime_corr = exp( mch.PeakTime() * clocktick / 1.e20);
+                float electrons = mch.Integral() * 198.; //mcc8 value
+                float dQ = electrons * lifetime_corr * 23.6 * 1e-6 ;
+                float dE = dQ / 0.577 ; // 0.62 -> recomb factor
+                mc_clus_e += dE ;
+              }   
+
+              if( i == 0 )
+                _mc_clus_e_0 = mc_clus_e ;
+              else
+                _mc_clus_e_1 = mc_clus_e ;
+
+            }
 
             auto ishr = ev_s->at(i);
 
@@ -1059,7 +1097,7 @@ namespace larlite {
 	             _pi0_low_true_st_x = mcs.DetProfile().X() ;
 	             _pi0_low_true_st_y = mcs.DetProfile().Y() ;
 	             _pi0_low_true_st_z = mcs.DetProfile().Z() ;
-	             _pi0_low_true_gammaE = mcs.Start().E() ;
+	             //_pi0_low_true_gammaE = mcs.Start().E() ;
                  _pi0_low_true_detProf_gammaE = mcs.DetProfile().E() ;
 	           }
              }
@@ -1083,7 +1121,7 @@ namespace larlite {
 	             _pi0_high_true_st_x = mcs.DetProfile().X() ;
 	             _pi0_high_true_st_y = mcs.DetProfile().Y() ;
 	             _pi0_high_true_st_z = mcs.DetProfile().Z() ;
-	             _pi0_high_true_gammaE = mcs.Start().E() ;
+	             //_pi0_high_true_gammaE = mcs.Start().E() ;
                  _pi0_high_true_detProf_gammaE = mcs.DetProfile().E() ;
 	           }
              }
@@ -1111,7 +1149,7 @@ namespace larlite {
 	             _pi0_low_true_st_x = mcs.DetProfile().X() ;
 	             _pi0_low_true_st_y = mcs.DetProfile().Y() ;
 	             _pi0_low_true_st_z = mcs.DetProfile().Z() ;
-	             _pi0_low_true_gammaE = mcs.Start().E() ;
+	             //_pi0_low_true_gammaE = mcs.Start().E() ;
                  _pi0_low_true_detProf_gammaE = mcs.DetProfile().E() ;
 	           }
              }
@@ -1137,7 +1175,7 @@ namespace larlite {
 	             _pi0_high_true_st_x = mcs.DetProfile().X() ;
 	             _pi0_high_true_st_y = mcs.DetProfile().Y() ;
 	             _pi0_high_true_st_z = mcs.DetProfile().Z() ;
-	             _pi0_high_true_gammaE = mcs.Start().E() ;
+	             //_pi0_high_true_gammaE = mcs.Start().E() ;
                  _pi0_high_true_detProf_gammaE = mcs.DetProfile().E() ;
 	           }
              }
@@ -1595,6 +1633,7 @@ namespace larlite {
     }
 
     if ( _fout ){
+      std::cout<<"WRiting "<<std::endl;
       _fout->cd();
       _tree->Write();
       _univ->Write();

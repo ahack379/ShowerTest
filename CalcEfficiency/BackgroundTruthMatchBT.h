@@ -167,6 +167,8 @@ namespace larlite {
     int _mu_mother_pdg ;
     int _mu_pdg ;
     // Variables related to pi0 selection
+    float _mc_clus_e_0 ;
+    float _mc_clus_e_1 ;
     float _pi0_mass ;
     float _pi0_mom ;
     float _pi0_oangle ;

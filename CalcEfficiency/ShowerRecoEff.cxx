@@ -200,6 +200,8 @@ namespace larlite {
     if ( !ev_mcs || !ev_mcs->size() ) {std::cout<<"No MCShower!" <<std::endl ; return false; }
 
     auto ev_s = storage->get_data<event_shower>("showerreco");
+
+    //std::cout<<"Reconstructed showers: "<<ev_s->size()<<std::endl;
     //if( !ev_s || !ev_s->size() ){ 
     //  std::cout<<"Not enough reco'd showers..." <<std::endl;
     //  return false;
@@ -214,7 +216,15 @@ namespace larlite {
 
       auto s = ev_mcs->at(i);
     
+      // Need this line for neutrino interactions; don't for single particle
       if ( s.Origin() != 1 || s.MotherPdgCode() != 111 || s.AncestorPdgCode() != 111) continue;
+      //if ( s.MotherPdgCode() != 111 || s.AncestorPdgCode() != 111) continue;
+      
+      auto x = s.Start().X() ;
+      auto y = s.Start().Y() ;
+      auto z = s.Start().Z() ;
+
+      if ( x < 20 || x > 236.35 || y < -96.5 || y > 96.5 || z < 10 || z > 1026.7 ) {std::cout<<"OUT OF FV ! "<<std::endl; return false; }
 
       all_mcs_v.emplace_back(i);
       
@@ -244,7 +254,6 @@ namespace larlite {
 
         float mc_clus_e = 0.;
             int closest_mcs_id = -1 ;
-            float closest_e = 1e9 ;
 
         // Loop over clusters associated to this shower
         for (size_t j = 0; j < ass_showerreco_v.at(i).size(); j++ ){
@@ -300,20 +309,6 @@ namespace larlite {
               if ( max_cid != ass_mcclus_v.size() && max_cid != -1 ){
 
                 auto mcclus = ev_mcc->at(max_cid) ;
-                //auto geo = larutil::GeometryHelper::GetME(); //time sample in usec
-
-                //for ( int i = 0; i < ev_mcs->size(); i++ ) { 
-        	      //  auto s = ev_mcs->at(i) ;
-        	      //  if(s.Origin() != 1 || s.MotherPdgCode() != 111 ) continue;
-        	      //  std::vector<float> vtx = { s.DetProfile().X(), s.DetProfile().Y(), s.DetProfile().Z() } ;
-        	      //  auto vtx_2d = geo->Point_3Dto2D(vtx,2) ;
-                      //  auto e = fabs(mc_clus_e - s.DetProfile().E()) ;
-        	      //  if ( e < closest_e ){
-        	      //    closest_e  = e;
-        	      //    closest_mcs_id = i ;
-        	      //  }
-                //}
-
                 auto clocktick = larutil::DetectorProperties::GetME()->SamplingRate() * 1.e-3; //time sample in usec
         	
                 // Store true shower detprofile energy
@@ -326,11 +321,14 @@ namespace larlite {
                   mc_clus_e += dE ;
                 }
 
+                float closest_e = 1e9 ;
+
                 // Find mcs this cluster belongs to in order to store the true shower energy
                 for ( int i = 0; i < ev_mcs->size(); i++ ) { 
 
         	        auto s = ev_mcs->at(i) ;
         	        if(s.Origin() != 1 || s.MotherPdgCode() != 111 ) continue;
+        	        //if( s.MotherPdgCode() != 111 ) continue;
                         
                          auto e = fabs(mc_clus_e - s.DetProfile().E()) ;
 
@@ -368,15 +366,12 @@ namespace larlite {
            _dir_y = ishr.Direction().Y();
            _dir_z = ishr.Direction().Z();
 
-           _mc_detProf_e = mc_clus_e;
+           if ( closest_mcs_id != -1 )
+             _mc_detProf_e = ev_mcs->at(closest_mcs_id).DetProfile().E() ; 
+             //_mc_detProf_e =  mc_clus_e;
 
-	   //if ( _mc_detProf_e > _high_shr_e ){
-	   //  _low_shr_e = _high_shr_e ;
-	   //  _high_shr_e = 
-	   //}
-
-           if ( _origin == 1 && _type == 1 && _from_pi0 ){
-	     //std::cout<<"Filling RECO"<<std::endl ;
+           if ( _origin == 1 && _type == 1 && _from_pi0 ){ // This one is for events with neutrino interactions 
+           //if ( _from_pi0 ){ // This one is for single particle sample
              
              _n_recod_true_showers = 1;
              _n_true_showers = 1 ;
@@ -387,9 +382,8 @@ namespace larlite {
         }
      }
 
+     std::cout<<"reco and true : "<<temp_n_recod_true_showers<<", "<<temp_n_true_showers<<std::endl ;
      if ( temp_n_recod_true_showers < temp_n_true_showers ){
-
-    
 
        for ( int i = 0 ; i < all_mcs_v.size() ; i++ ){
 
@@ -397,11 +391,12 @@ namespace larlite {
 	 if( std::find(used_mcs_v.begin(),used_mcs_v.end(),id) != used_mcs_v.end() )
 	   continue;
 	 else{
+
 	   _n_recod_true_showers = 0;
 	   _n_true_showers = 1;
 	   _mc_detProf_e = ev_mcs->at(id).DetProfile().E() ;
 
-	   //std::cout<<"Filling MCCC "<<std::endl ;
+	   std::cout<<"Filling MCCC "<<std::endl ;
 	   _tree->Fill();
 	 
 	 }
