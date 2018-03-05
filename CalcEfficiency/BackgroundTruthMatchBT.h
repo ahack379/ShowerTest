@@ -30,7 +30,8 @@ namespace larlite {
   public:
 
     /// Default constructor
-    BackgroundTruthMatchBT(){ _name="BackgroundTruthMatchBT"; _fout=0; _tree=0; _shower_tree = 0; _univ=0; _get_genie_info=false; _eventweight_producer = "";}
+    BackgroundTruthMatchBT(){ _name="BackgroundTruthMatchBT"; _fout=0; _tree=0; _shower_tree = 0; _univ=0; _get_genie_info=false; 
+			      _eventweight_producer = ""; _N = 0; _N_xsec = 0; _beam_min = 3.2; _beam_max = 4.8; }
 
     /// Default destructor
     virtual ~BackgroundTruthMatchBT(){}
@@ -70,17 +71,19 @@ namespace larlite {
 
     void SetNominalXsec ( float nom ) { _N_xsec = nom ; }
 
+    void SetBeamWindow(float beam_min, float beam_max) { _beam_min = beam_min; _beam_max = beam_max ; }
+
   protected:
 
     larutil::SpaceChargeMicroBooNE *_SCE;
     ::geoalgo::GeoAlgo _geoAlgo ;
     double _time2cm;
 
-    // Not currently in use
+    // For external study -- identify events with particular kind of background 
     std::vector<int> _event_list ;
-    std::vector<std::string> _bkgd_v ;
 
     // Counts for final cout
+    std::vector<std::string> _bkgd_v ;
     int _n_noise;
     int _n_cosmic ;
     int _n_cc1pi0 ; // This is the signal
@@ -97,15 +100,18 @@ namespace larlite {
     int _n_kaondecay;
     int _n_other ;
 
+    int _n_signals;
+
     // Check osc group question
     int _1gamma ;
  
-    int _n_signals;
 
     // MCCluster hit stuff
     std::map<int,int> _mc_hit_map ;
 
     // Setter variables
+    float _beam_min ;
+    float _beam_max ;
     bool _mc_sample ;
     bool _get_pi0_info ;
     bool _get_single_shower_info ;
@@ -167,14 +173,14 @@ namespace larlite {
     int _mu_mother_pdg ;
     int _mu_pdg ;
     // Variables related to pi0 selection
-    float _mc_clus_e_0 ;
-    float _mc_clus_e_1 ;
+    //float _mc_clus_e_0 ;
+    //float _mc_clus_e_1 ;
     float _pi0_mass ;
     float _pi0_mom ;
     float _pi0_oangle ;
     float _pi0_true_oangle ;
     float _pi0_IP;
-    float _pi0_low_shrE;
+    //float _pi0_low_shrE;
     float _pi0_low_radL;
     float _pi0_low_IP_w_vtx;
     float _pi0_low_purity;
@@ -183,6 +189,7 @@ namespace larlite {
     float _pi0_low_cw_complete;
     float _pi0_low_true_gammaE;
     float _pi0_low_true_detProf_gammaE;
+    float _pi0_low_perfect_clustering_E ;
     float _pi0_low_reco_gammaE;
     // Also add some other truth info from the mccluster
     float _pi0_low_origin ;   // is the corresponding mccluster due to nu(1), cosmic(2)
@@ -197,7 +204,7 @@ namespace larlite {
     float _pi0_low_true_st_y ;
     float _pi0_low_true_st_z ;
     float _pi0_low_dist_to_nearest_trk ;
-    float _pi0_high_shrE;
+    //float _pi0_high_shrE;
     float _pi0_high_radL;
     float _pi0_high_IP_w_vtx;
     float _pi0_high_purity;
@@ -206,6 +213,7 @@ namespace larlite {
     float _pi0_high_cw_complete;
     float _pi0_high_true_gammaE;
     float _pi0_high_true_detProf_gammaE;
+    float _pi0_high_perfect_clustering_E ;
     float _pi0_high_reco_gammaE;
     float _pi0_high_origin ;   
     float _pi0_high_type ;     
