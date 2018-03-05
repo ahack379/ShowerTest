@@ -1319,9 +1319,9 @@ namespace larlite {
              _gamma_from_pi0 = _gamma_mother_pdg == 111 ? 1 : 0 ;
              _gamma_trueE_detProf = mcs.DetProfile().E();
              _gamma_trueE = mcs.Start().E() ;
-	     _gamma_true_x = mcs.DetProfile().X() ;
-	     _gamma_true_y = mcs.DetProfile().Y() ;
-	     _gamma_true_z = mcs.DetProfile().Z() ;
+	     _gamma_true_startx = mcs.DetProfile().X() ;
+	     _gamma_true_starty = mcs.DetProfile().Y() ;
+	     _gamma_true_startz = mcs.DetProfile().Z() ;
            }
 
            if ( _bkgd_id == 2 && _gamma_origin != 2 ){
