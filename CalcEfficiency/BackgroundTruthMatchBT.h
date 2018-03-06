@@ -151,6 +151,9 @@ namespace larlite {
     float _mc_vtx_x ;
     float _mc_vtx_y ;
     float _mc_vtx_z ;
+    float _mc_scecorr_vtx_x ;
+    float _mc_scecorr_vtx_y ;
+    float _mc_scecorr_vtx_z ;
     // Variables related to flashes
     float _flash_time ;
     int _flash_pe ;
@@ -209,6 +212,9 @@ namespace larlite {
     float _pi0_low_true_st_x ;
     float _pi0_low_true_st_y ;
     float _pi0_low_true_st_z ;
+    float _pi0_low_true_scecorr_st_x ;
+    float _pi0_low_true_scecorr_st_y ;
+    float _pi0_low_true_scecorr_st_z ;
     float _pi0_low_true_detProf_st_x ;
     float _pi0_low_true_detProf_st_y ;
     float _pi0_low_true_detProf_st_z ;
@@ -235,6 +241,9 @@ namespace larlite {
     float _pi0_high_true_st_x ;
     float _pi0_high_true_st_y ;
     float _pi0_high_true_st_z ;
+    float _pi0_high_true_scecorr_st_x ;
+    float _pi0_high_true_scecorr_st_y ;
+    float _pi0_high_true_scecorr_st_z ;
     float _pi0_high_true_detProf_st_x ;
     float _pi0_high_true_detProf_st_y ;
     float _pi0_high_true_detProf_st_z ;

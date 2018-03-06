@@ -161,6 +161,9 @@ namespace larlite {
       _tree->Branch("mc_vtx_x",&_mc_vtx_x,"mc_vtx_x/F");
       _tree->Branch("mc_vtx_y",&_mc_vtx_y,"mc_vtx_y/F");
       _tree->Branch("mc_vtx_z",&_mc_vtx_z,"mc_vtx_z/F");
+      _tree->Branch("mc_scecorr_vtx_x",&_mc_scecorr_vtx_x,"mc_scecorr_vtx_x/F");
+      _tree->Branch("mc_scecorr_vtx_y",&_mc_scecorr_vtx_y,"mc_scecorr_vtx_y/F");
+      _tree->Branch("mc_scecorr_vtx_z",&_mc_scecorr_vtx_z,"mc_scecorr_vtx_z/F");
       // Flashes
       _tree->Branch("flash_time",&_flash_time,"flash_time/F");
       _tree->Branch("flash_pe",&_flash_pe,"flash_pe/I");
@@ -210,6 +213,9 @@ namespace larlite {
       _tree->Branch("pi0_low_st_x",&_pi0_low_st_x,"pi0_low_st_x/F");
       _tree->Branch("pi0_low_st_y",&_pi0_low_st_y,"pi0_low_st_y/F");
       _tree->Branch("pi0_low_st_z",&_pi0_low_st_z,"pi0_low_st_z/F");
+      _tree->Branch("pi0_low_true_scecorr_st_x",&_pi0_low_true_scecorr_st_x,"pi0_low_true_scecorr_st_x/F");
+      _tree->Branch("pi0_low_true_scecorr_st_y",&_pi0_low_true_scecorr_st_y,"pi0_low_true_scecorr_st_y/F");
+      _tree->Branch("pi0_low_true_scecorr_st_z",&_pi0_low_true_scecorr_st_z,"pi0_low_true_scecorr_st_z/F");
       _tree->Branch("pi0_low_true_st_x",&_pi0_low_true_st_x,"pi0_low_true_st_x/F");
       _tree->Branch("pi0_low_true_st_y",&_pi0_low_true_st_y,"pi0_low_true_st_y/F");
       _tree->Branch("pi0_low_true_st_z",&_pi0_low_true_st_z,"pi0_low_true_st_z/F");
@@ -236,6 +242,9 @@ namespace larlite {
       _tree->Branch("pi0_high_st_x",&_pi0_high_st_x,"pi0_high_st_x/F");
       _tree->Branch("pi0_high_st_y",&_pi0_high_st_y,"pi0_high_st_y/F");
       _tree->Branch("pi0_high_st_z",&_pi0_high_st_z,"pi0_high_st_z/F");
+      _tree->Branch("pi0_high_true_scecorr_st_x",&_pi0_high_true_scecorr_st_x,"pi0_high_true_scecorr_st_x/F");
+      _tree->Branch("pi0_high_true_scecorr_st_y",&_pi0_high_true_scecorr_st_y,"pi0_high_true_scecorr_st_y/F");
+      _tree->Branch("pi0_high_true_scecorr_st_z",&_pi0_high_true_scecorr_st_z,"pi0_high_true_scecorr_st_z/F");
       _tree->Branch("pi0_high_true_st_x",&_pi0_high_true_st_x,"pi0_high_true_st_x/F");
       _tree->Branch("pi0_high_true_st_y",&_pi0_high_true_st_y,"pi0_high_true_st_y/F");
       _tree->Branch("pi0_high_true_st_z",&_pi0_high_true_st_z,"pi0_high_true_st_z/F");
@@ -355,6 +364,9 @@ namespace larlite {
     _mc_vtx_x   = -999;
     _mc_vtx_y   = -999;
     _mc_vtx_z   = -999;
+    _mc_scecorr_vtx_x   = -999;
+    _mc_scecorr_vtx_y   = -999;
+    _mc_scecorr_vtx_z   = -999;
 
     _flash_time = -999;
     _flash_pe = -1 ;
@@ -403,6 +415,9 @@ namespace larlite {
     _pi0_low_st_x  = -999;
     _pi0_low_st_y  = -999;
     _pi0_low_st_z  = -999;
+    _pi0_low_true_scecorr_st_x = -999;
+    _pi0_low_true_scecorr_st_y = -999;
+    _pi0_low_true_scecorr_st_z = -999;
     _pi0_low_true_st_x = -999;
     _pi0_low_true_st_y = -999;
     _pi0_low_true_st_z = -999;
@@ -430,6 +445,9 @@ namespace larlite {
     _pi0_high_st_x = -999 ;
     _pi0_high_st_y = -999 ;
     _pi0_high_st_z = -999 ;
+    _pi0_high_true_scecorr_st_x= -999 ;
+    _pi0_high_true_scecorr_st_y= -999 ;
+    _pi0_high_true_scecorr_st_z= -999 ;
     _pi0_high_true_st_x= -999 ;
     _pi0_high_true_st_y= -999 ;
     _pi0_high_true_st_z= -999 ;
@@ -705,10 +723,14 @@ namespace larlite {
       auto vtxtick = (tvtx / 1000.) * 2.;
       auto vtxtimecm = vtxtick * _time2cm; 
       auto sce_corr = _SCE->GetPosOffsets(mc_vtx_x,mc_vtx_y,mc_vtx_z);
+
+      _mc_vtx_x = mc_vtx_x;
+      _mc_vtx_y = mc_vtx_y;
+      _mc_vtx_z = mc_vtx_z;
       
-      _mc_vtx_x = mc_vtx_x + vtxtimecm + 0.7 - sce_corr.at(0);
-      _mc_vtx_y = mc_vtx_y + sce_corr.at(1);
-      _mc_vtx_z = mc_vtx_z + sce_corr.at(2);
+      _mc_scecorr_vtx_x = mc_vtx_x + vtxtimecm + 0.7 - sce_corr.at(0);
+      _mc_scecorr_vtx_y = mc_vtx_y + sce_corr.at(1);
+      _mc_scecorr_vtx_z = mc_vtx_z + sce_corr.at(2);
 
       // Now get Mccluster info
       auto ev_ass = storage->get_data<larlite::event_ass>("mccluster");
@@ -1249,13 +1271,13 @@ namespace larlite {
            auto sce_corr_l = _SCE->GetPosOffsets(_pi0_low_true_st_x,_pi0_low_true_st_y,_pi0_low_true_st_z);
            auto sce_corr_h = _SCE->GetPosOffsets(_pi0_high_true_st_x,_pi0_high_true_st_y,_pi0_high_true_st_z);
 
-           _pi0_low_true_st_x += vtxtimecm + 0.7 - sce_corr_l.at(0);
-           _pi0_low_true_st_y += sce_corr_l.at(1);
-           _pi0_low_true_st_z += sce_corr_l.at(2);
+           _pi0_low_true_scecorr_st_x = _pi0_low_true_st_x + vtxtimecm + 0.7 - sce_corr_l.at(0);
+           _pi0_low_true_scecorr_st_y = _pi0_low_true_st_y + sce_corr_l.at(1);
+           _pi0_low_true_scecorr_st_z = _pi0_low_true_st_z + sce_corr_l.at(2);
            
-           _pi0_high_true_st_x += vtxtimecm + 0.7 - sce_corr_h.at(0);
-           _pi0_high_true_st_y += sce_corr_h.at(1);
-           _pi0_high_true_st_z += sce_corr_h.at(2);
+           _pi0_high_true_scecorr_st_x = _pi0_high_true_st_x + vtxtimecm + 0.7 - sce_corr_h.at(0);
+           _pi0_high_true_scecorr_st_y = _pi0_high_true_st_y + sce_corr_h.at(1);
+           _pi0_high_true_scecorr_st_z = _pi0_high_true_st_z + sce_corr_h.at(2);
 
          }
        } // Loop over candidate pi0 showers
