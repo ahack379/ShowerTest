@@ -1257,11 +1257,11 @@ namespace larlite {
            _pi0_high_true_st_y += sce_corr_h.at(1);
            _pi0_high_true_st_z += sce_corr_h.at(2);
 
-           if ( _bkgd_id == 2 && _pi0_low_origin != 2 && _pi0_high_origin != 2 ){
-             _signal = true;
-             _n_signals++;
-           }
          }
+       } // Loop over candidate pi0 showers
+       if ( _bkgd_id == 2 && _pi0_low_origin != 2 && _pi0_high_origin != 2 ){
+         _signal = true;
+         _n_signals++;
        }
      }
 
@@ -1382,8 +1382,8 @@ namespace larlite {
            }   
 
            _gamma_perfect_clustering_E = mc_clus_e ;
-         }
-       }
+         } // If we've found a matching mccluster
+       } // Find plane 2 candidate single shower
      } // if we're filling single shower info
    } // if we're filling MC truth info
 
