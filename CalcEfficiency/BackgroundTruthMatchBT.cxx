@@ -213,6 +213,9 @@ namespace larlite {
       _tree->Branch("pi0_low_true_st_x",&_pi0_low_true_st_x,"pi0_low_true_st_x/F");
       _tree->Branch("pi0_low_true_st_y",&_pi0_low_true_st_y,"pi0_low_true_st_y/F");
       _tree->Branch("pi0_low_true_st_z",&_pi0_low_true_st_z,"pi0_low_true_st_z/F");
+      _tree->Branch("pi0_low_true_detProf_st_x",&_pi0_low_true_detProf_st_x,"pi0_low_true_detProf_st_x/F");
+      _tree->Branch("pi0_low_true_detProf_st_y",&_pi0_low_true_detProf_st_y,"pi0_low_true_detProf_st_y/F");
+      _tree->Branch("pi0_low_true_detProf_st_z",&_pi0_low_true_detProf_st_z,"pi0_low_true_detProf_st_z/F");
       _tree->Branch("pi0_low_dist_to_nearest_trk",&_pi0_low_dist_to_nearest_trk,"pi0_low_dist_to_nearest_trk/F");
       _tree->Branch("pi0_low_mother_pdg",&_pi0_low_mother_pdg,"pi0_low_mother_pdg/I");
       _tree->Branch("pi0_low_pdg",&_pi0_low_pdg,"pi0_low_pdg/I");
@@ -236,6 +239,9 @@ namespace larlite {
       _tree->Branch("pi0_high_true_st_x",&_pi0_high_true_st_x,"pi0_high_true_st_x/F");
       _tree->Branch("pi0_high_true_st_y",&_pi0_high_true_st_y,"pi0_high_true_st_y/F");
       _tree->Branch("pi0_high_true_st_z",&_pi0_high_true_st_z,"pi0_high_true_st_z/F");
+      _tree->Branch("pi0_high_true_detProf_st_x",&_pi0_high_true_detProf_st_x,"pi0_high_true_detProf_st_x/F");
+      _tree->Branch("pi0_high_true_detProf_st_y",&_pi0_high_true_detProf_st_y,"pi0_high_true_detProf_st_y/F");
+      _tree->Branch("pi0_high_true_detProf_st_z",&_pi0_high_true_detProf_st_z,"pi0_high_true_detProf_st_z/F");
       _tree->Branch("pi0_high_dist_to_nearest_trk",&_pi0_high_dist_to_nearest_trk,"pi0_high_dist_to_nearest_trk/F");
       _tree->Branch("pi0_high_mother_pdg",&_pi0_high_mother_pdg,"pi0_high_mother_pdg/I");
       _tree->Branch("pi0_high_pdg",&_pi0_high_pdg,"pi0_high_pdg/I");
@@ -249,6 +255,9 @@ namespace larlite {
       _tree->Branch("gamma_true_startx",&_gamma_true_startx,"gamma_true_startx/F");
       _tree->Branch("gamma_true_starty",&_gamma_true_starty,"gamma_true_starty/F");
       _tree->Branch("gamma_true_startz",&_gamma_true_startz,"gamma_true_startz/F");
+      _tree->Branch("gamma_true_detProf_startx",&_gamma_true_detProf_startx,"gamma_true_detProf_startx/F");
+      _tree->Branch("gamma_true_detProf_starty",&_gamma_true_detProf_starty,"gamma_true_detProf_starty/F");
+      _tree->Branch("gamma_true_detProf_startz",&_gamma_true_detProf_startz,"gamma_true_detProf_startz/F");
       _tree->Branch("gamma_purity",&_gamma_purity,"gamma_purity/F");
       _tree->Branch("gamma_complete",&_gamma_complete,"gamma_complete/F");
       _tree->Branch("gamma_cw_purity",&_gamma_cw_purity,"gamma_cw_purity/F");
@@ -296,6 +305,9 @@ namespace larlite {
       _shower_tree->Branch("shr_true_startx",&_shr_true_startx,"shr_true_startx/F");
       _shower_tree->Branch("shr_true_starty",&_shr_true_starty,"shr_true_starty/F");
       _shower_tree->Branch("shr_true_startz",&_shr_true_startz,"shr_true_startz/F");
+      _shower_tree->Branch("shr_true_detProf_startx",&_shr_true_detProf_startx,"shr_true_detProf_startx/F");
+      _shower_tree->Branch("shr_true_detProf_starty",&_shr_true_detProf_starty,"shr_true_detProf_starty/F");
+      _shower_tree->Branch("shr_true_detProf_startz",&_shr_true_detProf_startz,"shr_true_detProf_startz/F");
       _shower_tree->Branch("shr_trueE",&_shr_trueE,"shr_trueE/F");
       _shower_tree->Branch("shr_trueE_detProf",&_shr_trueE_detProf,"shr_trueE_detProf/F");
       _shower_tree->Branch("shr_perfect_clustering_E",&_shr_perfect_clustering_E,"shr_perfect_clustering_E/F");
@@ -394,6 +406,9 @@ namespace larlite {
     _pi0_low_true_st_x = -999;
     _pi0_low_true_st_y = -999;
     _pi0_low_true_st_z = -999;
+    _pi0_low_true_detProf_st_x = -999;
+    _pi0_low_true_detProf_st_y = -999;
+    _pi0_low_true_detProf_st_z = -999;
     _pi0_low_dist_to_nearest_trk = -999 ;
     _pi0_low_mother_pdg = -1;
     _pi0_low_pdg = -1;
@@ -418,6 +433,9 @@ namespace larlite {
     _pi0_high_true_st_x= -999 ;
     _pi0_high_true_st_y= -999 ;
     _pi0_high_true_st_z= -999 ;
+    _pi0_high_true_detProf_st_x= -999 ;
+    _pi0_high_true_detProf_st_y= -999 ;
+    _pi0_high_true_detProf_st_z= -999 ;
     _pi0_high_dist_to_nearest_trk = -999 ;
     _pi0_high_mother_pdg = -1;
     _pi0_high_pdg = -1;
@@ -428,6 +446,9 @@ namespace larlite {
     _gamma_true_startx = -999 ;
     _gamma_true_starty = -999 ;
     _gamma_true_startz = -999 ;
+    _gamma_true_detProf_startx = -999 ;
+    _gamma_true_detProf_starty = -999 ;
+    _gamma_true_detProf_startz = -999 ;
     _gamma_E = -999;
     _gamma_RL = -999;
     _gamma_IP_w_vtx = -999;
@@ -447,6 +468,9 @@ namespace larlite {
     _shr_true_startx = -999;
     _shr_true_starty = -999;
     _shr_true_startz = -999;
+    _shr_true_detProf_startx = -999;
+    _shr_true_detProf_starty = -999;
+    _shr_true_detProf_startz = -999;
     _shr_startx = -999;
     _shr_starty = -999;
     _shr_startz = -999;
@@ -1120,9 +1144,13 @@ namespace larlite {
 
 	        if ( _pi0_low_type == 1 ){
                   auto mcs = ev_mcs->at(ts_index) ;
-	          _pi0_low_true_st_x = mcs.DetProfile().X() ;
-	          _pi0_low_true_st_y = mcs.DetProfile().Y() ;
-	          _pi0_low_true_st_z = mcs.DetProfile().Z() ;
+	          _pi0_low_true_st_x = mcs.Start().X() ;
+	          _pi0_low_true_st_y = mcs.Start().Y() ;
+	          _pi0_low_true_st_z = mcs.Start().Z() ;
+	          _pi0_low_true_detProf_st_x = mcs.DetProfile().X() ;
+	          _pi0_low_true_detProf_st_y = mcs.DetProfile().Y() ;
+	          _pi0_low_true_detProf_st_z = mcs.DetProfile().Z() ;
+
 	          _pi0_low_true_gammaE = mcs.Start().E() ;
                   _pi0_low_true_detProf_gammaE = mcs.DetProfile().E() ;
 	        }
@@ -1145,9 +1173,12 @@ namespace larlite {
 
 	        if ( _pi0_high_type == 1){
                   auto mcs = ev_mcs->at(ts_index) ;
-	          _pi0_high_true_st_x = mcs.DetProfile().X() ;
-	          _pi0_high_true_st_y = mcs.DetProfile().Y() ;
-	          _pi0_high_true_st_z = mcs.DetProfile().Z() ;
+	          _pi0_high_true_st_x = mcs.Start().X() ;
+	          _pi0_high_true_st_y = mcs.Start().Y() ;
+	          _pi0_high_true_st_z = mcs.Start().Z() ;
+	          _pi0_high_true_detProf_st_x = mcs.DetProfile().X() ;
+	          _pi0_high_true_detProf_st_y = mcs.DetProfile().Y() ;
+	          _pi0_high_true_detProf_st_z = mcs.DetProfile().Z() ;
 	          _pi0_high_true_gammaE = mcs.Start().E() ;
                   _pi0_high_true_detProf_gammaE = mcs.DetProfile().E() ;
 	        }
@@ -1174,9 +1205,12 @@ namespace larlite {
 
 	        if ( _pi0_low_type == 1 ){
                   auto mcs = ev_mcs->at(ts_index) ;
-	          _pi0_low_true_st_x = mcs.DetProfile().X() ;
-	          _pi0_low_true_st_y = mcs.DetProfile().Y() ;
-	          _pi0_low_true_st_z = mcs.DetProfile().Z() ;
+	          _pi0_low_true_st_x = mcs.Start().X() ;
+	          _pi0_low_true_st_y = mcs.Start().Y() ;
+	          _pi0_low_true_st_z = mcs.Start().Z() ;
+	          _pi0_low_true_detProf_st_x = mcs.DetProfile().X() ;
+	          _pi0_low_true_detProf_st_y = mcs.DetProfile().Y() ;
+	          _pi0_low_true_detProf_st_z = mcs.DetProfile().Z() ;
 	          _pi0_low_true_gammaE = mcs.Start().E() ;
                   _pi0_low_true_detProf_gammaE = mcs.DetProfile().E() ;
 	        }
@@ -1200,9 +1234,12 @@ namespace larlite {
 
 	       if ( _pi0_high_type == 1){
                  auto mcs = ev_mcs->at(ts_index) ;
-	         _pi0_high_true_st_x = mcs.DetProfile().X() ;
-	         _pi0_high_true_st_y = mcs.DetProfile().Y() ;
-	         _pi0_high_true_st_z = mcs.DetProfile().Z() ;
+	         _pi0_high_true_st_x = mcs.Start().X() ;
+	         _pi0_high_true_st_y = mcs.Start().Y() ;
+	         _pi0_high_true_st_z = mcs.Start().Z() ;
+	         _pi0_high_true_detProf_st_x = mcs.DetProfile().X() ;
+	         _pi0_high_true_detProf_st_y = mcs.DetProfile().Y() ;
+	         _pi0_high_true_detProf_st_z = mcs.DetProfile().Z() ;
 	         _pi0_high_true_gammaE = mcs.Start().E() ;
                  _pi0_high_true_detProf_gammaE = mcs.DetProfile().E() ;
 	       }
@@ -1319,9 +1356,12 @@ namespace larlite {
              _gamma_from_pi0 = _gamma_mother_pdg == 111 ? 1 : 0 ;
              _gamma_trueE_detProf = mcs.DetProfile().E();
              _gamma_trueE = mcs.Start().E() ;
-	     _gamma_true_startx = mcs.DetProfile().X() ;
-	     _gamma_true_starty = mcs.DetProfile().Y() ;
-	     _gamma_true_startz = mcs.DetProfile().Z() ;
+	     _gamma_true_detProf_startx = mcs.DetProfile().X() ;
+	     _gamma_true_detProf_starty = mcs.DetProfile().Y() ;
+	     _gamma_true_detProf_startz = mcs.DetProfile().Z() ;
+	     _gamma_true_startx = mcs.Start().X() ;
+	     _gamma_true_starty = mcs.Start().Y() ;
+	     _gamma_true_startz = mcs.Start().Z() ;
            }
 
            if ( _bkgd_id == 2 && _gamma_origin != 2 ){
@@ -1569,9 +1609,12 @@ namespace larlite {
                _shr_from_pi0 = _shr_mother_pdg == 111 ? 1 : 0 ;
                _shr_trueE = mcs.Start().E() ;
                _shr_trueE_detProf = mcs.DetProfile().E();
-	       _shr_true_startx = mcs.DetProfile().X();
-	       _shr_true_starty = mcs.DetProfile().X();
-	       _shr_true_startz = mcs.DetProfile().X();
+	       _shr_true_detProf_startx = mcs.DetProfile().X();
+	       _shr_true_detProf_starty = mcs.DetProfile().X();
+	       _shr_true_detProf_startz = mcs.DetProfile().X();
+	       _shr_true_startx = mcs.Start().X();
+	       _shr_true_starty = mcs.Start().X();
+	       _shr_true_startz = mcs.Start().X();
               }
              mc_clus_e = 0;
 
