@@ -181,6 +181,9 @@ namespace larlite {
     float _mu_type ;   // is this mccluster due to track(0) or shower(1)
     int _mu_mother_pdg ;
     int _mu_pdg ;
+    // Variables about showers
+    int _n_mcs_at_vtx ;
+    int _n_reco_at_vtx ;
     // Variables related to pi0 selection
     //float _mc_clus_e_0 ;
     //float _mc_clus_e_1 ;

@@ -190,6 +190,9 @@ namespace larlite {
       _tree->Branch("mu_type",&_mu_type,"mu_type/F");
       _tree->Branch("mu_pdg",&_mu_pdg,"mu_pdg/I");
       _tree->Branch("mu_mother_pdg",&_mu_mother_pdg,"mu_mother_pdg/I");
+      // Showers
+      _tree->Branch("n_mcs_at_vtx",&_n_mcs_at_vtx,"n_mcs_at_vtx/I");
+      _tree->Branch("n_reco_at_vtx",&_n_reco_at_vtx,"n_reco_at_vtx/I");
       // Candidate pi0 showers -- only filled when _get_pi0_info is true
       _tree->Branch("pi0_mass",&_pi0_mass,"pi0_mass/F");
       _tree->Branch("pi0_oangle",&_pi0_oangle,"pi0_oangle/F");
@@ -392,6 +395,9 @@ namespace larlite {
     _mu_type   = -1 ; // 0 is track
     _mu_pdg = -1;  
     _mu_mother_pdg = -1;  
+
+    _n_mcs_at_vtx = 0;
+    _n_reco_at_vtx = 0;
 
     _pi0_mass = -999;
     _pi0_oangle = -999;
@@ -917,6 +923,12 @@ namespace larlite {
             n_shr_111++ ;
             shr_it_v.emplace_back(si);
           }
+	  // For reco efficiency studies
+          if ( (s.PdgCode() == 22 && s.MotherPdgCode() == 111 && s.AncestorPdgCode() == 111 && s.Origin() == 1 ) ||
+	       (s.PdgCode() == 22 && s.AncestorPdgCode() == 22 && s.Origin() == 1 ) ||
+	       (s.PdgCode() == 11 && s.AncestorPdgCode() == 11 && s.Origin() == 1 ) ){
+	    _n_mcs_at_vtx++ ;
+	  }
         } 
         if ( n_shr_111 == 2 ){ 
           auto s0 = ev_mcs->at(shr_it_v.at(0));
@@ -1363,6 +1375,7 @@ namespace larlite {
            auto mcclus = ev_mcc->at(max_cid) ;
            _gamma_type   = mcclus.StartOpeningAngle() ; // opening angle set to track (0) or shower(1) in mccluster builder
            int gamma_index = mcclus.Width();            // width set to carry mct/s index
+	   float gamma_ancestor_pdg = -1;
 
            if( _gamma_type == 0 ){
              auto mct = ev_mct->at(gamma_index) ;
@@ -1374,6 +1387,7 @@ namespace larlite {
              auto mcs = ev_mcs->at(gamma_index) ;
              _gamma_origin = mcs.Origin(); 
              _gamma_mother_pdg = mcs.MotherPdgCode() ; 
+             gamma_ancestor_pdg = mcs.AncestorPdgCode() ; 
              _gamma_pdg = mcs.PdgCode() ; 
              _gamma_from_pi0 = _gamma_mother_pdg == 111 ? 1 : 0 ;
              _gamma_trueE_detProf = mcs.DetProfile().E();
@@ -1385,6 +1399,9 @@ namespace larlite {
 	     _gamma_true_starty = mcs.Start().Y() ;
 	     _gamma_true_startz = mcs.Start().Z() ;
            }
+
+	   if ( _gamma_origin == 1 && ( gamma_ancestor_pdg == 111 || gamma_ancestor_pdg == 22 || gamma_ancestor_pdg == 11) )
+	     _n_reco_at_vtx++ ;
 
            if ( _bkgd_id == 2 && _gamma_origin != 2 ){
              _n_signals++;
