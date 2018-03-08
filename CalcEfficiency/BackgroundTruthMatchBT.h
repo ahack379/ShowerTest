@@ -327,6 +327,9 @@ namespace larlite {
     int _shr_mother_pdg ;
     int _shr_pdg ;
 
+    int _shr_n_true;
+    int _shr_n_reco ;
+
     // For flux variations  
     TTree * _univ;
     std::vector<std::vector<float>> _xsec_v ;

@@ -338,6 +338,9 @@ namespace larlite {
       _shower_tree->Branch("shr_from_pi0",&_shr_from_pi0,"shr_from_pi0/B");
       _shower_tree->Branch("shr_pdg",&_shr_pdg,"shr_pdg/I");
       _shower_tree->Branch("shr_mother_pdg",&_shr_mother_pdg,"shr_mother_pdg/I");
+      _shower_tree->Branch("shr_n_true",&_shr_n_true,"shr_n_true/I");
+      _shower_tree->Branch("shr_n_reco",&_shr_n_reco,"shr_n_reco/I");
+
     }   
 
     // For analysis of GENIE and flux xsec uncertainties -- filled once in finalize() function
@@ -514,6 +517,8 @@ namespace larlite {
     _shr_trk_delta_phi = -999;
     _shr_pdg = -1;
     _shr_mother_pdg = -1;
+    _shr_n_true = -1;
+    _shr_n_reco = -1;
 
     // additions post technote version v0.9
     _n_track_hits_0 = 0;
@@ -691,6 +696,7 @@ namespace larlite {
 
     std::vector<int> pur_ctr_v ;
     std::vector<float> cw_pur_ctr_v ;
+    std::vector<int> all_mcs_v ; // For shower reco eff later in shower_tree
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Need to access the origin of the tagged muon. Thus, need to find the MCTrack truth match to
@@ -928,6 +934,7 @@ namespace larlite {
 	       (s.PdgCode() == 22 && s.AncestorPdgCode() == 22 && s.Origin() == 1 ) ||
 	       (s.PdgCode() == 11 && s.AncestorPdgCode() == 11 && s.Origin() == 1 ) ){
 	    _n_mcs_at_vtx++ ;
+            all_mcs_v.emplace_back(si);
 	  }
         } 
         if ( n_shr_111 == 2 ){ 
@@ -1515,6 +1522,9 @@ namespace larlite {
      for ( auto const & s : *ev_shr ){ if ( s.Energy(2) > 1e-30 ) shr_it++ ; } 
      _nshrs = shr_it;
    } 
+
+   // This is for showerrreco efficiency plots
+   std::vector<int> used_mcs_v ;
      
    // Fill info per shower
    if ( ev_shr->size() != 0 ){
@@ -1526,6 +1536,7 @@ namespace larlite {
 
      auto ev_ass_s = storage->get_data<larlite::event_ass>("showerreco");
      auto const& ass_showerreco_v = ev_ass_s->association(ev_shr->id(), ev_clus->id());
+
 
      // Loop over all showers in this event
      //std::cout<<" ass shower size: "<<ass_showerreco_v.size() <<", "<<ev_shr->size()<<std::endl ;
@@ -1634,6 +1645,8 @@ namespace larlite {
              _shr_type   = mcclus.StartOpeningAngle() ; // set opening angle to track (0) or shower(1) in mccluster builder
              auto shr_index = mcclus.Width() ;          // index of track or shower  
 
+	     float shr_ancestor_pdg = -1;
+
              if( _shr_type == 0 ){
                auto mct = ev_mct->at(shr_index) ;
                _shr_origin = mct.Origin(); 
@@ -1645,6 +1658,7 @@ namespace larlite {
                _shr_origin = mcs.Origin(); 
                _shr_pdg = mcs.PdgCode() ; 
                _shr_mother_pdg = mcs.MotherPdgCode() ; 
+               shr_ancestor_pdg = mcs.AncestorPdgCode() ; 
                _shr_from_pi0 = _shr_mother_pdg == 111 ? 1 : 0 ;
                _shr_trueE = mcs.Start().E() ;
                _shr_trueE_detProf = mcs.DetProfile().E();
@@ -1654,6 +1668,8 @@ namespace larlite {
 	       _shr_true_startx = mcs.Start().X();
 	       _shr_true_starty = mcs.Start().X();
 	       _shr_true_startz = mcs.Start().X();
+
+	       used_mcs_v.emplace_back(shr_index);
               }
              mc_clus_e = 0;
 
@@ -1667,6 +1683,11 @@ namespace larlite {
                mc_clus_e += dE ;
              }   
              _shr_perfect_clustering_E = mc_clus_e ;
+          
+	     if ( _shr_origin == 1 && ( shr_ancestor_pdg == 111 || shr_ancestor_pdg == 22 || shr_ancestor_pdg == 11) ){
+	       _shr_n_true = 1; 
+	       _shr_n_reco = 1;
+	     }
            }
 
            if( _shr_type == -999 ) _n_shr_noise++;
@@ -1678,6 +1699,34 @@ namespace larlite {
        }
        _shower_tree->Fill() ;
      }
+   }
+
+   // If the number of identified mcs's produced at neutrino vtx is more than reco'd showers, 
+   // add some more info to the shower tree. This is for shwoer reco efficiency later
+   if ( _n_mcs_at_vtx > used_mcs_v.size() && _mc_sample ){
+     auto ev_mcs = storage->get_data<event_mcshower>("mcreco") ;
+     if ( !ev_mcs || !ev_mcs->size() ) {std::cout<<"No MCShower!" <<std::endl ; return false; }
+
+     for ( int i = 0 ; i < all_mcs_v.size() ; i++ ){
+
+       int id = all_mcs_v.at(i);
+       if( std::find(used_mcs_v.begin(),used_mcs_v.end(),id) != used_mcs_v.end() )
+         continue;
+       else{
+         _shr_n_reco = 0;
+         _shr_n_true = 1;
+         _shr_trueE_detProf = ev_mcs->at(id).DetProfile().E() ;
+         _shr_trueE = ev_mcs->at(id).Start().E() ;
+         _shr_true_startx = ev_mcs->at(id).Start().X();
+         _shr_true_starty = ev_mcs->at(id).Start().Y();
+         _shr_true_startz = ev_mcs->at(id).Start().Z();
+         _shr_true_detProf_startx = ev_mcs->at(id).DetProfile().X() ;
+         _shr_true_detProf_starty = ev_mcs->at(id).DetProfile().Y() ;
+         _shr_true_detProf_startz = ev_mcs->at(id).DetProfile().Z() ;
+
+         _shower_tree->Fill();
+       }   
+     }   
    }
 
    // Fill info needed to assess GENIE/flux uncertainties
