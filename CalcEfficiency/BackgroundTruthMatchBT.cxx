@@ -172,6 +172,15 @@ namespace larlite {
       _tree->Branch("flash_y_width",&_flash_y_width,"flash_y_width/F");
       _tree->Branch("flash_z_width",&_flash_z_width,"flash_z_width/F");
       // Candidate Muon
+      _tree->Branch("mu_true_angle",&_mu_true_angle,"mu_true_angle/F");
+      _tree->Branch("mu_true_phi",&_mu_true_phi,"mu_true_phi/F");
+      _tree->Branch("mu_true_mom",&_mu_true_mom,"mu_true_mom/F");
+      _tree->Branch("mu_true_startx",&_mu_true_startx,"mu_true_startx/F");
+      _tree->Branch("mu_true_starty",&_mu_true_starty,"mu_true_starty/F");
+      _tree->Branch("mu_true_startz",&_mu_true_startz,"mu_true_startz/F");
+      _tree->Branch("mu_true_endx",&_mu_true_endx,"mu_true_endx/F");
+      _tree->Branch("mu_true_endy",&_mu_true_endy,"mu_true_endy/F");
+      _tree->Branch("mu_true_endz",&_mu_true_endz,"mu_true_endz/F");
       _tree->Branch("mu_angle",&_mu_angle,"mu_angle/F");
       _tree->Branch("mu_len",&_mu_len,"mu_len/F");
       _tree->Branch("mu_startx",&_mu_startx,"mu_startx/F");
@@ -380,6 +389,16 @@ namespace larlite {
     _flash_z_center = -999;
     _flash_y_width = -999;
     _flash_z_width = -999;
+
+    _mu_true_angle = -999;
+    _mu_true_phi  = -999;
+    _mu_true_mom  = -999;
+    _mu_true_startx = -999;
+    _mu_true_starty = -999;
+    _mu_true_startz = -999;
+    _mu_true_endx = -999;
+    _mu_true_endy = -999;
+    _mu_true_endz = -999;
 
     _mu_angle = -999;
     _mu_len   = -999;
@@ -956,6 +975,15 @@ namespace larlite {
          _mu_origin = mct.Origin(); 
          _mu_mother_pdg = mct.MotherPdgCode();
          _mu_pdg = mct.PdgCode();
+	 _mu_true_angle = mct.Start().Momentum().Theta() ;
+	 _mu_true_phi = mct.Start().Momentum().Phi() ;
+	 _mu_true_mom = mct.Start().Momentum().P() ;
+	 _mu_true_startx = mct.Start().X(); 
+	 _mu_true_starty = mct.Start().Y(); 
+	 _mu_true_startz = mct.Start().Z(); 
+	 _mu_true_endx = mct.End().X() ;
+	 _mu_true_endy = mct.End().Y() ;
+	 _mu_true_endz = mct.End().Z() ;
        }
        else{
          auto mcs = ev_mcs->at(ts_index) ;

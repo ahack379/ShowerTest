@@ -162,6 +162,16 @@ namespace larlite {
     float _flash_y_width;
     float _flash_z_width ;
     // Variables related to candidate muon
+    float _mu_true_angle ;
+    float _mu_true_phi ;
+    float _mu_true_mom ;
+    float _mu_true_startx ;
+    float _mu_true_starty ;
+    float _mu_true_startz ;
+    float _mu_true_endx ;
+    float _mu_true_endy ;
+    float _mu_true_endz ;
+
     float _mu_angle ;
     float _mu_len ;
     float _mu_startx ;
