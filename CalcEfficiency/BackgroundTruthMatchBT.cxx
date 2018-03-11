@@ -1594,6 +1594,15 @@ namespace larlite {
        _shr_trk_delta_theta = s.Direction().Theta() - _mu_angle;
        _shr_trk_delta_phi = s.Direction().Phi() - _mu_phi ;
 
+       geoalgo::Point_t vertex(3);
+       vertex[0] = vtx.X();
+       vertex[1] = vtx.Y();
+       vertex[2] = vtx.Z();
+
+       geoalgo::Vector_t rev_shr1(-1.*s.Direction()) ;
+       auto shr1_bkwrd_hl = ::geoalgo::HalfLine_t(s.ShowerStart(),rev_shr1);
+       _shr_ip = _geoAlgo.SqDist(vertex, shr1_bkwrd_hl) ;
+
        if ( _mc_sample ) {
 
          auto ev_mct = storage->get_data<event_mctrack>("mcreco");
