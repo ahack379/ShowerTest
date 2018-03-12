@@ -60,6 +60,8 @@ namespace larlite {
 
     void clear() ;
 
+    void shower_clear() ;
+
     // The rest is for uncertainty re-weighting
     // Tell the module to calculate uncertainties 
     void GetUncertaintyInfo  ( bool getit=false ) { _get_genie_info = getit; }

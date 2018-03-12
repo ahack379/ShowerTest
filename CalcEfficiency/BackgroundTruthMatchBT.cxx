@@ -511,33 +511,6 @@ namespace larlite {
     _gamma_pdg = -1;
     _gamma_mother_pdg = -1;
 
-    _shr_true_startx = -999;
-    _shr_true_starty = -999;
-    _shr_true_startz = -999;
-    _shr_true_detProf_startx = -999;
-    _shr_true_detProf_starty = -999;
-    _shr_true_detProf_startz = -999;
-    _shr_startx = -999;
-    _shr_starty = -999;
-    _shr_startz = -999;
-    _shr_startw = -999;
-    _shr_startt = -999;
-    _shr_dirx = -999;
-    _shr_diry = -999;
-    _shr_dirz = -999;
-    _shr_energy = -999;
-    _shr_trueE= -999;
-    _shr_trueE_detProf= -999;
-    _shr_perfect_clustering_E = -999;
-    _shr_oangle = -999;
-    _shr_dedx = -999;
-    _shr_vtx_dist = -999;
-    _shr_trk_delta_theta = -999;
-    _shr_trk_delta_phi = -999;
-    _shr_pdg = -1;
-    _shr_mother_pdg = -1;
-    _shr_n_true = -1;
-    _shr_n_reco = -1;
 
     // additions post technote version v0.9
     _n_track_hits_0 = 0;
@@ -573,7 +546,39 @@ namespace larlite {
     _sel_evts_p1.resize(funcs,0) ;
 
   }
+
+  void BackgroundTruthMatchBT::shower_clear(){
   
+    _shr_true_startx = -999;
+    _shr_true_starty = -999;
+    _shr_true_startz = -999;
+    _shr_true_detProf_startx = -999;
+    _shr_true_detProf_starty = -999;
+    _shr_true_detProf_startz = -999;
+    _shr_startx = -999;
+    _shr_starty = -999;
+    _shr_startz = -999;
+    _shr_startw = -999;
+    _shr_startt = -999;
+    _shr_dirx = -999;
+    _shr_diry = -999;
+    _shr_dirz = -999;
+    _shr_energy = -999;
+    _shr_trueE= -999;
+    _shr_trueE_detProf= -999;
+    _shr_perfect_clustering_E = -999;
+    _shr_oangle = -999;
+    _shr_dedx = -999;
+    _shr_vtx_dist = -999;
+    _shr_trk_delta_theta = -999;
+    _shr_trk_delta_phi = -999;
+    _shr_pdg = -1;
+    _shr_mother_pdg = -1;
+    _shr_n_true = -1;
+    _shr_n_reco = -1;
+  
+  }
+
   bool BackgroundTruthMatchBT::analyze(storage_manager* storage) {
 
     _event++ ;
@@ -1565,10 +1570,11 @@ namespace larlite {
      auto ev_ass_s = storage->get_data<larlite::event_ass>("showerreco");
      auto const& ass_showerreco_v = ev_ass_s->association(ev_shr->id(), ev_clus->id());
 
-
      // Loop over all showers in this event
      //std::cout<<" ass shower size: "<<ass_showerreco_v.size() <<", "<<ev_shr->size()<<std::endl ;
      for (size_t i = 0; i < ass_showerreco_v.size(); i++ ){
+       
+       shower_clear();
 
        auto s = ev_shr->at(i);
        if ( s.Energy(2) <= 1e-30 ){ continue ; }
