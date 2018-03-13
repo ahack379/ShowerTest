@@ -18,6 +18,7 @@
 #include "Analysis/ana_base.h"
 #include "GeoAlgo/GeoAlgo.h"
 #include "LArUtil/SpaceChargeMicroBooNE.h"
+#include "DataFormat/track.h"
 
 
 namespace larlite {
@@ -77,6 +78,12 @@ namespace larlite {
     void SetBeamWindow(float beam_min, float beam_max) { _beam_min = beam_min; _beam_max = beam_max ; }
 
     void SetGainRecomLifetime(float gain, float recomb, float lt) { _gain = gain; _recomb = recomb; _lifetime_corr = lt; }
+
+    double Median(std::vector<double> in) ;
+
+    double TrunMean(std::vector<double> in) ;
+
+    double MaxDeflection(larlite::track t );
 
   protected:
 
@@ -193,6 +200,10 @@ namespace larlite {
     float _mu_type ;   // is this mccluster due to track(0) or shower(1)
     int _mu_mother_pdg ;
     int _mu_pdg ;
+
+    float _mu_deviation ;
+    float _mu_trun_mean_dqdx ;
+
     // Variables about showers
     int _n_mcs_at_vtx ;
     int _n_reco_at_vtx ;
