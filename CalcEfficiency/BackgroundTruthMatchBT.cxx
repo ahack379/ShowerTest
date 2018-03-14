@@ -200,6 +200,10 @@ namespace larlite {
       _tree->Branch("mu_type",&_mu_type,"mu_type/F");
       _tree->Branch("mu_pdg",&_mu_pdg,"mu_pdg/I");
       _tree->Branch("mu_mother_pdg",&_mu_mother_pdg,"mu_mother_pdg/I");
+      _tree->Branch("mu_deviation",&_mu_deviation,"mu_deviation/F");
+      _tree->Branch("mu_trun_mean_dqdx",&_mu_trun_mean_dqdx,"mu_trun_mean_dqdx/F");
+      _tree->Branch("mu_pdg",&_mu_pdg,"mu_pdg/I");
+
       // Showers
       _tree->Branch("n_mcs_at_vtx",&_n_mcs_at_vtx,"n_mcs_at_vtx/I");
       _tree->Branch("n_reco_at_vtx",&_n_reco_at_vtx,"n_reco_at_vtx/I");
