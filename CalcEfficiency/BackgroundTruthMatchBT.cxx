@@ -664,7 +664,7 @@ namespace larlite {
     auto tagged_trk = ev_tagged_trk->at(0) ;
 
     // Fill track information
-    _mu_phi = tagged_trk.Phi();
+    _mu_phi = tagged_trk.VertexDirection().Phi();
     _mu_angle = cos(tagged_trk.Theta());
     _mu_len =   tagged_trk.Length(0); // Calculates the length from point 0 to end
     _mu_startx = tagged_trk.Vertex().X(); 
@@ -675,20 +675,20 @@ namespace larlite {
     _mu_endz = tagged_trk.End().Z(); 
 
     // Adjust for pandora bug
-    std::vector<double> dir = { (_mu_endx - _mu_startx) / _mu_len,
-                                (_mu_endy - _mu_starty) / _mu_len,
-                                (_mu_endz - _mu_startz) / _mu_len };
+    //std::vector<double> dir = { (_mu_endx - _mu_startx) / _mu_len,
+    //                            (_mu_endy - _mu_starty) / _mu_len,
+    //                            (_mu_endz - _mu_startz) / _mu_len };
 
-    auto dir_start = tagged_trk.VertexDirection();
-    std::vector<double> other_dir = { dir_start.X(), dir_start.Y(), dir_start.Z() };  
+    //auto dir_start = tagged_trk.VertexDirection();
+    //std::vector<double> other_dir = { dir_start.X(), dir_start.Y(), dir_start.Z() };  
 
-    float dotProd = dir.at(0) * other_dir.at(0) + dir.at(1) * other_dir.at(1) +  dir.at(2) * other_dir.at(2) ;
+    //float dotProd = dir.at(0) * other_dir.at(0) + dir.at(1) * other_dir.at(1) +  dir.at(2) * other_dir.at(2) ;
 
-    if( dotProd < 0 ) { 
-       TVector3 new_dir(-dir_start.X(),-dir_start.Y(),-dir_start.Z());
-       _mu_angle = cos(new_dir.Theta());
-       _mu_phi = new_dir.Phi();
-    }   
+    //if( dotProd < 0 ) { 
+    //   TVector3 new_dir(-dir_start.X(),-dir_start.Y(),-dir_start.Z());
+    //   _mu_angle = cos(new_dir.Theta());
+    //   _mu_phi = new_dir.Phi();
+    //}   
 
     // Also identify mip parameters
     auto ev_t_p = storage->get_data<event_track>("pandoraNu");
