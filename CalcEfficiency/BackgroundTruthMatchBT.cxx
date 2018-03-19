@@ -665,7 +665,7 @@ namespace larlite {
 
     // Fill track information
     _mu_phi = tagged_trk.VertexDirection().Phi();
-    _mu_angle = cos(tagged_trk.Theta());
+    _mu_angle = cos(tagged_trk.VertexDirection().Theta());
     _mu_len =   tagged_trk.Length(0); // Calculates the length from point 0 to end
     _mu_startx = tagged_trk.Vertex().X(); 
     _mu_starty = tagged_trk.Vertex().Y(); 
