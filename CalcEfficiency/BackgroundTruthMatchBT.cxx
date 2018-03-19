@@ -1988,7 +1988,7 @@ namespace larlite {
     float mcbnbcos_POT = 4.23214; 
     float mc_to_onbeam = dataPOT/mcbnbcos_POT;
 
-    if ( _get_genie_info ){
+    if ( _get_genie_info && _eventweight_producer == "fluxeventweight" ){
       for( int i = 0; i < funcs; i++){
         std::cout<<"FLUX! "<<_flux_by_universe[i][0]<<std::endl ;
         for( int j= 0; j < 1000; j++){

@@ -132,6 +132,7 @@ namespace larlite {
   float _pi0_mass ;
   float _pi0_mom ;
   float _pi0_oangle ;
+  float _pi0_true_oangle;   // is this mccluster from a pi0? yes(1) no(0)
   float _pi0_IP;
   float _pi0_low_shrE;
   float _pi0_high_shrE;

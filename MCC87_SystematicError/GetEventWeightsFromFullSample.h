@@ -56,7 +56,6 @@ namespace larlite {
   protected:
 
     float _n_sig;
-    const larutil::Geometry * fGeometry ;
     
     /////////// My extra variables
     int _funcs ;
@@ -74,6 +73,10 @@ namespace larlite {
     std::map<std::string,int> _label_map ;
 
     bool _print_output ;
+
+    float _all_evts_nominal;
+    std::vector<float> _all_evts_m1 ;
+    std::vector<float> _all_evts_p1 ;
 
   };
 }

@@ -177,6 +177,7 @@ namespace larlite {
 
       _tree->Branch("pi0_mass",&_pi0_mass,"pi0_mass/F");
       _tree->Branch("pi0_oangle",&_pi0_oangle,"pi0_oangle/F");
+      _tree->Branch("pi0_true_oangle",&_pi0_true_oangle,"pi0_true_oangle/F");
       _tree->Branch("pi0_IP",&_pi0_IP,"pi0_IP/F");
       _tree->Branch("pi0_mom",&_pi0_mom,"pi0_mom/F");
       _tree->Branch("pi0_low_shrE",&_pi0_low_shrE,"pi0_low_shrE/F");
@@ -346,6 +347,7 @@ namespace larlite {
 
     _pi0_mass = -999;
     _pi0_oangle = -999;
+    _pi0_true_oangle = -999;
     _pi0_IP = -999;
     _pi0_mom = -999;
     _pi0_low_shrE = -999;
@@ -817,6 +819,26 @@ namespace larlite {
           if( p.StatusCode() == 1 && p.PdgCode() == 22 )
             n_gamma++;
         }   
+
+        int n_shr_111 = 0;
+        std::vector<int> shr_it_v ;
+        for ( int si = 0; si < ev_mcs->size(); si++ ){
+          auto s = ev_mcs->at(si) ; 
+          if ( n_pi0 == 1 && s.MotherPdgCode() == 111 && s.Origin() == 1){
+            n_shr_111++ ;
+            shr_it_v.emplace_back(si);
+          }      
+        }      
+        if ( n_shr_111 == 2 ){
+          auto s0 = ev_mcs->at(shr_it_v.at(0));
+          auto s1 = ev_mcs->at(shr_it_v.at(1));
+	 
+	  auto dot = s0.StartDir().Dot(s1.StartDir()) / s0.StartDir().Mag() / s1.StartDir().Mag()  ; 
+          _pi0_true_oangle = acos(dot)  ;
+
+	  //std::cout<<"Pi0 true oangle: "<<_pi0_true_oangle <<std::endl ;
+        }
+
 
        auto mcclus = ev_mcc->at(max_cid) ;
        _mu_origin = mcclus.Width() ; 
@@ -1571,16 +1593,18 @@ namespace larlite {
     float mc_to_onbeam = dataPOT/mcbnbcos_POT;
 
 
-    for( int i = 0; i < funcs; i++){
-      std::cout<<"FLUX! "<<_flux_by_universe[i][0]<<std::endl ;
-      for( int j= 0; j < 1000; j++){
-        float eff = _s_weights_by_universe[i][j] / _t_weights_by_universe[i][j] ;
-        _xsec_v[i][j] = float( _N -  mc_to_onbeam*_b_weights_by_universe[i][j])/eff/ _flux_by_universe[i][j]/(8.855e+29);
-        _perc_v[i][j] = ( _xsec_v[i][j] - _N_xsec )/ _N_xsec *100;
-      }
-    }
+    //if (_get_genie_info){
+    //  for( int i = 0; i < funcs; i++){
+    //    std::cout<<"FLUX! "<<_flux_by_universe[i][0]<<std::endl ;
+    //    for( int j= 0; j < 1000; j++){
+    //      float eff = _s_weights_by_universe[i][j] / _t_weights_by_universe[i][j] ;
+    //      _xsec_v[i][j] = float( _N -  mc_to_onbeam*_b_weights_by_universe[i][j])/eff/ _flux_by_universe[i][j]/(8.855e+29);
+    //      _perc_v[i][j] = ( _xsec_v[i][j] - _N_xsec )/ _N_xsec *100;
+    //    }
+    //  }
 
-   _univ->Fill();
+    // _univ->Fill();
+    //}
 
     if ( _fout ){
       _fout->cd();

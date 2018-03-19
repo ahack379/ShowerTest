@@ -65,13 +65,16 @@ namespace larlite {
 	   {"genie_ccresVector_Genie",30},{"genie_cohMA_Genie",31},{"genie_cohR0_Genie",32},{"genie_ncelAxial_Genie",33},{"genie_ncelEta_Genie",34},
 	   {"genie_ncresAxial_Genie",35},{"genie_ncresVector_Genie",36},{"genie_qema_Genie",37},{"genie_qevec_Genie",38}};
 
+     _all_evts_nominal = 0;
+     _all_evts_m1.resize(_funcs,0) ; 
+     _all_evts_p1.resize(_funcs,0) ; 
+
    }
 
   for ( int i = 0; i < _funcs ; i++ )
       _t_weights_by_universe.at(i).resize(1000,0) ;
 
     std::cout<<"EVENT WEIGHT LABELS: "<<_genie_label_v.size()<<std::endl ;
-
 
     return true;
    }
@@ -132,8 +135,8 @@ namespace larlite {
 
     std::vector<float> unisim_tot_weight(1000,1);
     
-    //if ( _signal && _eventweight_label == "fluxeventweight" ) {
-    if ( _eventweight_label == "fluxeventweight" ) {
+    if ( _signal && _eventweight_label == "fluxeventweight" ) {
+    //if ( _eventweight_label == "fluxeventweight" ) {
       for ( auto const & m : wgt ) {
         std::cout<<"Size fo weights "<<m.first<<", "<<m.second.size()<<std::endl ;
 	// There should be 1000 weights
@@ -150,8 +153,23 @@ namespace larlite {
 
     }
 
-    //if ( _signal && _eventweight_label == "genieeventweight" ) {
-    if ( _eventweight_label == "genieeventweight" ) {
+    if ( _signal && _eventweight_label == "genieeventweight" ) {
+    //if ( _eventweight_label == "genieeventweight" ) {
+
+      _all_evts_nominal ++ ;
+
+      int it = 0;
+
+      // According to genie weight package, plus sig is stored first 
+      for ( auto const & m : wgt ) { 
+         auto w_v = m.second ;
+         //std::cout<<"Parameter: "<<m.first<<", "<<m.second.at(0)<<", "<<m.second.at(1)<<std::endl;
+         _all_evts_p1[it] += (w_v.at(0)) ; 
+         _all_evts_m1[it] += (w_v.at(1)) ;
+         it++;
+       }   
+
+
       for ( auto const & m : wgt ) {
         std::cout<<"Size fo weights "<<m.first<<", "<<m.second.size()<<std::endl ;
 	// There should be 1000 weights
@@ -192,22 +210,40 @@ namespace larlite {
 
     if ( _print_output && _eventweight_label == "genieventweight" ){
 
-      std::cout<<"{";
-
-      for( int i = 0; i < _funcs; i++){
-        std::cout<<"{";
-        for( int j= 0; j < 1000; j++){
-          if ( j != 999 )
-            std::cout<<  _t_weights_by_universe[i][j]<<", ";
-          else 
-            std::cout<<  _t_weights_by_universe[i][j];
-        }
-        if ( i != _funcs - 1 ) std::cout<<"},";
-        else std::cout<<"}";
+      std::cout<<"All events: "<<_all_evts_nominal<<std::endl ;
+      for( int i = 0 ; i < _all_evts_m1.size(); i++) {
+        std::cout<<"\nFunction: "<<_genie_label_v[i]<<std::endl ;
+        std::cout<<"All events (-3sig): "<<_all_evts_m1.at(i)<<std::endl ;
+        std::cout<<"All events (+3sig): "<<_all_evts_p1.at(i)<<std::endl ;
       }
-      std::cout<<"}";
+
+      std::cout<<"All events: "<<_all_evts_nominal<<std::endl ;
+
+      for( int i = 0 ; i < _all_evts_m1.size(); i++)
+        std::cout<<_all_evts_m1[i]<<", " ;
 
       std::cout<<std::endl ;
+      for( int i = 0 ; i < _all_evts_p1.size(); i++)
+        std::cout<<_all_evts_p1[i]<<", " ;
+
+      std::cout<<std::endl ;
+
+      //std::cout<<"{";
+
+      //for( int i = 0; i < _funcs; i++){
+      //  std::cout<<"{";
+      //  for( int j= 0; j < 1000; j++){
+      //    if ( j != 999 )
+      //      std::cout<<  _t_weights_by_universe[i][j]<<", ";
+      //    else 
+      //      std::cout<<  _t_weights_by_universe[i][j];
+      //  }
+      //  if ( i != _funcs - 1 ) std::cout<<"},";
+      //  else std::cout<<"}";
+      //}
+      //std::cout<<"}";
+
+      //std::cout<<std::endl ;
     }
 
     return true;

@@ -194,16 +194,8 @@ namespace larlite {
     int max_cid = -1 ;
     float tot_reco_cw_hits = 0;
 
-    // Get the association from cluster -> hit
-    auto const & ev_clus = storage->get_data<event_cluster>("ImageClusterHit");
-    auto const & ev_ass_c = storage->get_data<larlite::event_ass>("ImageClusterHit");
-    auto const & ass_imageclus_v = ev_ass_c->association(ev_clus->id(), ev_hit->id());
-
     auto ev_mcs = storage->get_data<event_mcshower>("mcreco") ;
     if ( !ev_mcs || !ev_mcs->size() ) {std::cout<<"No MCShower!" <<std::endl ; return false; }
-
-    auto ev_s = storage->get_data<event_shower>("showerreco");
-    //if( !ev_s || !ev_s->size() ){ std::cout<<"Not enough reco'd showers..." <<std::endl; return false;}   
 
     auto temp_n_true_showers = 0;
     auto temp_n_recod_true_showers = 0;
@@ -232,6 +224,14 @@ namespace larlite {
       _tot_shr ++; 
     }
 
+    // Get the association from cluster -> hit
+    auto const & ev_clus = storage->get_data<event_cluster>("ImageClusterHit");
+    auto const & ev_ass_c = storage->get_data<larlite::event_ass>("ImageClusterHit");
+    auto const & ass_imageclus_v = ev_ass_c->association(ev_clus->id(), ev_hit->id());
+
+    auto ev_s = storage->get_data<event_shower>("showerreco");
+    if( !ev_s || !ev_s->size() ){ std::cout<<"Not enough reco'd showers..." <<std::endl; return false;}   
+
     if ( ev_s->size() ){   
 
       // Get the association from shower -> cluster
@@ -248,6 +248,8 @@ namespace larlite {
         for (size_t j = 0; j < ass_showerreco_v.at(i).size(); j++ ){
 
               auto clus_id = ass_showerreco_v.at(i).at(j); 
+	      std::cout<<"Cluster id: "<<clus_id <<", "<<ev_clus->size()<<std::endl ;
+	      if ( clus_id >= ev_clus->size() ) { std::cout<<"What? "<<std::endl;  continue; }
               auto iclus = ev_clus->at(clus_id);
           
               int plane = iclus.Plane().Plane ;
@@ -341,6 +343,9 @@ namespace larlite {
                 _cw_complete = float(max_cw_hits) / tot_mc_cw_hits_v[max_cid]; 
              }
            }
+
+           std::cout<<"i "<<i<< " size: "<<ev_s->size() <<std::endl; 
+	   if ( i >= ev_s->size() ) { std::cout<<"WHHHAT? "<<std::endl ; continue; }
 
            auto ishr = ev_s->at(i);
 

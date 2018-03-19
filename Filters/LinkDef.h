@@ -23,7 +23,6 @@
 #pragma link C++ class larlite::dQdxFilter+;
 #pragma link C++ class larlite::AngledQdxCuts+;
 #pragma link C++ class larlite::DumbFilter+;
-#pragma link C++ class larlite::HitFilter+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
 

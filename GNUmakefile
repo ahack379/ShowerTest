@@ -20,7 +20,7 @@ endif
 #
 # Define directories to be compile upon a global "make"...
 #
-SUBDIRS := CalcEfficiency Filters Signal_Quality FindCutValue PlotDump #ADD_NEW_SUBDIR ... do not remove this comment from this line
+SUBDIRS := CalcEfficiency Filters Signal_Quality FindCutValue PlotDump MCC87_SystematicError #ADD_NEW_SUBDIR ... do not remove this comment from this line
 
 #####################################################################################
 #
