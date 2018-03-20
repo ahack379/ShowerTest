@@ -170,13 +170,13 @@ namespace larlite {
        }   
 
 
-      for ( auto const & m : wgt ) {
-        std::cout<<"Size fo weights "<<m.first<<", "<<m.second.size()<<std::endl ;
-	// There should be 1000 weights
-        for ( int jj = 0; jj < m.second.size(); jj++){
-          _t_weights_by_universe[_label_map[m.first]][jj] += m.second.at(jj);
-        }
-      }
+      //for ( auto const & m : wgt ) {
+      //  std::cout<<"Size fo weights "<<m.first<<", "<<m.second.size()<<std::endl ;
+      //  // There should be 1000 weights
+      //  for ( int jj = 0; jj < m.second.size(); jj++){
+      //    _t_weights_by_universe[_label_map[m.first]][jj] += m.second.at(jj);
+      //  }
+      //}
     }
       
 
@@ -208,7 +208,7 @@ namespace larlite {
       std::cout<<std::endl ;
     }
 
-    if ( _print_output && _eventweight_label == "genieventweight" ){
+    if ( _print_output && _eventweight_label == "genieeventweight" ){
 
       std::cout<<"All events: "<<_all_evts_nominal<<std::endl ;
       for( int i = 0 ; i < _all_evts_m1.size(); i++) {

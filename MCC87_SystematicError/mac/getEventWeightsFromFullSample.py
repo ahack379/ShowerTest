@@ -27,7 +27,7 @@ my_proc.set_ana_output_file("eventweights_from_full_sample.root");
 ana = fmwk.GetEventWeightsFromFullSample()
 ana.SetWeightProducer('genieeventweight')
 #ana.SetWeightProducer('fluxeventweight')
-ana.PrintOutput(False)
+ana.PrintOutput(True)
 
 my_proc.add_process(ana)
 
