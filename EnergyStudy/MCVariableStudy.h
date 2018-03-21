@@ -53,6 +53,9 @@ namespace larlite {
   protected:
 
   TTree * _pi0_tree ;
+  int _run_id ;
+  int _subrun_id ;
+  int _event_id ;
   float _true_pi0_e ;
   float _true_2mcs_e ;
   float _true_angle ;
@@ -79,6 +82,7 @@ namespace larlite {
   float _true_rad_l ;
   float _reco_rad_l ;
   float _true_reco_dot ;
+
 
   std::vector<int> _event_list ;
 

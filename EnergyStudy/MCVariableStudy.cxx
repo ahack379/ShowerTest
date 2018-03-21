@@ -14,6 +14,9 @@ namespace larlite {
     
     if( !_pi0_tree ){
       _pi0_tree = new TTree("pi0_tree","");
+      _pi0_tree->Branch("run_id",&_run_id,"run_id/F");
+      _pi0_tree->Branch("subrun_id",&_subrun_id,"subrun_id/F");
+      _pi0_tree->Branch("event_id",&_event_id,"event_id/F");
       _pi0_tree->Branch("true_pi0_e",&_true_pi0_e,"true_pi0_e/F");
       _pi0_tree->Branch("true_angle",&_true_angle,"true_angle/F");
       _pi0_tree->Branch("true_asym",&_true_asym,"true_asym/F");
@@ -77,6 +80,10 @@ namespace larlite {
 
     _event ++; 
     Clear() ;
+
+    _run_id = storage->run_id();
+    _subrun_id = storage->subrun_id();
+    _event_id = storage->event_id();
 
     //std::cout<<"\nEvent is : "<<_event <<std::endl ;
 
