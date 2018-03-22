@@ -87,6 +87,8 @@ namespace larlite {
   std::vector<int> _event_list ;
 
   geoalgo::GeoAlgo _geoAlgo ;
+
+  int _n_signals ;
     
   };
 }
