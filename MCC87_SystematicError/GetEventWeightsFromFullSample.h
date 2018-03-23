@@ -60,6 +60,7 @@ namespace larlite {
     /////////// My extra variables
     int _funcs ;
     std::vector<std::string> _genie_label_v ;
+    std::vector<std::string> _flux_label_v ;
     std::vector<std::string> _unisim_label_v ;
 
     int _events ;
