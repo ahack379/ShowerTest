@@ -87,7 +87,7 @@ namespace larlite {
        TDirectory *C_dir_numu = (TDirectory*) f-> Get("numu");
 
        TH1D * hcv = (TH1D*) C_dir_numu->Get("numu_CV_AV_TPC") ;
-       hcv->Scale(0.492*1e20/(2.43e11)/(256.35 * 233.));
+       hcv->Scale(1.616*1e20/(2.43e11)/(256.35 * 233.));
        
        TDirectory *C_dir_unisim = (TDirectory*) C_dir_numu -> Get("FluxUnisim");
        TDirectory *C_dir_av  = (TDirectory*) C_dir_unisim -> Get("Active_TPC_Volume");
@@ -109,32 +109,32 @@ namespace larlite {
            // Non-hadron pieces
            if ( j == 0 ) { 
              TH1D * h1 = (TH1D*) C_dir_av->Get(Form("numu_FluxUnisim_Uni_%d_AV_TPC",i)) ;
-             h1->Scale(0.492*1e20/(2.43e11)/(256.35 * 233.));
+             h1->Scale(1.616*1e20/(2.43e11)/(256.35 * 233.));
              _flux_by_universe[j][i] = h1->Integral() ; 
            }
            else if ( j == 1 ){
              TH1D * h1 = (TH1D*) kplus_av->Get(Form("numu_kplus_Uni_%d_AV_TPC",i)) ;
-             h1->Scale(0.492*1e20/(2.43e11)/(256.35 * 233.));
+             h1->Scale(1.616*1e20/(2.43e11)/(256.35 * 233.));
              _flux_by_universe[j][i] = h1->Integral() ; 
            }
            else if ( j == 2 ){
              TH1D * h1 = (TH1D*) kminus_av->Get(Form("numu_kminus_Uni_%d_AV_TPC",i)) ;
-             h1->Scale(0.492*1e20/(2.43e11)/(256.35 * 233.));
+             h1->Scale(1.616*1e20/(2.43e11)/(256.35 * 233.));
              _flux_by_universe[j][i] = h1->Integral() ; 
            }
            else if ( j == 3 ){
              TH1D * h1 = (TH1D*) kzero_av->Get(Form("numu_kzero_Uni_%d_AV_TPC",i)) ;
-             h1->Scale(0.492*1e20/(2.43e11)/(256.35 * 233.));
+             h1->Scale(1.616*1e20/(2.43e11)/(256.35 * 233.));
              _flux_by_universe[j][i] = h1->Integral() ; 
            }
            else if ( j == 4 ){ 
              TH1D * h1 = (TH1D*) piplus_av->Get(Form("numu_piplus_Uni_%d_AV_TPC",i)) ;
-             h1->Scale(0.492*1e20/(2.43e11)/(256.35 * 233.));
+             h1->Scale(1.616*1e20/(2.43e11)/(256.35 * 233.));
              _flux_by_universe[j][i] = h1->Integral() ; 
            }
            else if ( j == 5 ) { 
              TH1D * h1 = (TH1D*) piminus_av->Get(Form("numu_piminus_Uni_%d_AV_TPC",i)) ;
-             h1->Scale(0.492*1e20/(2.43e11)/(256.35 * 233.));
+             h1->Scale(1.616*1e20/(2.43e11)/(256.35 * 233.));
              _flux_by_universe[j][i] = h1->Integral() ; 
            }
          }
@@ -2014,8 +2014,8 @@ namespace larlite {
 
     std::cout<<"ONLY 1 GAMMA!!! "<<_1gamma<<std::endl;
     auto funcs = 6; 
-    float dataPOT = 0.492;
-    float mcbnbcos_POT = 4.23214; 
+    float dataPOT = 1.616;
+    float mcbnbcos_POT = 20.7948 ; //4.23214; 
     float mc_to_onbeam = dataPOT/mcbnbcos_POT;
 
     if ( _get_genie_info && _eventweight_producer == "fluxeventweight" ){
