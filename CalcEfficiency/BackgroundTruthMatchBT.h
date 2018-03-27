@@ -144,8 +144,11 @@ namespace larlite {
     std::vector<std::vector<float>>  _flux_by_universe ; 
     std::map<std::string,int> _label_map ;
 
+    std::vector<std::multimap<float,float>> _map_v ;
+
     TTree * _tree ;
     int _event ;
+    int _event_no_dup ;
 
     int _event_id ;
     int _subrun_id ;

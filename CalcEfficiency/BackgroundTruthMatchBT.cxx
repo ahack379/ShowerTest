@@ -24,6 +24,8 @@ namespace larlite {
 
   bool BackgroundTruthMatchBT::initialize() {    
 
+    _map_v.resize(10,std::multimap<float,float>());
+    _event_no_dup = 0;
     _event = -1; 
 
     _n_signals =0 ;
@@ -640,6 +642,33 @@ namespace larlite {
     //std::cout<<"\n\nEVENT IS: "<<_event<<std::endl;
     clear();
 
+    auto r = storage->run_id() ;
+    auto it = _map_v.at(r).find(storage->subrun_id());
+    bool foundit = false;
+
+    if( it != _map_v.at(r).end() ){
+     while ( it->first == storage->subrun_id() ){  
+       auto temp_event = it->second ; 
+       if( temp_event == storage->event_id() )
+         foundit = true;
+
+       it++; 
+       }   
+      if ( !foundit)
+       _map_v.at(r).emplace(storage->subrun_id(), storage->event_id() );
+    
+      else{
+        std::cout<<"Event: "<<_event<<std::endl;
+        std::cout<<"Duplicates "<<storage->run_id()<<", "<<storage->subrun_id()<<", "<<storage->event_id()<<std::endl;
+        return false ;
+      }   
+    }   
+    else 
+      _map_v.at(r).emplace(storage->subrun_id(), storage->event_id() );
+
+    _event_no_dup++ ;
+
+
     auto ev_shr = storage->get_data<event_shower>("showerreco");
     //if ( ev_shr->size() == 0 ) return false ;
 
@@ -693,69 +722,69 @@ namespace larlite {
     // Also identify mip parameters
     auto ev_t_p = storage->get_data<event_track>("pandoraNu");
 
-    //auto ev_calo= storage->get_data<event_calorimetry>("pandoraNucalo");
+    auto ev_calo= storage->get_data<event_calorimetry>("pandoraNucalo");
 
-    //if ( !ev_calo || ev_calo->size() == 0 ) {
-    //  std::cout << "No such calo associated to track! " << std::endl;
-    //  return false;
-    //}
+    if ( !ev_calo || ev_calo->size() == 0 ) {
+      std::cout << "No such calo associated to track! " << std::endl;
+      return false;
+    }
 
-    //auto ev_ass = storage->get_data<larlite::event_ass>("pandoraNucalo");
+    auto ev_ass = storage->get_data<larlite::event_ass>("pandoraNucalo");
 
-    //if ( !ev_ass || ev_ass->size() == 0 ) {
-    //  std::cout << "No such association! " << std::endl;
-    //  return false;
-    //}
+    if ( !ev_ass || ev_ass->size() == 0 ) {
+      std::cout << "No such association! " << std::endl;
+      return false;
+    }
 
-    //auto const& ass_calo_v = ev_ass->association(ev_t_p->id(), ev_calo->id());
-    //if ( ass_calo_v.size() == 0) {
-    //  std::cout << "No ass from track => hit! " << std::endl;
-    //  return false;
-    //}
+    auto const& ass_calo_v = ev_ass->association(ev_t_p->id(), ev_calo->id());
+    if ( ass_calo_v.size() == 0) {
+      std::cout << "No ass from track => hit! " << std::endl;
+      return false;
+    }
 
-    //float min_dist = 1e9;
-    //int min_it = -1; 
-    //auto tag_st = tagged_trk.End() ;
+    float min_dist = 1e9;
+    int min_it = -1; 
+    auto tag_st = tagged_trk.End() ;
 
-    //for ( int i = 0; i < ev_t_p->size(); i++){
+    for ( int i = 0; i < ev_t_p->size(); i++){
 
-    //  auto t = ev_t_p->at(i);
-    //  auto st = t.End() ;
-    //  auto dist = sqrt( pow(st.X() - tag_st.X(),2) + pow(st.Y() - tag_st.Y(),2) + pow(st.Z() - tag_st.Z(),2) );
-    //  if ( dist < min_dist ){
-    //    min_dist = dist;
-    //    min_it = i;
-    //  }
-    //}
+      auto t = ev_t_p->at(i);
+      auto st = t.End() ;
+      auto dist = sqrt( pow(st.X() - tag_st.X(),2) + pow(st.Y() - tag_st.Y(),2) + pow(st.Z() - tag_st.Z(),2) );
+      if ( dist < min_dist ){
+        min_dist = dist;
+        min_it = i;
+      }
+    }
 
-    //int N = 0;
-    //std::vector<double> dqdx; 
+    int N = 0;
+    std::vector<double> dqdx; 
 
-    //// Get calo ID for plane 2 at the tagged track.
-    //auto calo_it = ass_calo_v.at(min_it).at(2) ;
-    //auto calo_i = ev_calo->at(calo_it); 
+    // Get calo ID for plane 2 at the tagged track.
+    auto calo_it = ass_calo_v.at(min_it).at(2) ;
+    auto calo_i = ev_calo->at(calo_it); 
 
-    //for(int i = 0; i < calo_i.dQdx().size(); i++){
+    for(int i = 0; i < calo_i.dQdx().size(); i++){
 
-    //  if ( calo_i.dQdx().at(i) <= 0 ) continue;
-    //  N++;
+      if ( calo_i.dQdx().at(i) <= 0 ) continue;
+      N++;
 
-    //  if ( _mc_sample)
-    //    dqdx.push_back(calo_i.dQdx().at(i) * 198.);
-    //  else 
-    //    dqdx.push_back(calo_i.dQdx().at(i) * 243.);
-    //}   
+      if ( _mc_sample)
+        dqdx.push_back(calo_i.dQdx().at(i) * 198.);
+      else 
+        dqdx.push_back(calo_i.dQdx().at(i) * 243.);
+    }   
 
-    //if(N == 0)
-    //  dqdx.clear(); 
-    //else{
+    if(N == 0)
+      dqdx.clear(); 
+    else{
 
-    //  std::sort(dqdx.begin(),dqdx.end());
-    //  auto TrackTLMeandQdx = TrunMean(dqdx);
-    //  _mu_trun_mean_dqdx = TrackTLMeandQdx ;
+      std::sort(dqdx.begin(),dqdx.end());
+      auto TrackTLMeandQdx = TrunMean(dqdx);
+      _mu_trun_mean_dqdx = TrackTLMeandQdx ;
 
-    //  dqdx.clear();
-    //}
+      dqdx.clear();
+    }
 
     auto TrackMaxDeflection = MaxDeflection(tagged_trk);
     _mu_deviation = TrackMaxDeflection ;
@@ -1961,6 +1990,7 @@ namespace larlite {
 
   bool BackgroundTruthMatchBT::finalize() {
 
+    std::cout<<"Events: "<<_event<<", ev with no duplicates: "<<_event_no_dup<<std::endl ;
     std::cout<<"Signals: "<<_n_signals<<std::endl ;
     std::cout<<"Total CCpi0 : "<<_n_cc1pi0<<std::endl; 
 
