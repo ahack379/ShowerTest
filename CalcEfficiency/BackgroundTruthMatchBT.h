@@ -235,6 +235,9 @@ namespace larlite {
     bool _pi0_low_from_pi0;   // is this mccluster from a pi0? yes(1) no(0)
     int _pi0_low_mother_pdg ; // Mother Pdg of true matched particle
     int _pi0_low_pdg ;        // Pdg of true matched particle
+    float _pi0_low_mom_x;        
+    float _pi0_low_mom_y;        
+    float _pi0_low_mom_z;        
     float _pi0_low_st_x ;
     float _pi0_low_st_y ;
     float _pi0_low_st_z ;
@@ -264,6 +267,9 @@ namespace larlite {
     bool _pi0_high_from_pi0;   
     int _pi0_high_mother_pdg ; 
     int _pi0_high_pdg ;       
+    float _pi0_high_mom_x;        
+    float _pi0_high_mom_y;        
+    float _pi0_high_mom_z;        
     float _pi0_high_st_x ;
     float _pi0_high_st_y ;
     float _pi0_high_st_z ;

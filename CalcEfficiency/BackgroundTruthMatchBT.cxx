@@ -244,6 +244,9 @@ namespace larlite {
       _tree->Branch("pi0_low_dist_to_nearest_trk",&_pi0_low_dist_to_nearest_trk,"pi0_low_dist_to_nearest_trk/F");
       _tree->Branch("pi0_low_mother_pdg",&_pi0_low_mother_pdg,"pi0_low_mother_pdg/I");
       _tree->Branch("pi0_low_pdg",&_pi0_low_pdg,"pi0_low_pdg/I");
+      _tree->Branch("pi0_low_mom_x",&_pi0_low_mom_x,"pi0_low_mom_x/F");
+      _tree->Branch("pi0_low_mom_y",&_pi0_low_mom_y,"pi0_low_mom_y/F");
+      _tree->Branch("pi0_low_mom_z",&_pi0_low_mom_z,"pi0_low_mom_z/F");
       //_tree->Branch("pi0_high_shrE",&_pi0_high_shrE,"pi0_high_shrE/F");
       _tree->Branch("pi0_high_radL",&_pi0_high_radL,"pi0_high_radL/F");
       _tree->Branch("pi0_high_IP_w_vtx",&_pi0_high_IP_w_vtx,"pi0_high_IP_w_vtx/F");
@@ -273,6 +276,9 @@ namespace larlite {
       _tree->Branch("pi0_high_dist_to_nearest_trk",&_pi0_high_dist_to_nearest_trk,"pi0_high_dist_to_nearest_trk/F");
       _tree->Branch("pi0_high_mother_pdg",&_pi0_high_mother_pdg,"pi0_high_mother_pdg/I");
       _tree->Branch("pi0_high_pdg",&_pi0_high_pdg,"pi0_high_pdg/I");
+      _tree->Branch("pi0_high_mom_x",&_pi0_high_mom_x,"pi0_high_mom_x/F");
+      _tree->Branch("pi0_high_mom_y",&_pi0_high_mom_y,"pi0_high_mom_y/F");
+      _tree->Branch("pi0_high_mom_z",&_pi0_high_mom_z,"pi0_high_mom_z/F");
       // Candidate single shower samples -- only filled when _get_single_shower_info is true
       _tree->Branch("gamma_E",&_gamma_E,"gamma_E/F");
       _tree->Branch("gamma_RL",&_gamma_RL,"gamma_RL/F");
@@ -462,6 +468,9 @@ namespace larlite {
     _pi0_low_dist_to_nearest_trk = -999 ;
     _pi0_low_mother_pdg = -1;
     _pi0_low_pdg = -1;
+    _pi0_low_mom_x = -999;
+    _pi0_low_mom_y = -999;
+    _pi0_low_mom_z = -999;
 
     //_pi0_high_shrE = -999;
     _pi0_high_radL = -999;
@@ -492,6 +501,9 @@ namespace larlite {
     _pi0_high_dist_to_nearest_trk = -999 ;
     _pi0_high_mother_pdg = -1;
     _pi0_high_pdg = -1;
+    _pi0_high_mom_x = -999;
+    _pi0_high_mom_y = -999;
+    _pi0_high_mom_z = -999;
 
     _gamma_startx = -999 ;
     _gamma_starty = -999 ;
@@ -642,31 +654,34 @@ namespace larlite {
     //std::cout<<"\n\nEVENT IS: "<<_event<<std::endl;
     clear();
 
-    auto r = storage->run_id() ;
-    auto it = _map_v.at(r).find(storage->subrun_id());
-    bool foundit = false;
+    if ( _mc_sample ){
 
-    if( it != _map_v.at(r).end() ){
-     while ( it->first == storage->subrun_id() ){  
-       auto temp_event = it->second ; 
-       if( temp_event == storage->event_id() )
-         foundit = true;
+      auto r = storage->run_id() ;
+      auto it = _map_v.at(r).find(storage->subrun_id());
+      bool foundit = false;
 
-       it++; 
-       }   
-      if ( !foundit)
-       _map_v.at(r).emplace(storage->subrun_id(), storage->event_id() );
-    
-      else{
-        std::cout<<"Event: "<<_event<<std::endl;
-        std::cout<<"Duplicates "<<storage->run_id()<<", "<<storage->subrun_id()<<", "<<storage->event_id()<<std::endl;
-        return false ;
+      if( it != _map_v.at(r).end() ){
+       while ( it->first == storage->subrun_id() ){  
+         auto temp_event = it->second ; 
+         if( temp_event == storage->event_id() )
+           foundit = true;
+
+         it++; 
+         }   
+        if ( !foundit)
+         _map_v.at(r).emplace(storage->subrun_id(), storage->event_id() );
+      
+        else{
+          std::cout<<"Event: "<<_event<<std::endl;
+          std::cout<<"Duplicates "<<storage->run_id()<<", "<<storage->subrun_id()<<", "<<storage->event_id()<<std::endl;
+          return false ;
+        }   
       }   
-    }   
-    else 
-      _map_v.at(r).emplace(storage->subrun_id(), storage->event_id() );
+      else 
+        _map_v.at(r).emplace(storage->subrun_id(), storage->event_id() );
 
-    _event_no_dup++ ;
+      _event_no_dup++ ;
+    }
 
 
     auto ev_shr = storage->get_data<event_shower>("showerreco");
@@ -1663,7 +1678,7 @@ namespace larlite {
 
      // CCNC Diretion of two correlated shower
      geoalgo::Vector_t momentum(3);// need to fill out
-     geoalgo::Vector_t mom_vect(shr2.Direction()*shr1.Energy(2) +shr1.Direction()*shr2.Energy(2)) ;
+     geoalgo::Vector_t mom_vect(shr2.Direction()*shr2.Energy(2) + shr1.Direction()*shr1.Energy(2)) ;
 
      auto tot_pi0_mom = sqrt(pow(mom_vect[0],2) + pow(mom_vect[1],2) + pow(mom_vect[2],2) );
      auto radL_shr1 = vertex.Dist(shr1.ShowerStart());
@@ -1679,6 +1694,16 @@ namespace larlite {
      _pi0_high_radL = shr1.Energy(2) < shr2.Energy(2) ? radL_shr2 : radL_shr1 ;
      _pi0_high_IP_w_vtx = shr1.Energy(2) < shr2.Energy(2) ? shr2_IP_w_vtx : shr1_IP_w_vtx ;
      _pi0_low_IP_w_vtx  = shr1.Energy(2) < shr2.Energy(2) ? shr1_IP_w_vtx : shr2_IP_w_vtx ;
+
+     auto pz1 = shr1.Direction()*shr1.Energy(2) ;
+     auto pz2 = shr2.Direction()*shr2.Energy(2) ;
+
+     _pi0_low_mom_x = shr1.Energy(2) < shr2.Energy(2) ? pz1[0] : pz2[0] ;
+     _pi0_high_mom_x = shr1.Energy(2) < shr2.Energy(2) ? pz2[0] : pz1[0] ;
+     _pi0_low_mom_y = shr1.Energy(2) < shr2.Energy(2) ? pz1[1] : pz2[1] ;
+     _pi0_high_mom_y = shr1.Energy(2) < shr2.Energy(2) ? pz2[1] : pz1[1] ;
+     _pi0_low_mom_z = shr1.Energy(2) < shr2.Energy(2) ? pz1[2] : pz2[2] ;
+     _pi0_high_mom_z = shr1.Energy(2) < shr2.Energy(2) ? pz2[2] : pz1[2] ;
 
    }
  
