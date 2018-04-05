@@ -51,8 +51,11 @@ namespace larlite {
   protected:
 
   std::ifstream _file;
-  std::multimap<float,float> _map;
-  std::multimap<float,float> _pi0_map;
+  std::vector<std::multimap<float,float>> _pi0_map;
+  std::vector<std::multimap<float,float>> _map_v;
+  //std::multimap<float,float> _pi0_map;
+  //
+  int _event;
     
   };
 }

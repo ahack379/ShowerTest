@@ -10,7 +10,7 @@ namespace larlite {
 
   bool WriteWeights::initialize() {
 
-    event_file.open("GenieWeightStudy.txt");
+    //event_file.open("GenieWeightStudy.txt");
     _event = 0;
 
     return true;
@@ -32,7 +32,7 @@ namespace larlite {
     if( !ev_wgt || !ev_wgt->size() ){
       std::cout<<"No event weights..." <<std::endl;
       return false;
-     }
+    }
 
     //event_file << run << " " << subrun << " " << event <<" "; //<< " "
     std::cout<<run<<" "<<subrun<<" "<<event<<" " ; //<<std::endl ;
@@ -45,7 +45,11 @@ namespace larlite {
     std::vector<double> weights_v;
 
     for ( auto const & m : wgt ) { 
-       std::cout<<"Parameter: "<<m.first<<", "<<m.second.size() <<std::endl;
+       if (m.first == "bnbcorrection_FluxHist" ) {
+           continue;
+       }
+       //std::cout<<"Parameter: "<<m.first<<", "<<m.second.size() <<std::endl;
+
        for ( auto const & w : m.second){
          //event_file<<w<<" " ;
          std::cout<<w<<" "; //<<std::endl ;
@@ -53,7 +57,7 @@ namespace larlite {
     }   
 
     std::cout<<"\n";
-    event_file<<"\n";
+    //event_file<<"\n";
 
 
     return true;

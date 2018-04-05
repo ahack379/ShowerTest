@@ -323,6 +323,10 @@ namespace larlite {
     bool _signal ;
     std::vector<float> _sel_evts_m1;
     std::vector<float> _sel_evts_p1;
+    std::vector<float> _sig_evts_m1;
+    std::vector<float> _sig_evts_p1;
+    std::vector<float> _bkgd_evts_m1;
+    std::vector<float> _bkgd_evts_p1;
 
     // One entry per shower
     TTree * _shower_tree ;
@@ -364,6 +368,9 @@ namespace larlite {
 
     // For flux variations  
     TTree * _univ;
+    std::vector<std::vector<float>> _sig_v ;
+    std::vector<std::vector<float>> _tot_v ;
+    std::vector<std::vector<float>> _eff_v ;
     std::vector<std::vector<float>> _xsec_v ;
     std::vector<std::vector<float>> _perc_v;
 

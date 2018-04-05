@@ -55,6 +55,8 @@ namespace larlite {
   int evt ;
 
   ::larlite::event_user* _ev_user ;
+
+  std::vector<std::multimap<float,float>> _map_v;
     
   };
 }

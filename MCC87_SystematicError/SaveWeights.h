@@ -50,11 +50,14 @@ namespace larlite {
     
     std::ifstream _file;
 
-    std::map< std::pair<int,int> , std::vector<double> > _wgtmap;
+    //std::map< std::pair<int,int> , std::vector<double> > _wgtmap;
+    std::map< std::vector<float>, std::vector<double> > _wgtmap;
 
     std::vector<std::string> _func_v ;
 
     std::string _event_producer ;
+
+    int _event ;
     
   };
 }

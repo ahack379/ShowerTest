@@ -270,6 +270,7 @@ namespace larlite {
 
   std::vector<std::vector<float>>  _s_weights_by_universe ;
   std::vector<std::vector<float>>  _b_weights_by_universe ;
+  std::vector<std::vector<float>>  _e_weights_by_universe ;
   std::vector<std::vector<float>>  _t_weights_by_universe ;
   std::vector<std::vector<float>>  _flux_by_universe ; 
 

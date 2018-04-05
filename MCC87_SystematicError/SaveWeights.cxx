@@ -10,6 +10,8 @@ namespace larlite {
 
   bool SaveWeights::initialize() {
 
+    _event = 0;
+
     _func_v = {"AGKYpT_Genie","AGKYxF_Genie","DISAth_Genie","DISBth_Genie","DISCv1u_Genie","DISCv2u_Genie","FermiGasModelKf_Genie", "FermiGasModelSf_Genie","FormZone_Genie", "IntraNukeNabs_Genie", "IntraNukeNcex_Genie", "IntraNukeNel_Genie", "IntraNukeNinel_Genie", "IntraNukeNmfp_Genie", "IntraNukeNpi_Genie", "IntraNukePIabs_Genie", "IntraNukePIcex_Genie", "IntraNukePIel_Genie", "IntraNukePIinel_Genie", "IntraNukePImfp_Genie", "IntraNukePIpi_Genie", "NC_Genie", "NonResRvbarp1pi_Genie", "NonResRvbarppi_Genie", "NonResRvp1pi_Genie", "NonResRvppi_Genie", "ResDecayEta_Genie", "ResDecayGamma_Genie", "ResDecayTheta_Genie", "ccresAxial_Genie", "ccresVector_Genie", "cohMA_Genie", "cohR0_Genie", "ncelAxial_Genie", "ncelEta_Genie", "ncresAxial_Genie", "ncresVector_Genie", "qema_Genie", "qevec_Genie"}; 
 
     if ( _event_producer == "fluxeventweight" )
@@ -30,14 +32,17 @@ namespace larlite {
         float event ;
         in >> event ;
 
+        std::vector<float> evinfo = {run,subrun,event}; 
         std::vector<double> wgt_v ; 
 
-        auto evinfo = std::make_pair(subrun,event);
+        //auto evinfo = std::make_pair(subrun,event);
         double wgt ;
         while( in >> wgt ){
           wgt_v.emplace_back(wgt);
         }
+
         //std::cout<<"LENGTH :"<<wgt_v.size()<<", "<<i<<std::endl ;
+
 	    i++;
         _wgtmap[evinfo] = wgt_v ;
     }   
@@ -49,47 +54,52 @@ namespace larlite {
   
   bool SaveWeights::analyze(storage_manager* storage) {
 
-    auto run = storage->run_id();
-    auto event = storage->event_id();
-    auto subrun = storage->subrun_id();
+    float run = storage->run_id();
+    float event = storage->event_id();
+    float subrun = storage->subrun_id();
 
     //auto ev_wgt = storage->get_data<event_mceventweight>("genieeventweight");
     auto ev_wgt = storage->get_data<event_mceventweight>(_event_producer);
 
     storage->set_id(run, subrun, event);
 
-    std::pair<int,int> evinfo;
-    evinfo = std::make_pair(subrun,event);
+    //std::pair<int,int> evinfo;
+    //evinfo = std::make_pair(subrun,event);
+
+    std::vector<float> evinfo = {run,subrun,event};
+    bool foundit = false;
 
     // loop through all entries in map
     for (auto const& element : _wgtmap) {
 
 	if ( element.first != evinfo) continue;
+
+    foundit = true;
 	
 	//std::cout<<"Comparing subrun + event : "<<element.first.first <<", "<<element.first.second<<" with "<<evinfo.first<<", "<<evinfo.second<<std::endl;
 
 	auto const& wgt_v = element.second;
 	std::map<std::string,std::vector<double>> w_map; 
 
-    //if ( _event_producer == "genieeventweight"){
+    if ( _event_producer == "genieeventweight"){
 
-    //      for( int i = 0; i < _func_v.size() ; i++ ){
-    //        std::vector<double> temp_wgt_v = {wgt_v[2*i], wgt_v[2*i + 1] };
-    //        //std::cout<<"FUNCTION: "<<_func_v[i]<<", "<<temp_wgt_v[0]<<", "<<temp_wgt_v[1]<<std::endl ;
+          for( int i = 0; i < _func_v.size() ; i++ ){
+            std::vector<double> temp_wgt_v = {wgt_v[2*i], wgt_v[2*i + 1] };
+            //std::cout<<"FUNCTION: "<<_func_v[i]<<", "<<temp_wgt_v[0]<<", "<<temp_wgt_v[1]<<std::endl ;
 
-    //        w_map[_func_v[i]] = temp_wgt_v ; 
-    //      }
+            w_map[_func_v[i]] = temp_wgt_v ; 
+          }
 
-    //   larlite::mceventweight thisweight(w_map);
-    //   ev_wgt->emplace_back( thisweight);
+       larlite::mceventweight thisweight(w_map);
+       ev_wgt->emplace_back( thisweight);
 
-    //   if (ev_wgt->size() == 0 )
-    //     std::cout<<"WHAT IS HAPPENING\n\n\n\n\n\n\n\n "<<std::endl ;
+       if (ev_wgt->size() == 0 )
+         std::cout<<"WHAT IS HAPPENING\n\n\n\n\n\n\n\n "<<std::endl ;
 
-    //      return true;
-    //    
-    // }
-    // else{
+          return true;
+        
+     }
+     else{
 
 	  for( int i = 0; i < _func_v.size() ; i++ ){
 	    std::vector<double> temp_wgt_v; 
@@ -107,8 +117,14 @@ namespace larlite {
 
 	  return true;
 	
-    //  }
+      }
     }
+    _event++;
+
+    std::cout<<"Not found? "<<run<<", "<<subrun<<", "<<event<<std::endl; 
+   
+    if ( !foundit ) return false;
+
 
     return true;
   }

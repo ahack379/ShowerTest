@@ -11,12 +11,16 @@
 namespace larlite {
 
   bool MCVariableStudy::initialize() {
+
+    _map_v.resize(10,std::multimap<float,float>());
+
+    _event_no_dup = 0;
     
     if( !_pi0_tree ){
       _pi0_tree = new TTree("pi0_tree","");
-      _pi0_tree->Branch("run_id",&_run_id,"run_id/F");
-      _pi0_tree->Branch("subrun_id",&_subrun_id,"subrun_id/F");
-      _pi0_tree->Branch("event_id",&_event_id,"event_id/F");
+      _pi0_tree->Branch("run_id",&_run_id,"run_id/I");
+      _pi0_tree->Branch("subrun_id",&_subrun_id,"subrun_id/I");
+      _pi0_tree->Branch("event_id",&_event_id,"event_id/I");
       _pi0_tree->Branch("true_pi0_e",&_true_pi0_e,"true_pi0_e/F");
       _pi0_tree->Branch("true_angle",&_true_angle,"true_angle/F");
       _pi0_tree->Branch("true_asym",&_true_asym,"true_asym/F");
@@ -83,6 +87,33 @@ namespace larlite {
     _event ++; 
     Clear() ;
 
+    auto r = storage->run_id() ;
+    auto it = _map_v.at(r).find(storage->subrun_id());
+    bool foundit = false;
+
+    if( it != _map_v.at(r).end() ){
+     while ( it->first == storage->subrun_id() ){  
+       auto temp_event = it->second ; 
+       if( temp_event == storage->event_id() )
+         foundit = true;
+
+       it++; 
+       }   
+      if ( !foundit)
+       _map_v.at(r).emplace(storage->subrun_id(), storage->event_id() );
+     
+      else{
+        std::cout<<"Event: "<<_event<<std::endl;
+        std::cout<<"Duplicates "<<storage->run_id()<<", "<<storage->subrun_id()<<", "<<storage->event_id()<<std::endl;
+        return false ;
+      }   
+     }   
+    else 
+       _map_v.at(r).emplace(storage->subrun_id(), storage->event_id() );
+
+    _event_no_dup++ ;
+
+
     _run_id = storage->run_id();
     _subrun_id = storage->subrun_id();
     _event_id = storage->event_id();
@@ -105,7 +136,7 @@ namespace larlite {
 
     bool infv = true;
 
-    if( xyz[0] < 20 || xyz[0] > 236.25 || xyz[1] < -96.5 || xyz[1] > 96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
+    if( xyz[0] < 20 || xyz[0] > 236.35 || xyz[1] < -96.5 || xyz[1] > 96.5 || xyz[2] < 10 || xyz[2] > 1026.8 )
       infv = false ;
 
     auto parts = ev_mctruth->at(0).GetParticles();
@@ -129,11 +160,10 @@ namespace larlite {
         n_mu ++; 
     }
 
-    //if( n_mu != 1 || _n_true_pi0 != 1) return false ; 
-
     if( nu.Nu().PdgCode() != 14 || n_pi0 != 1 || nu.CCNC() != 0 || !infv ) return false;
 
     _n_signals++ ;
+    //std::cout<<"Here 5!"<<std::endl;
 
 
     _true_nu_e = ev_mctruth->at(0).GetNeutrino().Nu().Trajectory().at(0).E() ;
@@ -152,7 +182,7 @@ namespace larlite {
 
       auto s = ev_mcs->at(si);
 
-      if( s.PdgCode() != 22 || s.MotherPdgCode() != 111 || s.Origin() != 1 ) continue; //|| abs(s.MotherPdgCode()) == 13 ) continue;
+      if( s.PdgCode() != 22 || s.MotherPdgCode() != 111 || s.AncestorPdgCode() != 111 || s.Origin() != 1 ) continue; //|| abs(s.MotherPdgCode()) == 13 ) continue;
       
       auto st = s.Start();
       auto dist = sqrt( pow(st.X() - start[0],2) + pow(st.Y() - start[1],2) + pow(st.Z() - start[2],2) );
@@ -171,15 +201,18 @@ namespace larlite {
 
       int ii = 0;
       for ( auto const & map_element : shr_map ){
-        if( ii == 0 ){
-          leading_shower_id = map_element.second;
-          ii++;
-        }
+
         if( ii == 1 ){
           subleading_shower_id = map_element.second;
           break;
         }
+        if( ii == 0 ){
+          leading_shower_id = map_element.second;
+          ii++;
+        }
       }
+
+      //std::cout<<"lead, sub : "<<leading_shower_id<<", "<<subleading_shower_id <<std::endl ;
 
       auto s1 = ev_mcs->at(leading_shower_id).Start();
       auto s2 = ev_mcs->at(subleading_shower_id).Start();
@@ -193,6 +226,9 @@ namespace larlite {
 
       auto radL1 = sqrt( pow(d1.X() - xyz[0],2) + pow(d1.Y() - xyz[1],2) + pow(d1.Z() - xyz[2],2) ); 
       auto radL2 = sqrt( pow(d2.X() - xyz[0],2) + pow(d2.Y() - xyz[1],2) + pow(d2.Z() - xyz[2],2) ); 
+
+      //std::cout<<"radl: "<<radL1<<", "<<radL2<<", "<<xyz[0]<<", "<<xyz[1]<<", "<<xyz[2]<<std::endl;
+      //std::cout<<"d1 : "<<d1.E()<<", "<<d2.E()<<", "<<d1.X()<<", "<<d1.Y()<<", "<<d1.Z()<<", "<<d2.X()<<". "<<d2.Y()<<", "<<d2.Z()<<std::endl; 
 
       float e1 = s1.E() ;
       float e2 = s2.E() ;
@@ -239,6 +275,7 @@ namespace larlite {
 
 
   std::cout<<"Found N signals: "<<_n_signals<<std::endl;
+  std::cout<<"Found N events: "<<_event<<", "<<_event_no_dup<<std::endl ;
 
     if(_fout) { 
       _fout->cd(); 
