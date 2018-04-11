@@ -67,6 +67,11 @@ namespace larlite {
   int _n_nc_1gamma ;
   int _n_cc_1gamma ;
 
+
+  std::vector<std::multimap<float,float>> _map_v;
+  int _event_no_dup ;
+
+
   };
 }
 #endif

@@ -32,6 +32,8 @@ namespace larlite {
 
     bool IsEven = event_id % 2 == 0 ? 1 : 0 ;
 
+    //std::cout<<"event id : "<<event_id <<", "<<IsEven <<std::endl;
+
     // Now calculate the total POT + total numu neutrinos 
     auto ev_pot = storage->get_subrundata<potsummary>("generator"); 
 
@@ -51,6 +53,8 @@ namespace larlite {
 
   bool SplitDataOddEven::finalize() {
     
+    std::cout<<"Odd, Even: "<<_x_odd<<", "<<_x_even<<std::endl;
+    std::cout<<"POT Odd, Even: "<<_x_odd_POT<<", "<<_x_even_POT<<std::endl;
 
     _tree->Fill();
 

@@ -25,8 +25,8 @@ my_proc.set_ana_output_file("eventweights_from_full_sample.root");
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
 ana = fmwk.GetEventWeightsFromFullSample()
-ana.SetWeightProducer('genieeventweight')
-#ana.SetWeightProducer('fluxeventweight')
+#ana.SetWeightProducer('genieeventweight')
+ana.SetWeightProducer('fluxeventweight')
 ana.PrintOutput(True)
 
 my_proc.add_process(ana)

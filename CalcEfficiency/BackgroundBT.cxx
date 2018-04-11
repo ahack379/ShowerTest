@@ -56,11 +56,13 @@ namespace larlite {
       _xsec_v.resize(funcs);
       _perc_v.resize(funcs);
       _s_weights_by_universe.resize(funcs);
+      _e_weights_by_universe.resize(funcs);
       _b_weights_by_universe.resize(funcs);
       _flux_by_universe.resize(funcs);
 
       for ( int i = 0; i < funcs ; i++ ){
         _s_weights_by_universe.at(i).resize(1000,0) ;
+        _e_weights_by_universe.at(i).resize(1000,0) ;
         _b_weights_by_universe.at(i).resize(1000,0) ;
         _flux_by_universe.at(i).resize(1000,0) ;
         _xsec_v.at(i).resize(1000,0);
@@ -247,8 +249,8 @@ namespace larlite {
       //_tree->Branch("n_shower_hits_1",&_n_shower_hits_1,"n_shower_hits_1/I");
       //_tree->Branch("n_shower_hits_2",&_n_shower_hits_2,"n_shower_hits_2/I");
 
-      //_tree->Branch("sel_evts_m1","std::vector<float>",&_sel_evts_m1);
-      //_tree->Branch("sel_evts_p1","std::vector<float>",&_sel_evts_p1);
+      _tree->Branch("sel_evts_m1","std::vector<float>",&_sel_evts_m1);
+      _tree->Branch("sel_evts_p1","std::vector<float>",&_sel_evts_p1);
 
       //_tree->Branch("n_shr_pi0",&_n_shr_pi0,"n_shr_pi0/I");
       //_tree->Branch("n_shr_nushr",&_n_shr_nushr,"n_shr_nushr/I");
@@ -291,6 +293,10 @@ namespace larlite {
 
     if( !_univ) {
        _univ = new TTree("univ","");
+       _univ->Branch("sig_v","std::vector<std::vector<float>>",&_s_weights_by_universe); 
+       _univ->Branch("tot_v","std::vector<std::vector<float>>",&_t_weights_by_universe); 
+       _univ->Branch("eff_v","std::vector<std::vector<float>>",&_e_weights_by_universe); 
+       _univ->Branch("bkgd_v","std::vector<std::vector<float>>",&_b_weights_by_universe); 
        _univ->Branch("xsec_v","std::vector<std::vector<float>>",&_xsec_v); 
        _univ->Branch("perc_v","std::vector<std::vector<float>>",&_perc_v); 
      }
@@ -1598,6 +1604,7 @@ namespace larlite {
     //    std::cout<<"FLUX! "<<_flux_by_universe[i][0]<<std::endl ;
     //    for( int j= 0; j < 1000; j++){
     //      float eff = _s_weights_by_universe[i][j] / _t_weights_by_universe[i][j] ;
+    //      _e_weights_by_universe[i][j] = eff ;
     //      _xsec_v[i][j] = float( _N -  mc_to_onbeam*_b_weights_by_universe[i][j])/eff/ _flux_by_universe[i][j]/(8.855e+29);
     //      _perc_v[i][j] = ( _xsec_v[i][j] - _N_xsec )/ _N_xsec *100;
     //    }

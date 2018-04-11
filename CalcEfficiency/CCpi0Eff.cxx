@@ -20,6 +20,9 @@ namespace larlite {
     _signal = 0;
     _event_list.clear();
 
+    _event_no_dup = 0;
+    _map_v.resize(10,std::multimap<float,float>());
+
     _n_other = 0;    // 0 
     _n_cosmic = 0;   // 1
     _n_cc1pi0 = 0;   // 2 
@@ -37,29 +40,57 @@ namespace larlite {
   
   bool CCpi0Eff::analyze(storage_manager* storage) {
 
+    _event ++; 
+
+    auto r = storage->run_id() ;
+    auto it = _map_v.at(r).find(storage->subrun_id());
+    bool foundit = false;
+
+    if( it != _map_v.at(r).end() ){
+     while ( it->first == storage->subrun_id() ){  
+       auto temp_event = it->second ; 
+       if( temp_event == storage->event_id() )
+         foundit = true;
+
+       it++; 
+       }   
+      if ( !foundit)
+       _map_v.at(r).emplace(storage->subrun_id(), storage->event_id() );
+     
+      else{
+        std::cout<<"Event: "<<_event<<std::endl;
+        std::cout<<"Duplicates "<<storage->run_id()<<", "<<storage->subrun_id()<<", "<<storage->event_id()<<std::endl;
+        return false ;
+      }   
+     }   
+    else 
+       _map_v.at(r).emplace(storage->subrun_id(), storage->event_id() );
+
+    _event_no_dup++ ;
+
+
     //std::cout<<"\nEvent is : "<<_event <<", "<<storage->event_id()<<", "<<storage->subrun_id()<<std::endl ;
 
-   auto it = _map.find(storage->subrun_id());
-   bool foundit = false;
+   //auto it = _map.find(storage->subrun_id());
+   //bool foundit = false;
 
-   if( it != _map.end() ){
-    while ( it->first == storage->subrun_id() ){  
-      auto temp_event = it->second ; 
-      if( temp_event == storage->event_id() )
-        foundit = true;
+   //if( it != _map.end() ){
+   // while ( it->first == storage->subrun_id() ){  
+   //   auto temp_event = it->second ; 
+   //   if( temp_event == storage->event_id() )
+   //     foundit = true;
 
-      it++; 
-      }   
-     if ( !foundit)
-      _map.emplace(storage->subrun_id(), storage->event_id() );
+   //   it++; 
+   //   }   
+   //  if ( !foundit)
+   //   _map.emplace(storage->subrun_id(), storage->event_id() );
 
-     else return false ;
-    }   
-   else 
-      _map.emplace(storage->subrun_id(), storage->event_id() );
+   //  else return false ;
+   // }   
+   //else 
+   //   _map.emplace(storage->subrun_id(), storage->event_id() );
 
-
-    _event++ ;
+    //_event++ ;
 
     auto ev_mctruth= storage->get_data<event_mctruth>("generator"); 
     if(!ev_mctruth || !ev_mctruth->size() ) {
@@ -118,15 +149,16 @@ namespace larlite {
     
 
     // Now calculate the total POT + total numu neutrinos 
-    //auto ev_pot = storage->get_subrundata<potsummary>("generator"); 
-
-    //if( storage->subrun_id() != storage->last_subrun_id() )
-    //  _tot_pot += ev_pot->totgoodpot ;
+    auto ev_pot = storage->get_subrundata<potsummary>("generator"); 
+    if( storage->subrun_id() != storage->last_subrun_id() )
+      _tot_pot += ev_pot->totgoodpot ;
 
     return true;
   }
 
   bool CCpi0Eff::finalize() {
+
+   std::cout<<" NUMBER OF EVENTS! "<<_event <<", no dup: "<<_event_no_dup<<std::endl ;
 
    // std::cout<<"CCpi0 are "<<float(_event_list.size())/(_event)*100<<"\% of BNB ("<<_event_list.size()<<"/"<<_event<<")"<<std::endl ;
 

@@ -28,7 +28,11 @@ namespace larlite {
     _eventweight_label       = "" ;
     _n_sig = 0;
 
+    _map_v.resize(10,std::multimap<float,float>());
+
     _events = 0;
+    _event_no_dup = 0;
+
 
   }
   
@@ -77,6 +81,32 @@ namespace larlite {
  
   bool GetEventWeightsFromFullSample::analyze(storage_manager* storage) {
 
+      _events ++ ;
+
+      auto r = storage->run_id() ;
+      auto it = _map_v.at(r).find(storage->subrun_id());
+      bool foundit = false;
+
+      if( it != _map_v.at(r).end() ){
+       while ( it->first == storage->subrun_id() ){  
+         auto temp_event = it->second ; 
+         if( temp_event == storage->event_id() )
+           foundit = true;
+
+         it++; 
+         }   
+        if ( !foundit)
+         _map_v.at(r).emplace(storage->subrun_id(), storage->event_id() );
+       
+        else{
+          //std::cout<<"Event: "<<_events<<std::endl;
+          //std::cout<<"Duplicates "<<storage->run_id()<<", "<<storage->subrun_id()<<", "<<storage->event_id()<<std::endl;
+          return false ;
+        }   
+       }   
+      else 
+         _map_v.at(r).emplace(storage->subrun_id(), storage->event_id() );
+
     auto ev_mctruth = storage->get_data<event_mctruth>("generator"); 
     auto ev_gen_wgt= storage->get_data<event_mceventweight>("genieeventweight"); 
     auto ev_flux_wgt= storage->get_data<event_mceventweight>("fluxeventweight"); 
@@ -96,7 +126,7 @@ namespace larlite {
       return false;
      }
 
-    _events ++ ;
+    _event_no_dup++ ;
 
     auto nu  = ev_mctruth->at(0).GetNeutrino();
     double xyz[3] = {0.};
@@ -139,17 +169,21 @@ namespace larlite {
       auto flux_wgt  = ev_flux_wgt->at(0).GetWeights();
 
       for ( auto const & m : flux_wgt ) {
-        //std::cout<<"Size fo weights "<<m.first<<", "<<m.second.size()<<std::endl ;
-	if (m.first == "bnbcorrection_FluxHist" )
-	  continue;
+        std::cout<<"Size fo weights "<<m.first<<", "<<m.second.size()<<std::endl ;
+	    if (m.first == "bnbcorrection_FluxHist" )
+	      continue;
   	    // There should be 1000 weights
         for ( int jj = 0; jj < m.second.size(); jj++){
-          // THese are the 5 hadron values -- they may be correlated. Vary these 5 individually.
-          if ( find(_unisim_label_v.begin(),_unisim_label_v.end(),m.first) != _unisim_label_v.end() )
+          
+          // These are the 5 hadron values -- they may be correlated. Vary these 5 individually.
+          if ( find(_unisim_label_v.begin(),_unisim_label_v.end(),m.first) != _unisim_label_v.end() ){
                unisim_tot_weight[jj] *= m.second.at(jj) ;
+               //if ( jj < 10) std::cout<<"IS fluxunisim: "<<m.first<<", iteration: "<<jj<<", "<<m.second.at(jj)<<", "<<unisim_tot_weight[jj]<<std::endl;
+          }
           else{
 	      //std::cout<<"_label stuff: "<<m.first<<", "<<std::endl;
               _t_weights_by_universe[_label_map[m.first]][jj] += m.second.at(jj);
+              //if ( jj < 10) std::cout<<"NOT fluxunisim: "<<m.first<<", iteration: "<<jj<<", "<<m.second.at(jj)<<", "<<_t_weights_by_universe[_label_map[m.first]][jj]<<std::endl;
 	      }
         }
       }
@@ -175,14 +209,13 @@ namespace larlite {
        }   
 
     }
-      
 
     return true;
   }
 
   bool GetEventWeightsFromFullSample::finalize() {
 
-    std::cout<<"Events: "<<_events <<", "<<_n_sig<<std::endl ;
+    std::cout<<"Events: "<<_events <<", "<<_event_no_dup<<", "<<_n_sig<<std::endl ;
 
 
     if ( _print_output ) { // && _eventweight_label == "fluxeventweight" ){

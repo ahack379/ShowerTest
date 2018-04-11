@@ -79,6 +79,10 @@ namespace larlite {
     std::vector<float> _all_evts_m1 ;
     std::vector<float> _all_evts_p1 ;
 
+    std::vector<std::multimap<float,float>> _map_v;
+    int _event_no_dup ;
+
+
   };
 }
 #endif

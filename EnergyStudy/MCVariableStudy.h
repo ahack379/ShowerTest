@@ -89,6 +89,9 @@ namespace larlite {
   geoalgo::GeoAlgo _geoAlgo ;
 
   int _n_signals ;
+
+  std::vector<std::multimap<float,float>> _map_v;
+  int _event_no_dup ;
     
   };
 }

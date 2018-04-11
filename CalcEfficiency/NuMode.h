@@ -126,6 +126,8 @@ namespace larlite {
   bool _get_single_shower_info ;
 
   bool _get_gt0_shower ;
+
+  std::vector<std::multimap<float,float>> _map_v;
   
     
   };

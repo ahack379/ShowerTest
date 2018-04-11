@@ -144,8 +144,11 @@ namespace larlite {
     std::vector<std::vector<float>>  _flux_by_universe ; 
     std::map<std::string,int> _label_map ;
 
+    std::vector<std::multimap<float,float>> _map_v ;
+
     TTree * _tree ;
     int _event ;
+    int _event_no_dup ;
 
     int _event_id ;
     int _subrun_id ;
@@ -232,6 +235,9 @@ namespace larlite {
     bool _pi0_low_from_pi0;   // is this mccluster from a pi0? yes(1) no(0)
     int _pi0_low_mother_pdg ; // Mother Pdg of true matched particle
     int _pi0_low_pdg ;        // Pdg of true matched particle
+    float _pi0_low_mom_x;        
+    float _pi0_low_mom_y;        
+    float _pi0_low_mom_z;        
     float _pi0_low_st_x ;
     float _pi0_low_st_y ;
     float _pi0_low_st_z ;
@@ -261,6 +267,9 @@ namespace larlite {
     bool _pi0_high_from_pi0;   
     int _pi0_high_mother_pdg ; 
     int _pi0_high_pdg ;       
+    float _pi0_high_mom_x;        
+    float _pi0_high_mom_y;        
+    float _pi0_high_mom_z;        
     float _pi0_high_st_x ;
     float _pi0_high_st_y ;
     float _pi0_high_st_z ;
@@ -314,6 +323,10 @@ namespace larlite {
     bool _signal ;
     std::vector<float> _sel_evts_m1;
     std::vector<float> _sel_evts_p1;
+    std::vector<float> _sig_evts_m1;
+    std::vector<float> _sig_evts_p1;
+    std::vector<float> _bkgd_evts_m1;
+    std::vector<float> _bkgd_evts_p1;
 
     // One entry per shower
     TTree * _shower_tree ;
@@ -355,6 +368,9 @@ namespace larlite {
 
     // For flux variations  
     TTree * _univ;
+    std::vector<std::vector<float>> _sig_v ;
+    std::vector<std::vector<float>> _tot_v ;
+    std::vector<std::vector<float>> _eff_v ;
     std::vector<std::vector<float>> _xsec_v ;
     std::vector<std::vector<float>> _perc_v;
 
