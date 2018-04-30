@@ -55,26 +55,25 @@ namespace larlite {
     _time2cm = larutil::GeometryHelper::GetME()->TimeToCm();
 
     // This part only applicable when trying to calculate GENIE xsec uncertainties
-    if ( _get_genie_info && _eventweight_producer == "genieeventweight" ){
+    if ( _get_genie_info ){ //&& _eventweight_producer == "genieeventweight" ){
       _genie_label_v = {"AGKYpT","AGKYxF","DISAth","DISBth","DISCv1u","DISCv2u","FermiGasModelKf", "FermiGasModelSf","FormZone", "IntraNukeNabs", "IntraNukeNcex", "IntraNukeNel", "IntraNukeNinel", "IntraNukeNmfp", "IntraNukeNpi", "IntraNukePIabs", "IntraNukePIcex", "IntraNukePIel", "IntraNukePIinel", "IntraNukePImfp", "IntraNukePIpi", "NC", "NonResRvbarp1pi", "NonResRvbarp2pi", "NonResRvp1pi", "NonResRvp2pi", "ResDecayEta", "ResDecayGamma", "ResDecayTheta", "ccresAxial", "ccresVector", "cohMA", "cohR0", "ncelAxial", "ncelEta", "ncresAxial", "ncresVector", "qema", "qevec"};
 
-      int funcs = _genie_label_v.size() ; //78 total, +- for each func
+      int genie_funcs = _genie_label_v.size() ; //78 total, +- for each func
 
-      _sel_evts_m1.resize(funcs,0) ;
-      _sel_evts_p1.resize(funcs,0) ;
+      _sel_evts_m1.resize(genie_funcs,0) ;
+      _sel_evts_p1.resize(genie_funcs,0) ;
 
-      _sig_evts_m1.resize(funcs,0) ;
-      _sig_evts_p1.resize(funcs,0) ;
+      _sig_evts_m1.resize(genie_funcs,0) ;
+      _sig_evts_p1.resize(genie_funcs,0) ;
 
-      _bkgd_evts_p1.resize(funcs,0) ;
-      _bkgd_evts_m1.resize(funcs,0) ;
+      _bkgd_evts_p1.resize(genie_funcs,0) ;
+      _bkgd_evts_m1.resize(genie_funcs,0) ;
 
-    } 
-
+    //} 
     // This part only applicable when trying to calculate flux xsec uncertainties
-    if ( _get_genie_info && _eventweight_producer == "fluxeventweight"){
+    //if ( _get_genie_info && _eventweight_producer == "fluxeventweight"){
 
-      int  funcs = 6;
+      int funcs = 6;
       _sig_v.resize(funcs);
       _tot_v.resize(funcs);
       _eff_v.resize(funcs);
@@ -204,6 +203,9 @@ namespace larlite {
       _tree->Branch("mu_startx",&_mu_startx,"mu_startx/F");
       _tree->Branch("mu_starty",&_mu_starty,"mu_starty/F");
       _tree->Branch("mu_startz",&_mu_startz,"mu_startz/F");
+      _tree->Branch("mu_dirx",&_mu_dirx,"mu_dirx/F");
+      _tree->Branch("mu_diry",&_mu_diry,"mu_diry/F");
+      _tree->Branch("mu_dirz",&_mu_dirz,"mu_dirz/F");
       _tree->Branch("mu_endx",&_mu_endx,"mu_endx/F");
       _tree->Branch("mu_endy",&_mu_endy,"mu_endy/F");
       _tree->Branch("mu_endz",&_mu_endz,"mu_endz/F");
@@ -338,7 +340,11 @@ namespace larlite {
       _tree->Branch("bkgd_evts_m1","std::vector<float>",&_bkgd_evts_m1);
       _tree->Branch("bkgd_evts_p1","std::vector<float>",&_bkgd_evts_p1);
       _tree->Branch("signal",&_signal,"signal/B");
-
+      _tree->Branch("genie_weight_up",&_genie_weight_up,"genie_weight_up/F");
+      _tree->Branch("genie_weight_dn",&_genie_weight_dn,"genie_weight_dn/F");
+      _tree->Branch("flux_weight_up",&_flux_weight_up,"flux_weight_up/F");
+      _tree->Branch("flux_weight_dn",&_flux_weight_dn,"flux_weight_dn/F");
+      _tree->Branch("flux_weights","std::vector<float>",&_flux_weights);
    }
 
     // Filled per reconstructed shower
@@ -358,9 +364,14 @@ namespace larlite {
       _shower_tree->Branch("shr_true_startx",&_shr_true_startx,"shr_true_startx/F");
       _shower_tree->Branch("shr_true_starty",&_shr_true_starty,"shr_true_starty/F");
       _shower_tree->Branch("shr_true_startz",&_shr_true_startz,"shr_true_startz/F");
+      _shower_tree->Branch("shr_true_detProf_dirx",&_shr_true_detProf_dirx,"shr_true_detProf_dirx/F");
+      _shower_tree->Branch("shr_true_detProf_diry",&_shr_true_detProf_diry,"shr_true_detProf_diry/F");
+      _shower_tree->Branch("shr_true_detProf_dirz",&_shr_true_detProf_dirz,"shr_true_detProf_dirz/F");
+      _shower_tree->Branch("shr_dir_res",&_shr_dir_res,"shr_dir_res/F");
       _shower_tree->Branch("shr_true_detProf_startx",&_shr_true_detProf_startx,"shr_true_detProf_startx/F");
       _shower_tree->Branch("shr_true_detProf_starty",&_shr_true_detProf_starty,"shr_true_detProf_starty/F");
       _shower_tree->Branch("shr_true_detProf_startz",&_shr_true_detProf_startz,"shr_true_detProf_startz/F");
+      _shower_tree->Branch("shr_start_res",&_shr_start_res,"shr_start_res/F");
       _shower_tree->Branch("shr_trueE",&_shr_trueE,"shr_trueE/F");
       _shower_tree->Branch("shr_trueE_detProf",&_shr_trueE_detProf,"shr_trueE_detProf/F");
       _shower_tree->Branch("shr_perfect_clustering_E",&_shr_perfect_clustering_E,"shr_perfect_clustering_E/F");
@@ -381,6 +392,38 @@ namespace larlite {
       _shower_tree->Branch("shr_mother_pdg",&_shr_mother_pdg,"shr_mother_pdg/I");
       _shower_tree->Branch("shr_n_true",&_shr_n_true,"shr_n_true/I");
       _shower_tree->Branch("shr_n_reco",&_shr_n_reco,"shr_n_reco/I");
+      /////// Adding some stuff
+      _shower_tree->Branch("flash_pe",&_flash_pe,"flash_pe/I");
+      _shower_tree->Branch("flash_y_center",&_flash_y_center,"flash_y_center/F");
+      _shower_tree->Branch("flash_z_center",&_flash_z_center,"flash_z_center/F");
+      _shower_tree->Branch("flash_y_width",&_flash_y_width,"flash_y_width/F");
+      _shower_tree->Branch("flash_z_width",&_flash_z_width,"flash_z_width/F");
+      _shower_tree->Branch("mu_true_angle",&_mu_true_angle,"mu_true_angle/F");
+      _shower_tree->Branch("mu_true_phi",&_mu_true_phi,"mu_true_phi/F");
+      _shower_tree->Branch("mu_true_mom",&_mu_true_mom,"mu_true_mom/F");
+      _shower_tree->Branch("mu_angle",&_mu_angle,"mu_angle/F");
+      _shower_tree->Branch("mu_len",&_mu_len,"mu_len/F");
+      _shower_tree->Branch("mu_startx",&_mu_startx,"mu_startx/F");
+      _shower_tree->Branch("mu_starty",&_mu_starty,"mu_starty/F");
+      _shower_tree->Branch("mu_startz",&_mu_startz,"mu_startz/F");
+      _shower_tree->Branch("mu_dirx",&_mu_dirx,"mu_dirx/F");
+      _shower_tree->Branch("mu_diry",&_mu_diry,"mu_diry/F");
+      _shower_tree->Branch("mu_dirz",&_mu_dirz,"mu_dirz/F");
+      _shower_tree->Branch("mu_endx",&_mu_endx,"mu_endx/F");
+      _shower_tree->Branch("mu_endy",&_mu_endy,"mu_endy/F");
+      _shower_tree->Branch("mu_endz",&_mu_endz,"mu_endz/F");
+      _shower_tree->Branch("mu_phi",&_mu_phi,"mu_phi/F");
+      _shower_tree->Branch("mult",&_mult,"mult/F");
+      _shower_tree->Branch("mu_deviation",&_mu_deviation,"mu_deviation/F");
+      _shower_tree->Branch("mu_trun_mean_dqdx",&_mu_trun_mean_dqdx,"mu_trun_mean_dqdx/F");
+      _shower_tree->Branch("mu_pdg",&_mu_pdg,"mu_pdg/I");
+      _shower_tree->Branch("n_track_hits_0",&_n_track_hits_0,"n_track_hits_0/I");
+      _shower_tree->Branch("n_track_hits_1",&_n_track_hits_1,"n_track_hits_1/I");
+      _shower_tree->Branch("n_track_hits_2",&_n_track_hits_2,"n_track_hits_2/I");
+      _shower_tree->Branch("n_shower_hits_0",&_n_shower_hits_0,"n_shower_hits_0/I");
+      _shower_tree->Branch("n_shower_hits_1",&_n_shower_hits_1,"n_shower_hits_1/I");
+      _shower_tree->Branch("n_shower_hits_2",&_n_shower_hits_2,"n_shower_hits_2/I");
+
 
     }   
 
@@ -441,6 +484,9 @@ namespace larlite {
     _mu_startx = -999;
     _mu_starty = -999;
     _mu_startz = -999;
+    _mu_dirx = -999;
+    _mu_diry = -999;
+    _mu_dirz = -999;
     _mu_endx = -999;
     _mu_endy = -999;
     _mu_endz = -999;
@@ -578,6 +624,19 @@ namespace larlite {
 
     _signal = false;
 
+    // Adding GENIE + Flux weights 
+    _genie_weight_up = 1;
+    _genie_weight_dn = 1;
+    _flux_weight_up = 1;
+    _flux_weight_dn = 1;
+    _total_weight_up = 1;
+    _total_weight_dn = 1;
+
+    if ( _get_genie_info ){ //_get_single_shower_info || _get_pi0_info || _get_preselection_flux_info ){ 
+      _flux_weights.clear(); 
+      _flux_weights.resize(1000,1);
+    }
+
    }
 
   void BackgroundTruthMatchBT::shower_clear(){
@@ -585,9 +644,14 @@ namespace larlite {
     _shr_true_startx = -999;
     _shr_true_starty = -999;
     _shr_true_startz = -999;
+    _shr_true_detProf_dirx = -999;
+    _shr_true_detProf_diry = -999;
+    _shr_true_detProf_dirz = -999;
+    _shr_dir_res = -999;
     _shr_true_detProf_startx = -999;
     _shr_true_detProf_starty = -999;
     _shr_true_detProf_startz = -999;
+    _shr_start_res = -999;
     _shr_startx = -999;
     _shr_starty = -999;
     _shr_startz = -999;
@@ -668,7 +732,7 @@ namespace larlite {
     //std::cout<<"\n\nEVENT IS: "<<_event<<std::endl;
     clear();
 
-    if ( _mc_sample ){
+    if ( _remove_duplicates ){
 
       auto r = storage->run_id() ;
       auto it = _map_v.at(r).find(storage->subrun_id());
@@ -728,75 +792,80 @@ namespace larlite {
     _mu_startx = tagged_trk.Vertex().X(); 
     _mu_starty = tagged_trk.Vertex().Y(); 
     _mu_startz = tagged_trk.Vertex().Z(); 
+    _mu_dirx = tagged_trk.Vertex().Px(); 
+    _mu_diry = tagged_trk.Vertex().Py(); 
+    _mu_dirz = tagged_trk.Vertex().Pz(); 
     _mu_endx = tagged_trk.End().X(); 
     _mu_endy = tagged_trk.End().Y(); 
     _mu_endz = tagged_trk.End().Z(); 
 
     // Also identify mip parameters
-    auto ev_t_p = storage->get_data<event_track>("pandoraNu");
+    if ( _get_calo_info ){
 
-    auto ev_calo= storage->get_data<event_calorimetry>("pandoraNucalo");
+      auto ev_t_p = storage->get_data<event_track>("pandoraNu");
+      auto ev_calo= storage->get_data<event_calorimetry>("pandoraNucalo");
 
-    if ( !ev_calo || ev_calo->size() == 0 ) {
-      std::cout << "No such calo associated to track! " << std::endl;
-      return false;
-    }
-
-    auto ev_ass = storage->get_data<larlite::event_ass>("pandoraNucalo");
-
-    if ( !ev_ass || ev_ass->size() == 0 ) {
-      std::cout << "No such association! " << std::endl;
-      return false;
-    }
-
-    auto const& ass_calo_v = ev_ass->association(ev_t_p->id(), ev_calo->id());
-    if ( ass_calo_v.size() == 0) {
-      std::cout << "No ass from track => hit! " << std::endl;
-      return false;
-    }
-
-    float min_dist = 1e9;
-    int min_it = -1; 
-    auto tag_st = tagged_trk.End() ;
-
-    for ( int i = 0; i < ev_t_p->size(); i++){
-
-      auto t = ev_t_p->at(i);
-      auto st = t.End() ;
-      auto dist = sqrt( pow(st.X() - tag_st.X(),2) + pow(st.Y() - tag_st.Y(),2) + pow(st.Z() - tag_st.Z(),2) );
-      if ( dist < min_dist ){
-        min_dist = dist;
-        min_it = i;
+      if ( !ev_calo || ev_calo->size() == 0 ) {
+        std::cout << "No such calo associated to track! " << std::endl;
+        return false;
       }
-    }
 
-    int N = 0;
-    std::vector<double> dqdx; 
+      auto ev_ass = storage->get_data<larlite::event_ass>("pandoraNucalo");
 
-    // Get calo ID for plane 2 at the tagged track.
-    auto calo_it = ass_calo_v.at(min_it).at(2) ;
-    auto calo_i = ev_calo->at(calo_it); 
+      if ( !ev_ass || ev_ass->size() == 0 ) {
+        std::cout << "No such association! " << std::endl;
+        return false;
+      }
 
-    for(int i = 0; i < calo_i.dQdx().size(); i++){
+      auto const& ass_calo_v = ev_ass->association(ev_t_p->id(), ev_calo->id());
+      if ( ass_calo_v.size() == 0) {
+        std::cout << "No ass from track => hit! " << std::endl;
+        return false;
+      }
 
-      if ( calo_i.dQdx().at(i) <= 0 ) continue;
-      N++;
+      float min_dist = 1e9;
+      int min_it = -1; 
+      auto tag_st = tagged_trk.End() ;
 
-      if ( _mc_sample)
-        dqdx.push_back(calo_i.dQdx().at(i) * 198.);
-      else 
-        dqdx.push_back(calo_i.dQdx().at(i) * 243.);
-    }   
+      for ( int i = 0; i < ev_t_p->size(); i++){
 
-    if(N == 0)
-      dqdx.clear(); 
-    else{
+        auto t = ev_t_p->at(i);
+        auto st = t.End() ;
+        auto dist = sqrt( pow(st.X() - tag_st.X(),2) + pow(st.Y() - tag_st.Y(),2) + pow(st.Z() - tag_st.Z(),2) );
+        if ( dist < min_dist ){
+          min_dist = dist;
+          min_it = i;
+        }
+      }
 
-      std::sort(dqdx.begin(),dqdx.end());
-      auto TrackTLMeandQdx = TrunMean(dqdx);
-      _mu_trun_mean_dqdx = TrackTLMeandQdx ;
+      int N = 0;
+      std::vector<double> dqdx; 
 
-      dqdx.clear();
+      // Get calo ID for plane 2 at the tagged track.
+      auto calo_it = ass_calo_v.at(min_it).at(2) ;
+      auto calo_i = ev_calo->at(calo_it); 
+
+      for(int i = 0; i < calo_i.dQdx().size(); i++){
+
+        if ( calo_i.dQdx().at(i) <= 0 ) continue;
+        N++;
+
+        if ( _mc_sample)
+          dqdx.push_back(calo_i.dQdx().at(i) * 198.);
+        else 
+          dqdx.push_back(calo_i.dQdx().at(i) * 243.);
+      }   
+
+      if(N == 0)
+        dqdx.clear(); 
+      else{
+
+        std::sort(dqdx.begin(),dqdx.end());
+        auto TrackTLMeandQdx = TrunMean(dqdx);
+        _mu_trun_mean_dqdx = TrackTLMeandQdx ;
+
+        dqdx.clear();
+      }
     }
 
     auto TrackMaxDeflection = MaxDeflection(tagged_trk);
@@ -926,6 +995,7 @@ namespace larlite {
 
       auto vtxtick = (tvtx / 1000.) * 2.;
       auto vtxtimecm = vtxtick * _time2cm; 
+      _vtxtimecm = vtxtick * _time2cm; 
       auto sce_corr = _SCE->GetPosOffsets(mc_vtx_x,mc_vtx_y,mc_vtx_z);
 
       _mc_vtx_x = mc_vtx_x;
@@ -1679,8 +1749,8 @@ namespace larlite {
      geoalgo::Vector_t mom_vect(shr2.Direction()*shr2.Energy(2) + shr1.Direction()*shr1.Energy(2)) ;
 
      auto tot_pi0_mom = sqrt(pow(mom_vect[0],2) + pow(mom_vect[1],2) + pow(mom_vect[2],2) );
-     auto radL_shr1 = vertex.Dist(shr1.ShowerStart());
-     auto radL_shr2 = vertex.Dist(shr2.ShowerStart());
+     auto radL_shr1 = temp_vertex.Dist(shr1.ShowerStart());
+     auto radL_shr2 = temp_vertex.Dist(shr2.ShowerStart());
 
      _pi0_mass      = sqrt(2 * shr1.Energy(2) * shr2.Energy(2) *(1.-cos(oangle)));
      _pi0_mom       = tot_pi0_mom;
@@ -1693,6 +1763,13 @@ namespace larlite {
      _pi0_high_IP_w_vtx = shr1.Energy(2) < shr2.Energy(2) ? shr2_IP_w_vtx : shr1_IP_w_vtx ;
      _pi0_low_IP_w_vtx  = shr1.Energy(2) < shr2.Energy(2) ? shr1_IP_w_vtx : shr2_IP_w_vtx ;
 
+     _pi0_low_st_x = shr1.Energy(2) < shr2.Energy(2) ? shr1.ShowerStart().X(): shr2.ShowerStart().X() ;
+     _pi0_low_st_y = shr1.Energy(2) < shr2.Energy(2) ? shr1.ShowerStart().Y(): shr2.ShowerStart().Y() ;
+     _pi0_low_st_z = shr1.Energy(2) < shr2.Energy(2) ? shr1.ShowerStart().Z(): shr2.ShowerStart().Z() ;
+     _pi0_high_st_x = shr1.Energy(2) < shr2.Energy(2) ? shr2.ShowerStart().X(): shr1.ShowerStart().X();
+     _pi0_high_st_y = shr1.Energy(2) < shr2.Energy(2) ? shr2.ShowerStart().Y(): shr1.ShowerStart().Y();
+     _pi0_high_st_z = shr1.Energy(2) < shr2.Energy(2) ? shr2.ShowerStart().Z(): shr1.ShowerStart().Z();
+
      auto pz1 = shr1.Direction()*shr1.Energy(2) ;
      auto pz2 = shr2.Direction()*shr2.Energy(2) ;
 
@@ -1702,6 +1779,7 @@ namespace larlite {
      _pi0_high_mom_y = shr1.Energy(2) < shr2.Energy(2) ? pz2[1] : pz1[1] ;
      _pi0_low_mom_z = shr1.Energy(2) < shr2.Energy(2) ? pz1[2] : pz2[2] ;
      _pi0_high_mom_z = shr1.Energy(2) < shr2.Energy(2) ? pz2[2] : pz1[2] ;
+
 
    }
  
@@ -1884,11 +1962,36 @@ namespace larlite {
                _shr_trueE = mcs.Start().E() ;
                _shr_trueE_detProf = mcs.DetProfile().E();
 	       _shr_true_detProf_startx = mcs.DetProfile().X();
-	       _shr_true_detProf_starty = mcs.DetProfile().X();
-	       _shr_true_detProf_startz = mcs.DetProfile().X();
+	       _shr_true_detProf_starty = mcs.DetProfile().Y();
+	       _shr_true_detProf_startz = mcs.DetProfile().Z();
 	       _shr_true_startx = mcs.Start().X();
-	       _shr_true_starty = mcs.Start().X();
-	       _shr_true_startz = mcs.Start().X();
+	       _shr_true_starty = mcs.Start().Y();
+	       _shr_true_startz = mcs.Start().Z();
+
+           auto tot_dir = sqrt( pow(mcs.DetProfile().Px(),2) +  pow(mcs.DetProfile().Py(),2) +  pow(mcs.DetProfile().Pz(),2) ); 
+
+	       _shr_true_detProf_dirx = mcs.DetProfile().Px() / tot_dir;
+	       _shr_true_detProf_diry = mcs.DetProfile().Py() / tot_dir;
+	       _shr_true_detProf_dirz = mcs.DetProfile().Pz() / tot_dir;
+
+           _shr_dir_res = sqrt ( pow(_shr_true_detProf_dirx - _shr_dirx,2) + 
+								 pow(_shr_true_detProf_diry - _shr_diry,2) + 
+                                 pow(_shr_true_detProf_dirz - _shr_dirz,2) ) ;
+
+           auto sce_corr_det = _SCE->GetPosOffsets(_shr_true_detProf_startx,_shr_true_detProf_starty,_shr_true_detProf_startz);
+           auto sce_corr = _SCE->GetPosOffsets(_shr_true_startx,_shr_true_starty,_shr_true_startz);
+
+           _shr_true_detProf_startx += (_vtxtimecm + 0.7 - sce_corr_det.at(0));
+           _shr_true_detProf_starty += sce_corr_det.at(1);
+           _shr_true_detProf_startz += sce_corr_det.at(2);
+
+           _shr_start_res = sqrt ( pow(_shr_true_detProf_startx - _shr_startx,2) + 
+								   pow(_shr_true_detProf_starty - _shr_starty,2) + 
+                                   pow(_shr_true_detProf_startz - _shr_startz,2) );
+
+           _shr_true_startx += (_vtxtimecm + 0.7 - sce_corr.at(0));
+           _shr_true_starty += sce_corr.at(1);
+           _shr_true_startz += sce_corr.at(2);
 
 	       used_mcs_v.emplace_back(shr_index);
               }
@@ -1945,6 +2048,17 @@ namespace larlite {
          _shr_true_detProf_starty = ev_mcs->at(id).DetProfile().Y() ;
          _shr_true_detProf_startz = ev_mcs->at(id).DetProfile().Z() ;
 
+         auto sce_corr_det = _SCE->GetPosOffsets(_shr_true_detProf_startx,_shr_true_detProf_starty,_shr_true_detProf_startz);
+         auto sce_corr = _SCE->GetPosOffsets(_shr_true_startx,_shr_true_starty,_shr_true_startz);
+
+         _shr_true_detProf_startx += (_vtxtimecm + 0.7 - sce_corr_det.at(0));
+         _shr_true_detProf_starty += sce_corr_det.at(1);
+         _shr_true_detProf_startz += sce_corr_det.at(2);
+
+         _shr_true_startx += (_vtxtimecm + 0.7 - sce_corr.at(0));
+         _shr_true_starty += sce_corr.at(1);
+         _shr_true_startz += sce_corr.at(2);
+
          _shower_tree->Fill();
        }   
      }   
@@ -1953,83 +2067,120 @@ namespace larlite {
    // Fill info needed to assess GENIE/flux uncertainties
    if ( _get_genie_info ) {
 
-      auto ev_wgt= storage->get_data<event_mceventweight>(_eventweight_producer);
+      if ( ! _get_preselection_flux_info ) {
 
-      if( !ev_wgt || !ev_wgt->size() ){
-        std::cout<<"No event weights..." <<std::endl;
-        return false;
-      }
+        auto ev_genie_wgt= storage->get_data<event_mceventweight>("genieeventweight");
 
-      auto wgt  = ev_wgt->at(0).GetWeights();
-
-      if ( _eventweight_producer == "genieeventweight" ){
-        int it = 0;
-        for ( auto const & m : wgt ) {
-           auto w_v = m.second ;
-           _sel_evts_p1[it] = (w_v.at(0)) ;
-           _sel_evts_m1[it] = (w_v.at(1)) ;
-           it++;
+        if( !ev_genie_wgt || !ev_genie_wgt->size() ){
+          std::cout<<"No GENIE eventweights..." <<std::endl;
+          _tree->Fill();    
+          return false;
         }
 
-        if ( _signal ){
+        auto wgt  = ev_genie_wgt->at(0).GetWeights();
 
-          int it = 0;
-          for ( auto const & m : wgt ) { 
+        int it = 0;
+        for ( auto const & m : wgt ) {
+          auto w_v = m.second ;
+          _sel_evts_p1[it] = (w_v.at(0)) ;
+          _sel_evts_m1[it] = (w_v.at(1)) ;
+
+          // These are reset to 1 every new event
+          //_genie_weight_up *= std::max(_sel_evts_p1[it],_sel_evts_m1[it]) ; 
+          //_genie_weight_dn *= std::min(_sel_evts_p1[it],_sel_evts_m1[it]) ; 
+          _genie_weight_up *= _sel_evts_p1[it] ; 
+          _genie_weight_dn *= _sel_evts_m1[it] ; 
+
+          it++;
+         }
+         //std::cout<<"Genie weights:  "<<_genie_weight_up <<", "<<_genie_weight_dn <<std::endl ;
+
+         if ( _signal ){
+
+           int it = 0;
+           for ( auto const & m : wgt ) { 
              auto w_v = m.second ;
              _sig_evts_p1[it] += (w_v.at(0)) ; 
              _sig_evts_m1[it] += (w_v.at(1)) ;
              it++;
            }
-        }
-        else{
+         }
+         else{
 
-            int it = 0;
-            for ( auto const & m : wgt ) { 
-               auto w_v = m.second ;
-               _bkgd_evts_p1[it] += (w_v.at(0)) ; 
-               _bkgd_evts_m1[it] += (w_v.at(1)) ;
-               it++;
+           int it = 0;
+           for ( auto const & m : wgt ) { 
+             auto w_v = m.second ;
+             _bkgd_evts_p1[it] += (w_v.at(0)) ; 
+             _bkgd_evts_m1[it] += (w_v.at(1)) ;
+             it++;
+           }   
+         }
+       }
+
+       if ( _get_single_shower_info || _get_pi0_info || _get_preselection_flux_info ){
+
+         auto ev_flux_wgt= storage->get_data<event_mceventweight>("fluxeventweight");
+
+         if( !ev_flux_wgt || !ev_flux_wgt->size() ){
+           std::cout<<"No FLUX eventweights..." <<std::endl;
+           _tree->Fill();    
+           return false;
+         }
+
+         auto wgt_flux  = ev_flux_wgt->at(0).GetWeights();
+
+         std::vector<float> b_unisim_tot_weight(1000,1);
+         std::vector<float> s_unisim_tot_weight(1000,1);
+
+         // Rewrite with a map
+         for ( auto const & m : wgt_flux ) {
+
+           if (m.first == "bnbcorrection_FluxHist" )
+             continue;
+
+           for ( int jj = 0; jj < m.second.size(); jj++ ){
+
+             _flux_weights[jj] *= m.second.at(jj) ;
+
+             // These are the 5 hadron values -- they may be correlated. Vary these 5 individually.
+             if ( find(_unisim_label_v.begin(),_unisim_label_v.end(),m.first) != _unisim_label_v.end() ){
+                 if (_signal )
+                   s_unisim_tot_weight[jj] *= m.second.at(jj) ;
+                 else
+                   b_unisim_tot_weight[jj] *= m.second.at(jj) ;
              }   
-          }
-      }
-      else{
+             else{
+               if (_signal)
+                 _s_weights_by_universe[_label_map[m.first]][jj] += m.second.at(jj);
+               else
+                 _b_weights_by_universe[_label_map[m.first]][jj] += m.second.at(jj);
+             }
+           }
+         }
+         
+         float mean = 0;
+ 
+         for ( int jj = 0; jj < 1000; jj++){
+           if(_signal)
+           _s_weights_by_universe[0][jj] += s_unisim_tot_weight[jj] ;
+           else
+           _b_weights_by_universe[0][jj] += b_unisim_tot_weight[jj] ;
+             
+          mean += (_flux_weights[jj]/1000);
+         }
 
-        auto wgt  = ev_wgt->at(0).GetWeights();
+         float sigma  = 0;
 
-        std::vector<float> b_unisim_tot_weight(1000,1);
-        std::vector<float> s_unisim_tot_weight(1000,1);
-  
-        // Rewrite with a map
-        for ( auto const & m : wgt ) {
+         for ( int jj = 0; jj < 1000; jj++)
+           sigma += ( _flux_weights[jj] - mean ) * ( _flux_weights[jj] - mean );
 
-          if (m.first == "bnbcorrection_FluxHist" )
-            continue;
-          //std::cout<<"Weight: "<<m.first<<std::endl ;
+         sigma /= 1000;
 
-          for ( int jj = 0; jj < m.second.size(); jj++){
-            // These are the 5 hadron values -- they may be correlated. Vary these 5 individually.
-            if ( find(_unisim_label_v.begin(),_unisim_label_v.end(),m.first) != _unisim_label_v.end() ){
-                if (_signal )
-                  s_unisim_tot_weight[jj] *= m.second.at(jj) ;
-                else
-                  b_unisim_tot_weight[jj] *= m.second.at(jj) ;
-            }   
-            else{
-              if (_signal)
-                _s_weights_by_universe[_label_map[m.first]][jj] += m.second.at(jj);
-              else
-                _b_weights_by_universe[_label_map[m.first]][jj] += m.second.at(jj);
-            }   
-          }   
-        }   
-        for ( int jj = 0; jj < 1000; jj++){
-          if(_signal)
-          _s_weights_by_universe[0][jj] += s_unisim_tot_weight[jj] ;
-          else
-          _b_weights_by_universe[0][jj] += b_unisim_tot_weight[jj] ;
-        }   
-      }
-    }
+         _flux_weight_up = 1 + sqrt( sigma ) ; 
+         _flux_weight_dn = 1 - sqrt( sigma ) ; 
+       }
+
+     }
 
     _tree->Fill();    
 
@@ -2066,7 +2217,7 @@ namespace larlite {
     float mcbnbcos_POT = 20.7948 ; //4.23214; 
     float mc_to_onbeam = dataPOT/mcbnbcos_POT;
 
-    if ( _get_genie_info && _eventweight_producer == "fluxeventweight" ){
+    if ( _get_genie_info && (_get_single_shower_info || _get_pi0_info) ) {  // && _eventweight_producer == "fluxeventweight" ){
       for( int i = 0; i < funcs; i++){
         std::cout<<"FLUX! "<<_flux_by_universe[i][0]<<std::endl ;
         for( int j= 0; j < 1000; j++){
@@ -2082,12 +2233,9 @@ namespace larlite {
       }
 
       _univ->Fill();
-    }
-
-    if ( _get_genie_info && _eventweight_producer == "genieeventweight" ){
+      //if ( _get_genie_info && _eventweight_producer == "genieeventweight" ){
 
       std::cout<<"SIGNAL GENIE : "<<std::endl ;
-
       for( int i = 0 ; i < _sel_evts_m1.size(); i++)
         std::cout<<_sig_evts_m1[i]<<", " ;
 

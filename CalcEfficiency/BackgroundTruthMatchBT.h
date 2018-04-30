@@ -33,7 +33,7 @@ namespace larlite {
     /// Default constructor
     BackgroundTruthMatchBT(){ _name="BackgroundTruthMatchBT"; _fout=0; _tree=0; _shower_tree = 0; _univ=0; _get_genie_info=false; 
 			      _eventweight_producer = ""; _N = 0; _N_xsec = 0; _beam_min = 3.2; _beam_max = 4.8; _gain = 196.97874008458268; 
-			      _recomb = 0.572; _lifetime_corr = 1e20; }
+			      _recomb = 0.572; _lifetime_corr = 1e20; _get_preselection_flux_info = false; _remove_duplicates = true; _get_calo_info = true; }
 
     /// Default destructor
     virtual ~BackgroundTruthMatchBT(){}
@@ -58,6 +58,12 @@ namespace larlite {
     void GetPi0Info  ( bool getit=false ) { _get_pi0_info = getit; }
 
     void GetSingleShowerInfo  ( bool getit=false ) { _get_single_shower_info = getit; }
+
+    void GetPreselectionFluxInfo( bool getit=false ) { _get_preselection_flux_info = getit; }
+
+    void RemoveDuplicates( bool remove=true) { _remove_duplicates = remove ; }
+
+    void GetCaloInfo  ( bool getit=true ) { _get_calo_info = getit; }
 
     void clear() ;
 
@@ -127,7 +133,10 @@ namespace larlite {
     bool _mc_sample ;
     bool _get_pi0_info ;
     bool _get_single_shower_info ;
+    bool _get_preselection_flux_info ;
+    bool _remove_duplicates ;
     bool _get_genie_info ;
+    bool _get_calo_info ;
     float _N ;
     float _N_xsec ;
     std::string _eventweight_producer ;
@@ -189,6 +198,9 @@ namespace larlite {
     float _mu_startx ;
     float _mu_starty ;
     float _mu_startz ;
+    float _mu_dirx ;
+    float _mu_diry ;
+    float _mu_dirz ;
     float _mu_endx ;
     float _mu_endy ;
     float _mu_endz ;
@@ -327,6 +339,14 @@ namespace larlite {
     std::vector<float> _sig_evts_p1;
     std::vector<float> _bkgd_evts_m1;
     std::vector<float> _bkgd_evts_p1;
+ 
+    float _total_weight_up ;
+    float _total_weight_dn ;
+    float _genie_weight_up ;
+    float _genie_weight_dn ;
+    float _flux_weight_up ;
+    float _flux_weight_dn ;
+    std::vector<float> _flux_weights ;
 
     // One entry per shower
     TTree * _shower_tree ;
@@ -339,6 +359,11 @@ namespace larlite {
     float _shr_true_detProf_startx;
     float _shr_true_detProf_starty;
     float _shr_true_detProf_startz;
+    float _shr_start_res ;
+    float _shr_true_detProf_dirx;
+    float _shr_true_detProf_diry;
+    float _shr_true_detProf_dirz;
+    float _shr_dir_res ;
     float _shr_startw;
     float _shr_startt;
     float _shr_dirx;
@@ -373,6 +398,10 @@ namespace larlite {
     std::vector<std::vector<float>> _eff_v ;
     std::vector<std::vector<float>> _xsec_v ;
     std::vector<std::vector<float>> _perc_v;
+
+
+
+    float _vtxtimecm = 0;
 
 
   };
