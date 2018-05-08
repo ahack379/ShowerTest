@@ -323,10 +323,10 @@ namespace larlite {
       _mu_endx = t.End().X() ;
       _mu_endy = t.End().Y() ;
       _mu_endz = t.End().Z() ;
-      _mu_mom  = t.VertexMomentum() ;
+      //_mu_mom  = t.VertexMomentum() ;
       _mu_len  = t.Length(0); // Calculates the length from point 0 to end
-      _mu_angle = t.Theta() ;
-      _mu_phi = t.Phi() ; 
+      _mu_angle = t.VertexDirection().Theta() ;
+      _mu_phi = t.VertexDirection().Phi() ; 
 
       std::vector<double> dir = { (_mu_endx - _mu_startx) / _mu_len,
                                   (_mu_endy - _mu_starty) / _mu_len,
@@ -452,7 +452,6 @@ namespace larlite {
           min_trk_dist_it = ii ;
         }
     }
-
 
       std::vector<int> pur_ctr_v ;
       std::vector<float> cw_pur_ctr_v ;
@@ -715,7 +714,7 @@ namespace larlite {
 
     std::multimap<float,std::pair<int,int>> mc_reco_map ;    
 
-    std::cout<<" shr ids: "<<shr_ids.size()<<std::endl;
+    //std::cout<<" shr ids: "<<shr_ids.size()<<std::endl;
     // Match showers
     for( auto const & mc_id : shr_ids ){
       auto mcs_i = ev_mcshr->at(mc_id);
@@ -766,12 +765,12 @@ namespace larlite {
         break;
       }
     }
-    if ( mc_g2_id != -1 ) {
+   // if ( mc_g2_id != -1 ) {
 
-    std::cout<<"Mc and reco ids : "<<mc_g1_id<<", "<<reco_g1_id<<", "<<dot_g1<<", energy: "<<ev_s->at(reco_g1_id).Energy(2)<<", "<<ev_mcshr->at(mc_g1_id).DetProfile().E()<<std::endl;
-    std::cout<<"Mc and reco ids : "<<mc_g2_id<<", "<<reco_g2_id<<", "<<dot_g2<<", energy: "<<ev_s->at(reco_g2_id).Energy(2)<<", "<<ev_mcshr->at(mc_g2_id).DetProfile().E()<<std::endl;
+   // std::cout<<"Mc and reco ids : "<<mc_g1_id<<", "<<reco_g1_id<<", "<<dot_g1<<", energy: "<<ev_s->at(reco_g1_id).Energy(2)<<", "<<ev_mcshr->at(mc_g1_id).DetProfile().E()<<std::endl;
+   // std::cout<<"Mc and reco ids : "<<mc_g2_id<<", "<<reco_g2_id<<", "<<dot_g2<<", energy: "<<ev_s->at(reco_g2_id).Energy(2)<<", "<<ev_mcshr->at(mc_g2_id).DetProfile().E()<<std::endl;
 
-   }
+   //}
 
     // Get the association from cluster -> hit
     auto const & ev_clus = storage->get_data<event_cluster>("ImageClusterHit");

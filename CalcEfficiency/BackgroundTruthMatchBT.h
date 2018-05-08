@@ -215,6 +215,7 @@ namespace larlite {
     float _mu_type ;   // is this mccluster due to track(0) or shower(1)
     int _mu_mother_pdg ;
     int _mu_pdg ;
+    float _mult2_track_oangle ;
 
     float _mu_deviation ;
     float _mu_trun_mean_dqdx ;
